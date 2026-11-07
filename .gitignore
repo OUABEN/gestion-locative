@@ -1,0 +1,20 @@
+# Dépendances
+node_modules/
+
+# Builds
+dist/
+target/
+
+# Environnement
+.env
+
+# Tests
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
