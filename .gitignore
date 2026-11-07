@@ -7,6 +7,8 @@ target/
 
 # Environnement
 .env
+.env.*
+!.env.example
 
 # Tests
 coverage/
