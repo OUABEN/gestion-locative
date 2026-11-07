@@ -1,0 +1,315 @@
+# =====================================================================
+# CI — Gestion Locative
+# Un job par service, déclenché uniquement si le service a changé.
+# Les étapes sont ignorées tant que le service n'a pas de package.json /
+# pom.xml (code pas encore écrit) : le job reste vert.
+# =====================================================================
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------------
+  # Détection des services modifiés (filtre de chemins par job)
+  # -------------------------------------------------------------------
+  changes:
+    name: Détection des changements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      # Listes JSON des services modifiés (matrices dynamiques)
+      node: ${{ steps.lists.outputs.node }}
+      spring: ${{ steps.lists.outputs.spring }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      database: ${{ steps.filter.outputs.database }}
+      compose: ${{ steps.filter.outputs.compose }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend_gestion_biens:
+              - 'backend/backend_gestion_biens/**'
+              - '.github/workflows/ci.yml'
+            backend_gestion_locataires:
+              - 'backend/backend_gestion_locataires/**'
+              - '.github/workflows/ci.yml'
+            backend_gestion_loyers:
+              - 'backend/backend_gestion_loyers/**'
+              - '.github/workflows/ci.yml'
+            backend_gestion_quittances:
+              - 'backend/backend_gestion_quittances/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yml'
+            database:
+              - 'database/**'
+              - '.github/workflows/ci.yml'
+            compose:
+              - 'docker-compose.yml'
+              - '.env.example'
+              - '**/Dockerfile'
+              - 'frontend/nginx.conf'
+              - '.github/workflows/ci.yml'
+
+      - name: Construction des matrices de services
+        id: lists
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+        run: |
+          node=$(echo "$CHANGES" | jq -c '[.[] | select(. == "backend_gestion_biens" or . == "backend_gestion_locataires")]')
+          spring=$(echo "$CHANGES" | jq -c '[.[] | select(. == "backend_gestion_loyers" or . == "backend_gestion_quittances")]')
+          echo "node=$node" >> "$GITHUB_OUTPUT"
+          echo "spring=$spring" >> "$GITHUB_OUTPUT"
+          echo "Node : $node | Spring : $spring"
+
+  # -------------------------------------------------------------------
+  # Microservices Node.js + TypeScript (biens, locataires)
+  # -------------------------------------------------------------------
+  node-services:
+    name: ${{ matrix.service }} (Node.js)
+    needs: changes
+    if: needs.changes.outputs.node != '[]' && needs.changes.outputs.node != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.node) }}
+    defaults:
+      run:
+        working-directory: backend/${{ matrix.service }}
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Détection du projet
+        id: detect
+        run: |
+          if [ ! -f package.json ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${{ matrix.service }} : pas encore de package.json, étapes ignorées."
+          elif [ ! -f package-lock.json ]; then
+            echo "::error::${{ matrix.service }} : package-lock.json manquant (requis par npm ci)."
+            exit 1
+          else
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js 20
+        if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/${{ matrix.service }}/package-lock.json
+
+      - name: Installation
+        if: steps.detect.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Lint
+        if: steps.detect.outputs.exists == 'true'
+        run: npm run lint --if-present
+
+      - name: Build
+        if: steps.detect.outputs.exists == 'true'
+        run: npm run build
+
+      - name: Tests
+        if: steps.detect.outputs.exists == 'true'
+        run: npm test --if-present
+
+      - name: Upload des rapports (coverage, junit)
+        if: always() && steps.detect.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.service }}
+          path: |
+            backend/${{ matrix.service }}/coverage/
+            backend/${{ matrix.service }}/reports/
+            backend/${{ matrix.service }}/junit*.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # -------------------------------------------------------------------
+  # Microservices Spring Boot (loyers, quittances)
+  # -------------------------------------------------------------------
+  spring-services:
+    name: ${{ matrix.service }} (Spring Boot)
+    needs: changes
+    if: needs.changes.outputs.spring != '[]' && needs.changes.outputs.spring != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.spring) }}
+    defaults:
+      run:
+        working-directory: backend/${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Détection du projet
+        id: detect
+        run: |
+          if [ -f pom.xml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${{ matrix.service }} : pas encore de pom.xml, étapes ignorées."
+          fi
+
+      - name: Setup Java 21 (Temurin)
+        if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: backend/${{ matrix.service }}/pom.xml
+
+      - name: Build & tests (mvn verify)
+        if: steps.detect.outputs.exists == 'true'
+        run: mvn -B -ntp verify
+
+      - name: Upload des rapports surefire
+        if: always() && steps.detect.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.service }}
+          path: |
+            backend/${{ matrix.service }}/target/surefire-reports/
+            backend/${{ matrix.service }}/target/failsafe-reports/
+            backend/${{ matrix.service }}/target/site/jacoco/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  # -------------------------------------------------------------------
+  # Frontend React
+  # -------------------------------------------------------------------
+  frontend:
+    name: frontend (React)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Détection du projet
+        id: detect
+        run: |
+          if [ ! -f package.json ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::frontend : pas encore de package.json, étapes ignorées."
+          elif [ ! -f package-lock.json ]; then
+            echo "::error::frontend : package-lock.json manquant (requis par npm ci)."
+            exit 1
+          else
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js 20
+        if: steps.detect.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installation
+        if: steps.detect.outputs.exists == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.detect.outputs.exists == 'true'
+        run: npm run build
+
+      - name: Tests
+        if: steps.detect.outputs.exists == 'true'
+        run: npm test --if-present
+
+  # -------------------------------------------------------------------
+  # Validation des scripts SQL sur un vrai PostgreSQL 16
+  # -------------------------------------------------------------------
+  database:
+    name: Validation SQL (PostgreSQL 16)
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: db_gestion_locative
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_user -d db_gestion_locative"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: ci_user
+      PGPASSWORD: ci_password
+      PGDATABASE: db_gestion_locative
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Exécution des 6 scripts dans l'ordre
+        run: |
+          for f in 01_users 02_biens 03_locataires 04_baux 05_loyers_paiements 06_quittances; do
+            echo "::group::$f.sql"
+            psql -v ON_ERROR_STOP=1 -f "database/init/$f.sql"
+            echo "::endgroup::"
+          done
+
+      - name: Ré-exécution (vérifie l'idempotence IF NOT EXISTS)
+        run: |
+          for f in database/init/0*.sql; do
+            psql -v ON_ERROR_STOP=1 -q -f "$f"
+          done
+
+      - name: Vérification des tables créées
+        run: |
+          psql -c '\dt'
+          count=$(psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('users','biens','locataires','baux','echeances','paiements','quittances')")
+          echo "Tables trouvées : $count / 7"
+          test "$count" -eq 7
+
+  # -------------------------------------------------------------------
+  # Validation de docker-compose.yml
+  # -------------------------------------------------------------------
+  compose:
+    name: Validation docker-compose
+    needs: changes
+    if: needs.changes.outputs.compose == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker compose config
+        run: docker compose --env-file .env.example config --quiet
