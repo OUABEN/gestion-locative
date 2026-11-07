@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="28" failures="0" errors="0" time="7.495">
+  <testsuite name="ValidationMiddleware - Tests Unitaires (Règles Métier)" errors="0" failures="0" skipped="0" timestamp="2026-11-07T20:27:54" time="5.367" tests="9">
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateUuidParam [Cas normal] accepte un UUID v4 valide et appelle next()" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateUuidParam [Cas normal] accepte un UUID v4 valide et appelle next()" time="0.024">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateUuidParam [Cas limite] refuse un id au mauvais format (non UUID) avec une AppError 400" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateUuidParam [Cas limite] refuse un id au mauvais format (non UUID) avec une AppError 400" time="0.052">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas normal] valide un payload complet et correct" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas normal] valide un payload complet et correct" time="0.004">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas limite] refuse surface = 0 avec AppError 400 (règle surface &gt; 0)" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas limite] refuse surface = 0 avec AppError 400 (règle surface &gt; 0)" time="0.005">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas limite] refuse une adresse vide ou composée uniquement d&apos;espaces avec AppError 400" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas limite] refuse une adresse vide ou composée uniquement d&apos;espaces avec AppError 400" time="0.006">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas d&apos;erreur] refuse un prixMensuel négatif avec AppError 400 (règle prixMensuel &gt;= 0)" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas d&apos;erreur] refuse un prixMensuel négatif avec AppError 400 (règle prixMensuel &gt;= 0)" time="0.004">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas d&apos;erreur] refuse des charges négatives avec AppError 400 (règle charges &gt;= 0)" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validateCreateBien [Cas d&apos;erreur] refuse des charges négatives avec AppError 400 (règle charges &gt;= 0)" time="0.003">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validatePatchStatut [Cas normal] accepte les statuts valides &apos;LIBRE&apos; et &apos;OCCUPE&apos;" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validatePatchStatut [Cas normal] accepte les statuts valides &apos;LIBRE&apos; et &apos;OCCUPE&apos;" time="0.002">
+    </testcase>
+    <testcase classname="ValidationMiddleware - Tests Unitaires (Règles Métier) validatePatchStatut [Cas d&apos;erreur] refuse un statut autre que LIBRE ou OCCUPE avec AppError 400" name="ValidationMiddleware - Tests Unitaires (Règles Métier) validatePatchStatut [Cas d&apos;erreur] refuse un statut autre que LIBRE ou OCCUPE avec AppError 400" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="BienService - Tests Unitaires" errors="0" failures="0" skipped="0" timestamp="2026-11-07T20:27:54" time="5.502" tests="19">
+    <testcase classname="BienService - Tests Unitaires createBien [Cas normal] crée un bien valide avec statut LIBRE et charges par défaut" name="BienService - Tests Unitaires createBien [Cas normal] crée un bien valide avec statut LIBRE et charges par défaut" time="0.024">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires createBien [Cas limite] accepte une surface très petite strictement positive (0.01 m²)" name="BienService - Tests Unitaires createBien [Cas limite] accepte une surface très petite strictement positive (0.01 m²)" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires createBien [Cas limite] accepte un prix mensuel nul (0 €)" name="BienService - Tests Unitaires createBien [Cas limite] accepte un prix mensuel nul (0 €)" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires createBien [Cas limite] charges absentes sont transmises et persistées par défaut à 0" name="BienService - Tests Unitaires createBien [Cas limite] charges absentes sont transmises et persistées par défaut à 0" time="0.002">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getBienById [Cas normal] retourne le bien correspondant à un identifiant existant" name="BienService - Tests Unitaires getBienById [Cas normal] retourne le bien correspondant à un identifiant existant" time="0.004">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getBienById [Cas d&apos;erreur] lève une AppError 404 lorsque le bien n&apos;existe pas" name="BienService - Tests Unitaires getBienById [Cas d&apos;erreur] lève une AppError 404 lorsque le bien n&apos;existe pas" time="0.037">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getDisponibilite [Cas normal] retourne disponible=true lorsque le statut est LIBRE" name="BienService - Tests Unitaires getDisponibilite [Cas normal] retourne disponible=true lorsque le statut est LIBRE" time="0.002">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getDisponibilite [Cas normal] retourne disponible=false lorsque le statut est OCCUPE" name="BienService - Tests Unitaires getDisponibilite [Cas normal] retourne disponible=false lorsque le statut est OCCUPE" time="0.002">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getDisponibilite [Cas d&apos;erreur] propage une AppError 404 si le bien est introuvable" name="BienService - Tests Unitaires getDisponibilite [Cas d&apos;erreur] propage une AppError 404 si le bien est introuvable" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateStatut [Cas normal] met à jour atomiquement le statut vers OCCUPE quand il était LIBRE" name="BienService - Tests Unitaires updateStatut [Cas normal] met à jour atomiquement le statut vers OCCUPE quand il était LIBRE" time="0.004">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateStatut [Cas normal] met à jour atomiquement le statut vers LIBRE quand il était OCCUPE" name="BienService - Tests Unitaires updateStatut [Cas normal] met à jour atomiquement le statut vers LIBRE quand il était OCCUPE" time="0.002">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateStatut [Cas d&apos;erreur] lève une AppError 409 de conflit si le bien est déjà dans le statut demandé" name="BienService - Tests Unitaires updateStatut [Cas d&apos;erreur] lève une AppError 409 de conflit si le bien est déjà dans le statut demandé" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateStatut [Cas d&apos;erreur] lève une AppError 404 si le bien est introuvable lors de l&apos;update de statut" name="BienService - Tests Unitaires updateStatut [Cas d&apos;erreur] lève une AppError 404 si le bien est introuvable lors de l&apos;update de statut" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires deleteBien [Cas normal] supprime avec succès un bien avec statut LIBRE" name="BienService - Tests Unitaires deleteBien [Cas normal] supprime avec succès un bien avec statut LIBRE" time="0.002">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires deleteBien [Cas d&apos;erreur] lève une AppError 409 si le bien est OCCUPE et refuse la suppression" name="BienService - Tests Unitaires deleteBien [Cas d&apos;erreur] lève une AppError 409 si le bien est OCCUPE et refuse la suppression" time="0.004">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires deleteBien [Cas d&apos;erreur] lève une AppError 404 si le bien à supprimer n&apos;existe pas" name="BienService - Tests Unitaires deleteBien [Cas d&apos;erreur] lève une AppError 404 si le bien à supprimer n&apos;existe pas" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateBien [Cas normal] modifie un bien existant et retourne l&apos;entité mise à jour" name="BienService - Tests Unitaires updateBien [Cas normal] modifie un bien existant et retourne l&apos;entité mise à jour" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires updateBien [Cas d&apos;erreur] lève une AppError 404 si le bien à modifier n&apos;existe pas" name="BienService - Tests Unitaires updateBien [Cas d&apos;erreur] lève une AppError 404 si le bien à modifier n&apos;existe pas" time="0.003">
+    </testcase>
+    <testcase classname="BienService - Tests Unitaires getAllBiens [Cas normal] retourne la liste des biens correspondant aux filtres" name="BienService - Tests Unitaires getAllBiens [Cas normal] retourne la liste des biens correspondant aux filtres" time="0.003">
+    </testcase>
+  </testsuite>
+</testsuites>
