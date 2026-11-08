@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  locataires-db:
+    image: postgres:15-alpine
+    container_name: locataires-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: gestion_locative_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - locataires_pgdata:/var/lib/postgresql/data
+    networks:
+      - gestion-locative-net
+
+  gestion-locataires:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: service-locataires
+    restart: always
+    depends_on:
+      - locataires-db
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://locataires-db:5432/gestion_locative_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret_password
+    ports:
+      - "8082:8082"
+    networks:
+      - gestion-locative-net
+
+networks:
+  gestion-locative-net:
+    driver: bridge
+
+volumes:
+  locataires_pgdata:
