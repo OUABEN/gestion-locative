@@ -1,0 +1,26 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: backend-gestion-loyers
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/db_gestion_locative}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate   # le schéma est géré par database/init/*.sql
+    open-in-view: false
+
+# JWT partagé : MÊME secret et MÊME algorithme (HS256) que les autres microservices
+jwt:
+  secret: ${JWT_SECRET:}
+
+# Règles métier des échéances (à confirmer avec l'équipe)
+loyers:
+  jour-echeance: 5          # le loyer du mois M est dû le 5 du mois M
+  jours-avant-impaye: 30    # EN_RETARD puis IMPAYEE après 30 jours de retard
+  services:
+    locataires-url: ${LOCATAIRES_URL:http://localhost:8082}
+    biens-url: ${BIENS_URL:http://localhost:8081}
