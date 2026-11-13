@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestion des Locataires — Démonstration Frontend (LAARIF Ahmed)</title>
+  <title>LOCATIVE. — Gestion des Locataires & Baux (Midnight & Lime Edition v2.0)</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React & ReactDOM -->
@@ -11,453 +11,814 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            navy: {
-              50: '#F0F5FA',
-              100: '#E1EBF5',
-              600: '#255A97',
-              700: '#1F4E79',
-              800: '#1A4064',
-              900: '#163653',
-              950: '#0E2236',
+            midnight: {
+              DEFAULT: '#0B0B0C',
+              card: '#18181C',
+              elevated: '#141417',
+              border: '#26262C',
             },
-            surface: '#F8FAFC',
+            lime: {
+              DEFAULT: '#C6F432',
+              hover: '#b5e526',
+            },
+            coral: '#FF4D4F',
+            canvas: '#F6F7F9'
           },
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          boxShadow: {
+            'lime-glow': '0 0 25px rgba(198, 244, 50, 0.45)',
+            'lime-sm': '0 0 12px rgba(198, 244, 50, 0.35)',
+            'midnight-card': '0 8px 30px rgba(0, 0, 0, 0.25)',
+            'card-soft': '0 4px 20px rgba(0, 0, 0, 0.04)'
+          },
+          borderRadius: {
+            'button': '14px',
+            'card': '22px',
+            'hero': '28px'
           }
         }
       }
     }
   </script>
   <style>
-    body { background-color: #F8FAFC; font-family: 'Inter', sans-serif; }
-    .card-shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05); }
-    .modal-backdrop { background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); }
+    body {
+      background-color: #F6F7F9;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(198, 244, 50, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(198, 244, 50, 0.03) 0%, transparent 40%);
+      color: #0B0B0C;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.01em;
+    }
+    .glass-topbar {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(14px);
+    }
+    .modal-backdrop {
+      background-color: rgba(11, 11, 12, 0.65);
+      backdrop-filter: blur(6px);
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
   </style>
 </head>
-<body class="min-h-screen text-slate-800 antialiased">
+<body class="min-h-screen text-midnight antialiased">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState } = React;
 
-    const initialLocataires = [
+    const initialData = [
       {
-        id: "c1f7b823-3f1d-405a-87f1-79b8c0a969e2",
+        id: "loc-001-c1f7b823",
         nom: "El Amrani",
         prenom: "Yassine",
         cin: "AB123456",
-        email: "yassine.elamrani@mail.ma",
         telephone: "+212 6 61 00 11 22",
-        hasBailActif: true,
-        bailInfo: { appartement: "Apt B-12 (3e étage)", residence: "Résidence Al Mansour, Casablanca", loyerMensuel: 4800 },
-        piecesJustificatives: [{ nom: "CIN_ElAmrani_RectoVerso.pdf", taille: "1.4 Mo" }, { nom: "Contrat_Travail_CDI.pdf", taille: "2.1 Mo" }]
+        email: "yassine.elamrani@gmail.com",
+        bien: {
+          titre: "Appartement B-12 (3e étage)",
+          adresse: "45, Boulevard d'Anfa, Gauthier",
+          ville: "Casablanca"
+        },
+        loyerMensuel: 6500,
+        depotGarantie: 13000,
+        dateDebut: "01/01/2026",
+        dateFin: "31/12/2027",
+        statutBail: "ACTIF"
       },
       {
-        id: "8d9e2b14-6c3f-4e89-a1b2-3c4d5e6f7a8b",
+        id: "loc-002-8d9e2b14",
         nom: "Bennani",
         prenom: "Fatima Zahra",
         cin: "CD789012",
-        email: "fatima.bennani@mail.ma",
         telephone: "+212 6 62 33 44 55",
-        hasBailActif: true,
-        bailInfo: { appartement: "Apt C-04 (1er étage)", residence: "Les Jardins de l'Agdal, Rabat", loyerMensuel: 5500 },
-        piecesJustificatives: [{ nom: "CIN_Bennani_FZ.pdf", taille: "1.2 Mo" }, { nom: "Attestation_Titularisation.pdf", taille: "850 Ko" }]
+        email: "fatima.bennani@corporate.ma",
+        bien: {
+          titre: "Penthouse C-04 avec Terrasse",
+          adresse: "12, Rue Michlifen, Agdal",
+          ville: "Rabat"
+        },
+        loyerMensuel: 9200,
+        depotGarantie: 18400,
+        dateDebut: "15/02/2026",
+        dateFin: "14/02/2028",
+        statutBail: "ACTIF"
       },
       {
-        id: "5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c8d",
+        id: "loc-003-5a6b7c8d",
         nom: "Benjelloun",
         prenom: "Mehdi",
         cin: "EF345678",
-        email: "mehdi.benjelloun@mail.ma",
         telephone: "+212 6 61 22 33 44",
-        hasBailActif: true,
-        bailInfo: { appartement: "Apt A-01 (RDC)", residence: "Le Carré Majorelle, Marrakech", loyerMensuel: 4200 },
-        piecesJustificatives: [{ nom: "CIN_Benjelloun_M.pdf", taille: "1.8 Mo" }]
+        email: "mehdi.benjelloun@techinvest.ma",
+        bien: {
+          titre: "Villa Moderne Ryad Al Mansour",
+          adresse: "28, Avenue Mohammed VI, Hivernage",
+          ville: "Marrakech"
+        },
+        loyerMensuel: 14500,
+        depotGarantie: 29000,
+        dateDebut: "01/03/2026",
+        dateFin: "28/02/2027",
+        statutBail: "ACTIF"
       },
       {
-        id: "2f3a4b5c-6d7e-4f8a-9b0c-1d2e3f4a5b6c",
+        id: "loc-004-2f3a4b5c",
         nom: "Tazi",
         prenom: "Kenza",
         cin: "GH901234",
-        email: "kenza.tazi@mail.ma",
         telephone: "+212 6 64 55 66 77",
-        hasBailActif: false,
-        bailInfo: null,
-        piecesJustificatives: [{ nom: "CIN_Tazi_Kenza.pdf", taille: "980 Ko" }, { nom: "Dossier_Candidature.pdf", taille: "3.2 Mo" }]
+        email: "kenza.tazi@avocat-barreau.ma",
+        bien: {
+          titre: "Plateau Professionnel 105",
+          adresse: "102, Angle Bd Zerktouni & Roudani",
+          ville: "Casablanca"
+        },
+        loyerMensuel: 8000,
+        depotGarantie: 16000,
+        dateDebut: "01/01/2024",
+        dateFin: "31/12/2025",
+        statutBail: "TERMINE"
+      },
+      {
+        id: "loc-005-9e4c1b7d",
+        nom: "Alaoui",
+        prenom: "Hamza",
+        cin: "BK456789",
+        telephone: "+212 6 63 77 88 99",
+        email: "hamza.alaoui@marocfinance.ma",
+        bien: {
+          titre: "Appartement Marina Bay 402",
+          adresse: "Avenue d'Espagne, Port de Tanger",
+          ville: "Tanger"
+        },
+        loyerMensuel: 7200,
+        depotGarantie: 14400,
+        dateDebut: "01/04/2026",
+        dateFin: "31/03/2028",
+        statutBail: "ACTIF"
+      },
+      {
+        id: "loc-006-7b2a9e1f",
+        nom: "Chraibi",
+        prenom: "Salma",
+        cin: "EE654321",
+        telephone: "+212 6 65 11 22 33",
+        email: "salma.chraibi@artdesign.ma",
+        bien: {
+          titre: "Studio Cosy Palmier",
+          adresse: "18, Rue des Palmiers, Bourgogne",
+          ville: "Casablanca"
+        },
+        loyerMensuel: 4800,
+        depotGarantie: 9600,
+        dateDebut: "01/09/2024",
+        dateFin: "31/08/2025",
+        statutBail: "TERMINE"
       }
     ];
 
     function App() {
-      const [locataires, setLocataires] = useState(initialLocataires);
-      const [activeTab, setActiveTab] = useState('repertoire');
+      const [locataires, setLocataires] = useState(initialData);
+      const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+      const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'list' | 'new'
       const [searchTerm, setSearchTerm] = useState('');
       const [filterStatut, setFilterStatut] = useState('ALL');
-
-      // Modales
-      const [isCreateOpen, setIsCreateOpen] = useState(false);
-      const [detailLocataire, setDetailLocataire] = useState(null);
-      const [editLocataire, setEditLocataire] = useState(null);
-      const [deleteLocataire, setDeleteLocataire] = useState(null);
+      const [quittanceModal, setQuittanceModal] = useState(null);
       const [toast, setToast] = useState('');
 
       const showToast = (msg) => {
         setToast(msg);
-        setTimeout(() => setToast(''), 3000);
+        setTimeout(() => setToast(''), 3500);
       };
 
-      const existingCins = locataires.map(l => l.cin.toUpperCase());
+      const totalLocataires = 48; // Total portefeuille
+      const bauxActifs = locataires.filter(l => l.statutBail === 'ACTIF').length;
+      const bauxTermines = locataires.filter(l => l.statutBail === 'TERMINE').length;
 
       const filtered = locataires.filter(l => {
         const s = searchTerm.toLowerCase();
-        const match = l.cin.toLowerCase().includes(s) || l.nom.toLowerCase().includes(s) || l.prenom.toLowerCase().includes(s) || l.email.toLowerCase().includes(s);
+        const match = l.cin.toLowerCase().includes(s) || l.nom.toLowerCase().includes(s) || l.prenom.toLowerCase().includes(s) || l.bien.ville.toLowerCase().includes(s);
         if (!match) return false;
-        if (filterStatut === 'ACTIF') return l.hasBailActif;
-        if (filterStatut === 'SANS_BAIL') return !l.hasBailActif;
+        if (filterStatut === 'ACTIF') return l.statutBail === 'ACTIF';
+        if (filterStatut === 'TERMINE') return l.statutBail === 'TERMINE';
         return true;
       });
 
       return (
-        <div className="min-h-screen flex flex-col">
-          {/* Header */}
-          <header className="bg-navy-700 text-white shadow-md border-b border-navy-800 sticky top-0 z-30">
-            <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-navy-600 flex items-center justify-center font-bold text-sky-300">
-                  GL
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-lg">Gestion Locative</span>
-                    <span className="bg-navy-900 text-sky-300 text-xs px-2 py-0.5 rounded-full font-semibold">Groupe 16</span>
-                  </div>
-                  <p className="text-xs text-slate-300">Module 02 : Gestion des locataires — <strong>LAARIF Ahmed</strong></p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="bg-navy-800 rounded-lg p-1 text-xs">
-                  <button onClick={() => setActiveTab('repertoire')} className={`px-3 py-1.5 rounded-md ${activeTab === 'repertoire' ? 'bg-sky-500 text-white font-semibold' : 'text-slate-300'}`}>
-                    Répertoire ({locataires.length})
-                  </button>
-                  <button onClick={() => setActiveTab('interop')} className={`px-3 py-1.5 rounded-md ${activeTab === 'interop' ? 'bg-sky-500 text-white font-semibold' : 'text-slate-300'}`}>
-                    Interopérabilité Quittances
-                  </button>
-                </div>
-                <div className="bg-navy-800/80 px-3 py-1.5 rounded-full text-[11px] text-slate-200 flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span className="font-mono">API :8082</span>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Toast */}
+        <div className="min-h-screen flex flex-col font-sans">
+          
+          {/* TOAST */}
           {toast && (
-            <div className="fixed bottom-5 right-5 z-50 bg-navy-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center space-x-2 border border-navy-700">
-              <span className="text-emerald-400 font-bold">✓</span>
+            <div className="fixed bottom-6 right-6 z-50 bg-midnight text-white px-5 py-3 rounded-button shadow-2xl border border-midnight-border flex items-center space-x-2 text-xs">
+              <span className="text-lime font-bold">✓</span>
               <span>{toast}</span>
             </div>
           )}
 
-          <main className="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white p-4 rounded-xl border border-slate-200 card-shadow">
-                <div className="text-xs uppercase text-slate-400 font-bold">Référentiel Fiches</div>
-                <div className="text-2xl font-bold text-navy-700 mt-1">{locataires.length}</div>
-                <div className="text-[11px] text-slate-400">Locataires actifs</div>
+          {/* 1. COLLAPSIBLE LEFT SIDEBAR (280px wide, Midnight Black #0B0B0C) */}
+          <aside className={`fixed top-0 left-0 h-screen bg-midnight border-r border-midnight-border z-40 transition-all duration-300 flex flex-col justify-between select-none ${isSidebarCollapsed ? 'w-[82px]' : 'w-[280px]'}`}>
+            <div>
+              {/* Header */}
+              <div className="h-[74px] flex items-center justify-between px-5 border-b border-midnight-border">
+                <div className="flex items-center space-x-3 overflow-hidden">
+                  <div className="w-[42px] h-[42px] rounded-[14px] bg-lime flex items-center justify-center flex-shrink-0 shadow-lime-sm">
+                    <span className="font-black text-midnight text-xl font-mono">L.</span>
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <div className="truncate">
+                      <div className="flex items-center space-x-1">
+                        <span className="font-extrabold text-white text-lg tracking-tight">LOCATIVE</span>
+                        <span className="w-2 h-2 rounded-full bg-lime inline-block"></span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 font-medium">Gestion Immobilière</p>
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="w-8 h-8 rounded-lg bg-midnight-elevated border border-midnight-border flex items-center justify-center text-slate-400 hover:text-white">
+                  {isSidebarCollapsed ? "→" : "←"}
+                </button>
               </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 card-shadow">
-                <div className="text-xs uppercase text-emerald-600 font-bold">Baux Actifs</div>
-                <div className="text-2xl font-bold text-emerald-700 mt-1">{locataires.filter(l => l.hasBailActif).length}</div>
-                <div className="text-[11px] text-slate-400">Biens rattachés</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 card-shadow">
-                <div className="text-xs uppercase text-amber-600 font-bold">Sans Bail</div>
-                <div className="text-2xl font-bold text-amber-700 mt-1">{locataires.filter(l => !l.hasBailActif).length}</div>
-                <div className="text-[11px] text-slate-400">En attente d'affectation</div>
-              </div>
-              <div className="bg-white p-4 rounded-xl border border-slate-200 card-shadow">
-                <div className="text-xs uppercase text-sky-600 font-bold">Intégrité Clé Métier</div>
-                <div className="text-2xl font-bold text-sky-700 mt-1">100 %</div>
-                <div className="text-[11px] text-slate-400">Unicité CIN vérifiée</div>
+
+              {/* Navigation Items */}
+              <div className="p-4 space-y-6">
+                <div>
+                  {!isSidebarCollapsed && <p className="px-3 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">Navigation Principale</p>}
+                  <nav className="space-y-1.5">
+                    <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center justify-between px-3.5 py-3 rounded-button font-medium text-xs transition-all ${activeTab === 'dashboard' ? 'bg-midnight-elevated text-white' : 'text-slate-400 hover:text-white'}`}>
+                      <div className="flex items-center space-x-3">
+                        <span>📊</span>
+                        {!isSidebarCollapsed && <span>Tableau de bord</span>}
+                      </div>
+                      {!isSidebarCollapsed && <span className="text-[10px] bg-midnight-card text-slate-400 px-2 py-0.5 rounded-full font-bold">Hub</span>}
+                    </button>
+
+                    <button className="w-full flex items-center justify-between px-3.5 py-3 rounded-button font-medium text-xs text-slate-400 hover:text-white">
+                      <div className="flex items-center space-x-3">
+                        <span>🏢</span>
+                        {!isSidebarCollapsed && <span>Biens immobiliers</span>}
+                      </div>
+                    </button>
+
+                    <button onClick={() => setActiveTab('list')} className="w-full flex items-center justify-between px-3.5 py-3 rounded-button text-xs transition-all bg-lime text-midnight font-extrabold shadow-lime-glow">
+                      <div className="flex items-center space-x-3">
+                        <span>👥</span>
+                        {!isSidebarCollapsed && <span>Locataires & Baux</span>}
+                      </div>
+                      {!isSidebarCollapsed && <span className="text-[10px] bg-midnight text-lime px-2 py-0.5 rounded-full font-mono font-bold">Actif</span>}
+                    </button>
+
+                    <button className="w-full flex items-center justify-between px-3.5 py-3 rounded-button font-medium text-xs text-slate-400 hover:text-white">
+                      <div className="flex items-center space-x-3">
+                        <span>💳</span>
+                        {!isSidebarCollapsed && <span>Loyers & Règlements</span>}
+                      </div>
+                    </button>
+
+                    <button className="w-full flex items-center justify-between px-3.5 py-3 rounded-button font-medium text-xs text-slate-400 hover:text-white">
+                      <div className="flex items-center space-x-3">
+                        <span>📑</span>
+                        {!isSidebarCollapsed && <span>Quittances</span>}
+                      </div>
+                      {!isSidebarCollapsed && <span className="text-[10px] bg-midnight-card text-sky-400 px-2 py-0.5 rounded-full font-mono">Akram</span>}
+                    </button>
+                  </nav>
+                </div>
               </div>
             </div>
 
-            {activeTab === 'repertoire' ? (
-              <div className="bg-white rounded-xl border border-slate-200 card-shadow overflow-hidden">
-                <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50/50">
-                  <div className="relative w-full max-w-md">
-                    <input
-                      type="text"
-                      placeholder="Rechercher par CIN (ex. AB123456), Nom, Prénom..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full px-3.5 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-600"
-                    />
+            {/* Bottom Promo Card */}
+            {!isSidebarCollapsed && (
+              <div className="p-4 border-t border-midnight-border">
+                <div className="p-4 rounded-card bg-midnight-card border border-midnight-border relative">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="bg-lime text-midnight text-[10px] font-extrabold px-2 py-0.5 rounded-full font-mono">PRO</span>
+                    <span className="text-[10px] text-slate-400 font-mono">Sujet 16</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-white border border-slate-200 rounded-lg p-1 text-xs">
-                      <button onClick={() => setFilterStatut('ALL')} className={`px-2.5 py-1 rounded ${filterStatut === 'ALL' ? 'bg-navy-700 text-white font-bold' : ''}`}>Tous</button>
-                      <button onClick={() => setFilterStatut('ACTIF')} className={`px-2.5 py-1 rounded ${filterStatut === 'ACTIF' ? 'bg-emerald-600 text-white font-bold' : ''}`}>Bail Actif</button>
-                      <button onClick={() => setFilterStatut('SANS_BAIL')} className={`px-2.5 py-1 rounded ${filterStatut === 'SANS_BAIL' ? 'bg-amber-600 text-white font-bold' : ''}`}>Sans Bail</button>
-                    </div>
-                    <button onClick={() => setIsCreateOpen(true)} className="px-4 py-2 bg-navy-700 hover:bg-navy-800 text-white rounded-lg text-sm font-semibold shadow-sm">
-                      + Nouveau locataire
-                    </button>
+                  <h4 className="text-white font-bold text-xs">Parc Immobilier Pro</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">PostgreSQL v15 · Microservices</p>
+                  <div className="mt-3 pt-2 border-t border-midnight-border text-[10px] font-mono text-slate-500 flex justify-between">
+                    <span>v2.0 · Midnight & Lime</span>
+                    <span className="text-lime font-bold">Connecté</span>
                   </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-slate-100/70 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
-                        <th className="py-3 px-4">CIN (Clé Métier)</th>
-                        <th className="py-3 px-4">Locataire</th>
-                        <th className="py-3 px-4">Contact</th>
-                        <th className="py-3 px-4">Statut Bail</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {filtered.map(l => (
-                        <tr key={l.id} className="hover:bg-slate-50">
-                          <td className="py-3 px-4 font-mono font-bold text-navy-700">
-                            <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-xs">{l.cin}</span>
-                          </td>
-                          <td className="py-3 px-4 font-semibold text-slate-800">
-                            {l.prenom} {l.nom}
-                            <div className="text-[11px] text-slate-400 font-mono font-normal">{l.id.substring(0,8)}...</div>
-                          </td>
-                          <td className="py-3 px-4 text-xs">
-                            <div>{l.telephone}</div>
-                            <div className="text-slate-400">{l.email}</div>
-                          </td>
-                          <td className="py-3 px-4">
-                            {l.hasBailActif ? (
-                              <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
-                                Bail Actif ({l.bailInfo?.appartement})
-                              </span>
-                            ) : (
-                              <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full font-semibold">
-                                Sans bail
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right space-x-1">
-                            <button onClick={() => setDetailLocataire(l)} className="px-2.5 py-1 bg-slate-100 hover:bg-navy-50 text-navy-700 rounded text-xs font-semibold">Voir</button>
-                            <button onClick={() => setEditLocataire(l)} className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded text-xs font-semibold">Modifier</button>
-                            <button onClick={() => setDeleteLocataire(l)} className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 rounded text-xs font-semibold">Supprimer</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              /* Vue Interopérabilité Quittances */
-              <div className="space-y-4">
-                <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
-                  <h3 className="text-lg font-bold text-sky-400">Passerelle Quittances (GET /api/v1/locataires/:id/quittance-summary)</h3>
-                  <p className="text-xs text-slate-300 mt-1">Fournit l'identité certifiée sans exposer les documents privés.</p>
-                  <pre className="bg-black/60 p-4 rounded-xl text-emerald-400 font-mono text-xs mt-4 overflow-x-auto">
-                    {JSON.stringify(locataires.map(l => ({
-                      id: l.id,
-                      nom: l.nom,
-                      prenom: l.prenom,
-                      nomComplet: `${l.prenom} ${l.nom}`,
-                      cin: l.cin,
-                      email: l.email,
-                      telephone: l.telephone
-                    })), null, 2)}
-                  </pre>
                 </div>
               </div>
             )}
-          </main>
+          </aside>
 
-          {/* Modale F-LOC-01 : Création avec contrôle 409 */}
-          {isCreateOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-              <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 card-shadow">
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h3 className="font-bold text-base text-navy-700">Nouveau locataire (F-LOC-01)</h3>
-                  <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+          {/* 2. MAIN LAYOUT WRAPPER */}
+          <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'pl-[82px]' : 'pl-[82px] lg:pl-[280px]'}`}>
+            
+            {/* STICKY TOPBAR (74px high, frosted white glass) */}
+            <header className="h-[74px] sticky top-0 z-30 glass-topbar border-b border-slate-200 px-6 flex items-center justify-between select-none">
+              <div className="flex items-center space-x-4">
+                <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all border ${isSidebarCollapsed ? 'bg-lime text-midnight border-lime shadow-lime-sm' : 'bg-midnight text-white border-midnight'}`}>
+                  {isSidebarCollapsed ? "Ouvrir menu" : "Masquer menu"}
+                </button>
+
+                {/* 3 Quick-Choice Tabs */}
+                <div className="hidden lg:flex items-center bg-midnight p-1 rounded-full border border-midnight-border">
+                  <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all ${activeTab === 'dashboard' ? 'bg-lime text-midnight shadow-lime-sm' : 'text-slate-300 hover:text-white'}`}>
+                    Tableau de bord
+                  </button>
+                  <button onClick={() => setActiveTab('list')} className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all ${activeTab === 'list' ? 'bg-lime text-midnight shadow-lime-sm' : 'text-slate-300 hover:text-white'}`}>
+                    Afficher les locataires & baux ({locataires.length})
+                  </button>
+                  <button onClick={() => setActiveTab('new')} className={`px-4 py-2 rounded-full text-xs font-extrabold transition-all ${activeTab === 'new' ? 'bg-lime text-midnight shadow-lime-sm' : 'text-slate-300 hover:text-white'}`}>
+                    Nouveau locataire / bail
+                  </button>
                 </div>
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.target;
-                  const cinVal = form.cin.value.trim().toUpperCase();
-                  if (existingCins.includes(cinVal)) {
-                    alert(`Fiche refusée : CIN déjà utilisé (${cinVal}) - Erreur HTTP 409 Conflict`);
-                    return;
-                  }
-                  const newLoc = {
-                    id: "loc-" + Date.now(),
-                    nom: form.nom.value.trim(),
-                    prenom: form.prenom.value.trim(),
-                    cin: cinVal,
-                    email: form.email.value.trim(),
-                    telephone: form.telephone.value.trim(),
-                    hasBailActif: false,
-                    bailInfo: null,
-                    piecesJustificatives: [{ nom: "CIN_Copie.pdf", taille: "1.1 Mo" }]
-                  };
-                  setLocataires([newLoc, ...locataires]);
-                  setIsCreateOpen(false);
-                  showToast(`Locataire ${newLoc.prenom} ${newLoc.nom} créé avec succès !`);
-                }} className="space-y-3 text-xs">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold block mb-1">Nom (*)</label>
-                      <input name="nom" required className="w-full border p-2 rounded" placeholder="ex. Alami" />
-                    </div>
-                    <div>
-                      <label className="font-bold block mb-1">Prénom (*)</label>
-                      <input name="prenom" required className="w-full border p-2 rounded" placeholder="ex. Karim" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="font-bold block mb-1">CIN (*) [Test doublon: AB123456]</label>
-                    <input name="cin" required className="w-full border p-2 rounded font-mono uppercase" placeholder="ex. AB123456" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="font-bold block mb-1">Email (*)</label>
-                      <input name="email" type="email" required className="w-full border p-2 rounded" placeholder="k.alami@mail.ma" />
-                    </div>
-                    <div>
-                      <label className="font-bold block mb-1">Téléphone (*)</label>
-                      <input name="telephone" required className="w-full border p-2 rounded" placeholder="0661998877" />
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onClick={() => setIsCreateOpen(false)} className="px-3 py-1.5 border rounded">Annuler</button>
-                    <button type="submit" className="px-4 py-1.5 bg-navy-700 text-white rounded font-bold">Enregistrer la fiche</button>
-                  </div>
-                </form>
               </div>
-            </div>
-          )}
 
-          {/* Modale F-LOC-03 : Détail & Quittances */}
-          {detailLocataire && (
+              {/* User Profile Pill */}
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 bg-white pl-1.5 pr-3 py-1.5 rounded-full border border-slate-200 shadow-card-soft">
+                  <span className="bg-lime text-midnight text-[10px] font-extrabold px-2.5 py-1 rounded-full font-mono">BAILLEUR</span>
+                  <span className="text-xs font-bold text-midnight hidden sm:inline">ahmed.laarif@locative.ma</span>
+                  <div className="w-7 h-7 rounded-full bg-midnight text-lime flex items-center justify-center font-bold text-xs font-mono">AL</div>
+                </div>
+                <button onClick={() => showToast("Session sécurisée active.")} className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-600">
+                  Déconnexion
+                </button>
+              </div>
+            </header>
+
+            {/* WORKSPACE */}
+            <main className="p-6 sm:p-8 max-w-[1600px] w-full mx-auto flex-1">
+              
+              {/* TOP HERO BANNER (Midnight Black #0B0B0C, 28px radius) */}
+              <div className="rounded-hero bg-midnight p-7 sm:p-9 text-white shadow-midnight-card border border-midnight-border mb-8 relative overflow-hidden">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                  <div className="space-y-3">
+                    <span className="inline-block px-3 py-1 rounded-full bg-midnight-elevated border border-lime/30 text-lime text-xs font-mono font-bold">
+                      ● ESPACE BAILLEUR · GESTION LOCATIVE
+                    </span>
+                    <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                      Bonjour, <span className="text-lime">Ahmed LAARIF</span>
+                    </h1>
+                    <p className="text-slate-300 text-xs sm:text-sm max-w-xl">
+                      Plateforme centrale de gestion des locataires, contrôle d'unicité absolue du CIN et interopérabilité Quittances.
+                    </p>
+                    <div className="pt-2 flex flex-wrap gap-2">
+                      <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-full text-xs font-extrabold ${activeTab === 'dashboard' ? 'bg-lime text-midnight' : 'bg-midnight-elevated text-slate-300'}`}>
+                        Tableau de bord
+                      </button>
+                      <button onClick={() => setActiveTab('list')} className={`px-4 py-2 rounded-full text-xs font-extrabold ${activeTab === 'list' ? 'bg-lime text-midnight' : 'bg-midnight-elevated text-slate-300'}`}>
+                        Afficher les locataires & baux ({locataires.length})
+                      </button>
+                      <button onClick={() => setActiveTab('new')} className={`px-4 py-2 rounded-full text-xs font-extrabold ${activeTab === 'new' ? 'bg-lime text-midnight' : 'bg-midnight-elevated text-slate-300'}`}>
+                        Nouveau locataire / bail
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Floating Glass Stat Card */}
+                  <div className="bg-midnight-card p-5 rounded-card border border-midnight-border lg:w-[300px]">
+                    <div className="flex justify-between items-center text-[10px] font-mono text-slate-400 mb-1">
+                      <span>TAUX D'OCCUPATION</span>
+                      <span className="text-lime font-bold">PostgreSQL Live</span>
+                    </div>
+                    <div className="text-4xl font-black text-lime font-mono">98.4 %</div>
+                    <p className="text-xs text-slate-300 mt-1">{bauxActifs} baux actifs sous contrat</p>
+                    <div className="w-full h-1.5 bg-midnight-elevated rounded-full mt-3 overflow-hidden">
+                      <div className="h-full bg-lime rounded-full" style={{ width: '98.4%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 6 KPI CARDS (Alternating Pure White & Midnight Black) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+                {/* 1. Total Locataires (Pure White) */}
+                <div className="bg-white rounded-card p-6 border border-slate-200 shadow-card-soft">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">👥</div>
+                    <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">+14% vs N-1</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-500 uppercase">Total Locataires</div>
+                  <div className="text-3xl font-black text-midnight mt-1 font-sans">{totalLocataires}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Référentiel certifié unique</div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '100%' }}></div>
+                  </div>
+                </div>
+
+                {/* 2. Baux Actifs (Midnight Black) */}
+                <div className="bg-midnight text-white rounded-card p-6 border border-midnight-border shadow-midnight-card">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">📋</div>
+                    <span className="text-[10px] font-mono font-bold bg-lime text-midnight px-2 py-0.5 rounded-full">Priorité #1</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-400 uppercase">Baux Actifs</div>
+                  <div className="text-3xl font-black text-lime mt-1 font-mono">{bauxActifs}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Contrats valides avec loyers perçus</div>
+                  <div className="w-full h-1.5 bg-midnight-elevated rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+
+                {/* 3. Baux Terminés (Pure White) */}
+                <div className="bg-white rounded-card p-6 border border-slate-200 shadow-card-soft">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">📁</div>
+                    <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">Archivés</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-500 uppercase">Baux Terminés</div>
+                  <div className="text-3xl font-black text-midnight mt-1 font-sans">{bauxTermines}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Clôturés avec état des lieux signé</div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '40%' }}></div>
+                  </div>
+                </div>
+
+                {/* 4. Taux de Rétention (Midnight Black) */}
+                <div className="bg-midnight text-white rounded-card p-6 border border-midnight-border shadow-midnight-card">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">📈</div>
+                    <span className="text-[10px] font-mono font-bold bg-lime text-midnight px-2 py-0.5 rounded-full">+3.2%</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-400 uppercase">Taux de Rétention</div>
+                  <div className="text-3xl font-black text-white mt-1 font-sans">94.8 %</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Renouvellement tacite des baux</div>
+                  <div className="w-full h-1.5 bg-midnight-elevated rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '94.8%' }}></div>
+                  </div>
+                </div>
+
+                {/* 5. Dépôts de Garantie Cumulés (Pure White) */}
+                <div className="bg-white rounded-card p-6 border border-slate-200 shadow-card-soft">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">🛡️</div>
+                    <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Garanti 100%</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-500 uppercase">Dépôts de Garantie</div>
+                  <div className="text-3xl font-black text-midnight mt-1 font-mono">248 500 DH</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Séquestre et cautions sécurisées</div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '88%' }}></div>
+                  </div>
+                </div>
+
+                {/* 6. Loyers sous Contrat (Midnight Black) */}
+                <div className="bg-midnight text-white rounded-card p-6 border border-midnight-border shadow-midnight-card">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-11 h-11 rounded-[14px] bg-lime flex items-center justify-center font-bold text-midnight text-lg shadow-lime-sm">💰</div>
+                    <span className="text-[10px] font-mono font-bold bg-lime text-midnight px-2 py-0.5 rounded-full">Flux Actif</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-400 uppercase">Loyers sous Contrat</div>
+                  <div className="text-3xl font-black text-lime mt-1 font-mono">312 000 DH</div>
+                  <div className="text-[11px] text-slate-400 mt-1">Revenus locatifs mensuels garantis</div>
+                  <div className="w-full h-1.5 bg-midnight-elevated rounded-full mt-3 overflow-hidden">
+                    <div className="h-full bg-lime rounded-full" style={{ width: '92%' }}></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ANALYTICS SECTION */}
+              {activeTab === 'dashboard' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  {/* Midnight Chart Card */}
+                  <div className="lg:col-span-2 rounded-card bg-midnight p-6 border border-midnight-border text-white shadow-midnight-card">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-base font-extrabold text-white">Évolution des Loyers & Encaissements 2026</h3>
+                        <p className="text-xs text-slate-400">Flux récurrents en Dirham Marocain (DH)</p>
+                      </div>
+                      <span className="text-lime font-mono text-xs font-bold bg-midnight-elevated px-3 py-1 rounded-full border border-midnight-border">312 000 DH / mois</span>
+                    </div>
+
+                    {/* Chart Mock */}
+                    <div className="h-44 flex items-end justify-between space-x-2 pt-6 pb-2 border-b border-midnight-border">
+                      {['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov'].map((m, idx) => {
+                        const heights = [65, 70, 75, 80, 85, 92, 92, 95, 98, 100, 100];
+                        const h = heights[idx];
+                        return (
+                          <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
+                            <div className="w-full bg-midnight-elevated rounded-t-lg relative flex items-end justify-center" style={{ height: '120px' }}>
+                              <div className="w-4/5 bg-lime rounded-t-md transition-all shadow-lime-sm" style={{ height: `${h}%` }}></div>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono">{m}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Donut Chart Card */}
+                  <div className="rounded-card bg-white p-6 border border-slate-200 shadow-card-soft flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-midnight">Répartition Géographique</h3>
+                      <p className="text-xs text-slate-500 mb-4">Portefeuille par ville marocaine</p>
+                      <div className="space-y-2.5 text-xs">
+                        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50">
+                          <span className="font-bold flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-lime mr-2"></span>Casablanca</span>
+                          <span className="font-mono font-bold">50% (24 baux)</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50">
+                          <span className="font-bold flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-midnight mr-2"></span>Rabat</span>
+                          <span className="font-mono font-bold">25% (12 baux)</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50">
+                          <span className="font-bold flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-sky-500 mr-2"></span>Marrakech</span>
+                          <span className="font-mono font-bold">17% (8 baux)</span>
+                        </div>
+                        <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50">
+                          <span className="font-bold flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-slate-400 mr-2"></span>Tanger</span>
+                          <span className="font-mono font-bold">8% (4 baux)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TABLE CATALOGUE */}
+              {activeTab !== 'new' && (
+                <div className="rounded-card bg-white border border-slate-200 shadow-card-soft overflow-hidden">
+                  <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3 bg-slate-50/50">
+                    <input
+                      type="text"
+                      placeholder="Rechercher par CIN (ex: AB123456), nom ou ville..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full max-w-md px-3.5 py-2 text-xs border border-slate-200 rounded-button bg-white focus:outline-none focus:ring-2 focus:ring-midnight"
+                    />
+
+                    <div className="flex items-center space-x-2">
+                      <div className="bg-slate-200/80 p-1 rounded-full text-xs font-bold">
+                        <button onClick={() => setFilterStatut('ALL')} className={`px-3 py-1 rounded-full ${filterStatut === 'ALL' ? 'bg-midnight text-white' : ''}`}>Tous ({locataires.length})</button>
+                        <button onClick={() => setFilterStatut('ACTIF')} className={`px-3 py-1 rounded-full ${filterStatut === 'ACTIF' ? 'bg-lime text-midnight' : ''}`}>ACTIF</button>
+                        <button onClick={() => setFilterStatut('TERMINE')} className={`px-3 py-1 rounded-full ${filterStatut === 'TERMINE' ? 'bg-midnight text-white' : ''}`}>TERMINÉ</button>
+                      </div>
+
+                      <button onClick={() => setActiveTab('new')} className="px-4 py-2 bg-lime hover:bg-lime-hover text-midnight text-xs font-black rounded-button shadow-lime-sm">
+                        + Nouveau bail
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 8 Strict Columns Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 text-[10px] uppercase font-extrabold text-slate-500 border-b">
+                          <th className="py-3 px-4">Nom & Prénom</th>
+                          <th className="py-3 px-4">CIN</th>
+                          <th className="py-3 px-4">Téléphone & Email</th>
+                          <th className="py-3 px-4">Bien Rattaché (Adresse & Ville)</th>
+                          <th className="py-3 px-4 text-right">Montant Loyer</th>
+                          <th className="py-3 px-4 text-right">Dépôt Garantie</th>
+                          <th className="py-3 px-4">Dates (Début / Fin)</th>
+                          <th className="py-3 px-4 text-center">Statut Bail</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filtered.map(item => {
+                          const isActif = item.statutBail === 'ACTIF';
+                          return (
+                            <tr key={item.id} className="hover:bg-slate-50">
+                              <td className="py-3 px-4 font-extrabold text-midnight">
+                                {item.prenom} {item.nom}
+                                <div className="text-[10px] text-slate-400 font-mono font-normal">{item.id.substring(0, 11)}...</div>
+                              </td>
+                              <td className="py-3 px-4 font-mono font-bold">
+                                <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{item.cin}</span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-semibold">{item.telephone}</div>
+                                <div className="text-slate-400 text-[11px]">{item.email}</div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-slate-800">{item.bien.titre}</div>
+                                <div className="text-slate-500 text-[11px]">{item.bien.ville} • {item.bien.adresse}</div>
+                              </td>
+                              <td className="py-3 px-4 text-right font-mono font-black text-midnight whitespace-nowrap">
+                                {item.loyerMensuel.toLocaleString('fr-FR')} DH
+                              </td>
+                              <td className="py-3 px-4 text-right font-mono font-bold text-slate-700 whitespace-nowrap">
+                                {item.depotGarantie.toLocaleString('fr-FR')} DH
+                              </td>
+                              <td className="py-3 px-4 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                                {item.dateDebut} → {item.dateFin}
+                              </td>
+                              <td className="py-3 px-4 text-center whitespace-nowrap">
+                                {isActif ? (
+                                  <span className="px-3 py-1 rounded-full text-[11px] font-black bg-lime text-midnight font-mono shadow-lime-sm">
+                                    ● ACTIF
+                                  </span>
+                                ) : (
+                                  <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-midnight text-white font-mono">
+                                    ● TERMINE
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                                <button onClick={() => setQuittanceModal(item)} className="px-2.5 py-1 bg-lime/20 text-midnight hover:bg-lime rounded text-[11px] font-bold">
+                                  Quittances
+                                </button>
+                                <button onClick={() => {
+                                  if (isActif) {
+                                    alert("Suppression impossible : Un bail actif est rattaché à ce locataire. Clôturez d'abord le bail dans le module Biens.");
+                                  } else {
+                                    setLocataires(locataires.filter(l => l.id !== item.id));
+                                    showToast("Locataire archivé.");
+                                  }
+                                }} className={`px-2 py-1 rounded text-[11px] font-bold ${isActif ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-red-50 text-coral hover:bg-red-100'}`}>
+                                  {isActif ? '🔒 Verrouillé' : 'Supprimer'}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* QUICK-CHOICE TAB 3 : NOUVEAU LOCATAIRE / BAIL */}
+              {activeTab === 'new' && (
+                <div className="rounded-card bg-white border border-slate-200 shadow-card-soft p-6 sm:p-8">
+                  <div className="flex justify-between items-center pb-4 mb-6 border-b">
+                    <div>
+                      <h2 className="text-2xl font-black text-midnight tracking-tight">Nouveau Locataire & Contrat de Bail</h2>
+                      <p className="text-xs text-slate-500">Enregistrement centralisé avec contrôle strict d'unicité du CIN marocain.</p>
+                    </div>
+                    <button onClick={() => setActiveTab('list')} className="px-3 py-1.5 bg-slate-100 rounded-button text-xs font-bold text-slate-600">
+                      Annuler
+                    </button>
+                  </div>
+
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const form = e.target;
+                    const cinVal = form.cin.value.trim().toUpperCase();
+                    if (locataires.some(l => l.cin.toUpperCase() === cinVal)) {
+                      alert(`Fiche refusée : CIN déjà utilisé (${cinVal}) - Erreur HTTP 409 Conflict`);
+                      return;
+                    }
+                    const newRecord = {
+                      id: "loc-" + Date.now().toString(36),
+                      nom: form.nom.value.trim(),
+                      prenom: form.prenom.value.trim(),
+                      cin: cinVal,
+                      telephone: form.telephone.value.trim(),
+                      email: form.email.value.trim(),
+                      bien: {
+                        titre: form.bienTitre.value.trim(),
+                        adresse: form.bienAdresse.value.trim(),
+                        ville: form.bienVille.value
+                      },
+                      loyerMensuel: Number(form.loyerMensuel.value),
+                      depotGarantie: Number(form.depotGarantie.value),
+                      dateDebut: form.dateDebut.value,
+                      dateFin: form.dateFin.value,
+                      statutBail: "ACTIF"
+                    };
+                    setLocataires([newRecord, ...locataires]);
+                    setActiveTab('list');
+                    showToast(`Bail activé pour ${newRecord.prenom} ${newRecord.nom} (${newRecord.loyerMensuel} DH) !`);
+                  }} className="space-y-6 text-xs">
+                    
+                    {/* Section 1 */}
+                    <div className="space-y-3">
+                      <div className="font-extrabold text-midnight uppercase tracking-wider text-xs flex items-center">
+                        <span className="w-5 h-5 rounded-full bg-midnight text-lime flex items-center justify-center mr-2 text-[10px]">1</span>
+                        Identité du locataire
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="font-bold block mb-1">Nom (*)</label>
+                          <input name="nom" required className="w-full p-2.5 border rounded-button bg-slate-50" placeholder="ex. Naciri" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Prénom (*)</label>
+                          <input name="prenom" required className="w-full p-2.5 border rounded-button bg-slate-50" placeholder="ex. Samir" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">CIN (*) [Test doublon: AB123456]</label>
+                          <input name="cin" required className="w-full p-2.5 border rounded-button bg-slate-50 font-mono uppercase" placeholder="ex. EF345678" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="font-bold block mb-1">Téléphone marocain (*)</label>
+                          <input name="telephone" required className="w-full p-2.5 border rounded-button bg-slate-50" placeholder="+212 6 63 11 22 33" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Email (*)</label>
+                          <input name="email" type="email" required className="w-full p-2.5 border rounded-button bg-slate-50" placeholder="samir.naciri@mail.ma" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2 */}
+                    <div className="space-y-3 pt-4 border-t">
+                      <div className="font-extrabold text-midnight uppercase tracking-wider text-xs flex items-center">
+                        <span className="w-5 h-5 rounded-full bg-midnight text-lime flex items-center justify-center mr-2 text-[10px]">2</span>
+                        Bien Immobilier & Modalités Financières (DH)
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="font-bold block mb-1">Titre de l'appartement (*)</label>
+                          <input name="bienTitre" defaultValue="Appartement C-05 Standing" required className="w-full p-2.5 border rounded-button bg-slate-50" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Adresse (*)</label>
+                          <input name="bienAdresse" defaultValue="Boulevard Zerktouni, Gauthier" required className="w-full p-2.5 border rounded-button bg-slate-50" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Ville (*)</label>
+                          <select name="bienVille" className="w-full p-2.5 border rounded-button bg-slate-50 font-bold">
+                            <option value="Casablanca">Casablanca</option>
+                            <option value="Rabat">Rabat</option>
+                            <option value="Marrakech">Marrakech</option>
+                            <option value="Tanger">Tanger</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label className="font-bold block mb-1">Loyer Mensuel (DH) (*)</label>
+                          <input name="loyerMensuel" type="number" defaultValue="7500" required className="w-full p-2.5 border rounded-button bg-slate-50 font-mono font-bold" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Dépôt Garantie (DH) (*)</label>
+                          <input name="depotGarantie" type="number" defaultValue="15000" required className="w-full p-2.5 border rounded-button bg-slate-50 font-mono font-bold" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Date Début (*)</label>
+                          <input name="dateDebut" defaultValue="01/01/2026" required className="w-full p-2.5 border rounded-button bg-slate-50 font-mono" />
+                        </div>
+                        <div>
+                          <label className="font-bold block mb-1">Date Fin (*)</label>
+                          <input name="dateFin" defaultValue="31/12/2027" required className="w-full p-2.5 border rounded-button bg-slate-50 font-mono" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t flex justify-end space-x-3">
+                      <button type="button" onClick={() => setActiveTab('list')} className="px-5 py-2.5 border rounded-button font-bold text-slate-700">Annuler</button>
+                      <button type="submit" className="px-6 py-2.5 bg-lime hover:bg-lime-hover text-midnight rounded-button font-black uppercase tracking-wider shadow-lime-sm">
+                        Enregistrer et Activer le bail (DH)
+                      </button>
+                    </div>
+
+                  </form>
+                </div>
+              )}
+
+            </main>
+
+            {/* FOOTER */}
+            <footer className="border-t border-slate-200 py-4 px-8 text-xs text-slate-500 bg-white flex justify-between items-center">
+              <div><strong>LOCATIVE.</strong> — Gestion Immobilière Marocaine (Master Web Services · Groupe 16)</div>
+              <div className="font-mono text-lime-dark font-bold">Midnight & Lime Edition v2.0</div>
+            </footer>
+
+          </div>
+
+          {/* QUITTANCE MODAL */}
+          {quittanceModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-              <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 card-shadow">
+              <div className="bg-white rounded-card p-6 max-w-lg w-full space-y-4 shadow-2xl border">
                 <div className="flex justify-between items-center border-b pb-3">
-                  <h3 className="font-bold text-base text-navy-700">Fiche Locataire & Quittances (F-LOC-03)</h3>
-                  <button onClick={() => setDetailLocataire(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                  <h3 className="font-extrabold text-sm text-midnight">Passerelle Quittances (Module Akram)</h3>
+                  <button onClick={() => setQuittanceModal(null)} className="text-slate-400 font-bold">✕</button>
                 </div>
-                <div className="space-y-3 text-xs">
-                  <div className="p-2.5 bg-slate-50 rounded border font-mono">
-                    <span className="text-slate-400 block text-[10px]">UUID SYSTÈME :</span>
-                    <strong>{detailLocataire.id}</strong>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><span className="text-slate-400 block">Locataire :</span><strong>{detailLocataire.prenom} {detailLocataire.nom}</strong></div>
-                    <div><span className="text-slate-400 block">CIN vérifié :</span><strong>{detailLocataire.cin}</strong></div>
-                    <div><span className="text-slate-400 block">Téléphone :</span>{detailLocataire.telephone}</div>
-                    <div><span className="text-slate-400 block">Email :</span>{detailLocataire.email}</div>
-                  </div>
-                  <div className="p-3 bg-slate-900 text-emerald-400 rounded font-mono text-[11px]">
-                    <div className="text-sky-300 font-bold mb-1">Flux JSON transmis à Quittances :</div>
-                    <pre>{JSON.stringify({
-                      id: detailLocataire.id,
-                      nom: detailLocataire.nom,
-                      prenom: detailLocataire.prenom,
-                      nomComplet: `${detailLocataire.prenom} ${detailLocataire.nom}`,
-                      cin: detailLocataire.cin,
-                      email: detailLocataire.email,
-                      telephone: detailLocataire.telephone
-                    }, null, 2)}</pre>
-                  </div>
+                <div className="text-xs text-slate-600">
+                  Flux JSON transmis via l'endpoint <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[11px]">GET /api/v1/locataires/:id/quittance-summary</code> :
                 </div>
+                <pre className="bg-midnight p-4 rounded-xl text-emerald-400 font-mono text-xs overflow-x-auto">
+                  {JSON.stringify({
+                    id: quittanceModal.id,
+                    nom: quittanceModal.nom,
+                    prenom: quittanceModal.prenom,
+                    nomComplet: `${quittanceModal.prenom} ${quittanceModal.nom}`,
+                    cin: quittanceModal.cin,
+                    loyerMensuelDH: quittanceModal.loyerMensuel,
+                    bien: quittanceModal.bien.titre,
+                    ville: quittanceModal.bien.ville
+                  }, null, 2)}
+                </pre>
                 <div className="flex justify-end pt-2 border-t">
-                  <button onClick={() => setDetailLocataire(null)} className="px-4 py-1.5 bg-slate-200 rounded font-bold text-xs">Fermer</button>
+                  <button onClick={() => setQuittanceModal(null)} className="px-4 py-2 bg-midnight text-white rounded-button font-bold text-xs">Fermer</button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Modale F-LOC-04 : Modification */}
-          {editLocataire && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-              <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 card-shadow">
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h3 className="font-bold text-base text-navy-700">Modifier coordonnées (F-LOC-04)</h3>
-                  <button onClick={() => setEditLocataire(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
-                </div>
-                <div className="p-2.5 bg-slate-100 rounded text-xs text-slate-600">
-                  🔒 Identité ({editLocataire.prenom} {editLocataire.nom}) et CIN ({editLocataire.cin}) verrouillés.
-                </div>
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.target;
-                  setLocataires(locataires.map(l => l.id === editLocataire.id ? {
-                    ...l,
-                    email: form.email.value.trim(),
-                    telephone: form.telephone.value.trim()
-                  } : l));
-                  setEditLocataire(null);
-                  showToast("Coordonnées modifiées avec succès !");
-                }} className="space-y-3 text-xs">
-                  <div>
-                    <label className="font-bold block mb-1">Nouvel email (*)</label>
-                    <input name="email" defaultValue={editLocataire.email} required className="w-full border p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="font-bold block mb-1">Nouveau téléphone (*)</label>
-                    <input name="telephone" defaultValue={editLocataire.telephone} required className="w-full border p-2 rounded" />
-                  </div>
-                  <div className="flex justify-end space-x-2 pt-3 border-t">
-                    <button type="button" onClick={() => setEditLocataire(null)} className="px-3 py-1.5 border rounded">Annuler</button>
-                    <button type="submit" className="px-4 py-1.5 bg-navy-700 text-white rounded font-bold">Enregistrer</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Modale F-LOC-05 : Suppression sécurisée */}
-          {deleteLocataire && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-              <div className="bg-white rounded-2xl p-6 max-w-md w-full space-y-4 card-shadow">
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h3 className="font-bold text-base text-navy-700">Suppression sécurisée (F-LOC-05)</h3>
-                  <button onClick={() => setDeleteLocataire(null)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
-                </div>
-                {deleteLocataire.hasBailActif ? (
-                  <div className="space-y-3 text-xs">
-                    <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-amber-900">
-                      <strong>⚠️ Suppression impossible :</strong> Ce locataire a un <strong>bail actif en cours</strong> ({deleteLocataire.bailInfo?.appartement}).
-                    </div>
-                    <p className="text-slate-500">Règle de gestion : Résiliez le bail dans le module Biens avant de supprimer cette fiche.</p>
-                    <div className="flex justify-end pt-2">
-                      <button onClick={() => setDeleteLocataire(null)} className="px-4 py-2 bg-slate-200 rounded font-bold text-xs">Compris / Fermer</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3 text-xs">
-                    <p className="text-slate-700">Confirmez-vous la suppression de <strong>{deleteLocataire.prenom} {deleteLocataire.nom}</strong> (CIN: {deleteLocataire.cin}) ?</p>
-                    <div className="flex justify-end space-x-2 pt-2 border-t">
-                      <button onClick={() => setDeleteLocataire(null)} className="px-3 py-1.5 border rounded">Annuler</button>
-                      <button onClick={() => {
-                        setLocataires(locataires.filter(l => l.id !== deleteLocataire.id));
-                        setDeleteLocataire(null);
-                        showToast("Locataire supprimé.");
-                      }} className="px-4 py-1.5 bg-red-600 text-white rounded font-bold">Supprimer définitivement</button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
