@@ -1,0 +1,5 @@
+**
+!Dockerfile
+!.dockerignore
+!target/
+!target/service-quittances-0.0.1-SNAPSHOT.jar
