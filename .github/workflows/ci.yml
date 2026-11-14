@@ -1,10 +1,10 @@
-name: Java CI with Maven (Module Locataires)
+﻿name: Java CI with Maven (Module Locataires)
 
 on:
   push:
-    branches: [ "main", "feature/**" ]
+    branches: [ "main", "feature/**", "laarif-ahmed" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "laarif-ahmed" ]
 
 jobs:
   build-and-test:
@@ -20,8 +20,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+        cache-dependency-path: '**/pom.xml'
 
     - name: Build and run 14 unit tests with Maven
+      working-directory: ./backend/backend_gestion_locataires
       run: mvn clean test --batch-mode
 
     - name: Generate Surefire test report
@@ -29,4 +31,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: surefire-reports
-        path: target/surefire-reports/
+        path: backend/backend_gestion_locataires/target/surefire-reports/
