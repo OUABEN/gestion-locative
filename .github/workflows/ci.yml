@@ -1,32 +1,29 @@
-name: Java CI with Maven (Module Locataires)
+﻿name: Node.js CI (Module Locataires)
 
 on:
   push:
-    branches: [ "main", "feature/**" ]
+    branches: [ main, laarif-ahmed ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, laarif-ahmed ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend-locataire
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Build and run 14 unit tests with Maven
-      run: mvn clean test --batch-mode
+      - name: Install dependencies
+        run: npm install
 
-    - name: Generate Surefire test report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: surefire-reports
-        path: target/surefire-reports/
+      - name: Run tests
+        run: npm test --if-present
