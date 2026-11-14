@@ -1,4 +1,4 @@
-# =====================================================================
+﻿# =====================================================================
 # CD — Gestion Locative
 # Après une CI réussie sur la branche main : construction des images
 # Docker et publication sur GitHub Container Registry (ghcr.io).
@@ -9,7 +9,7 @@ name: CD
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [CI, "Node.js CI (Module Locataires)"]
     types: [completed]
     branches: [main]
 
@@ -37,7 +37,7 @@ jobs:
           - service: backend_gestion_biens
             context: backend/backend_gestion_biens
           - service: backend_gestion_locataires
-            context: backend/backend_gestion_locataires
+            context: backend-locataire
           - service: backend_gestion_loyers
             context: backend/backend_gestion_loyers
           - service: backend_gestion_quittances
