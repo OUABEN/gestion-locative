@@ -1,0 +1,401 @@
+.sidebar {
+  width: 280px;
+  background-color: var(--color-midnight);
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  border-right: 1px solid var(--color-midnight-border);
+  transition: transform 0.45s var(--ease-out-expo), box-shadow 0.45s var(--ease-out-expo);
+  box-shadow: 10px 0 36px rgba(11, 11, 12, 0.28);
+  overflow: hidden;
+}
+
+.open {
+  transform: translateX(0);
+}
+
+.closed {
+  transform: translateX(-100%);
+  box-shadow: none;
+}
+
+/* Halo lumineux Lime Green en haut de la sidebar */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: -90px;
+  left: -60px;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(198, 244, 50, 0.16) 0%, transparent 70%);
+}
+
+/* ================= Bouton flottant pour rouvrir quand fermé ================= */
+.floatingOpenBtn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 98;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  background: var(--color-midnight);
+  color: var(--color-white);
+  border: 1px solid rgba(198, 244, 50, 0.45);
+  box-shadow: 0 14px 32px rgba(11, 11, 12, 0.35), 0 0 20px rgba(198, 244, 50, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-24px) scale(0.92);
+  transition: all 0.4s var(--ease-spring);
+}
+
+.floatingVisible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) scale(1);
+}
+
+.floatingOpenBtn:hover {
+  transform: translateY(-3px) scale(1.03);
+  border-color: var(--color-lime);
+}
+
+.floatingLogo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-glow-lime);
+}
+
+.floatingText {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.floatingText b {
+  color: var(--color-lime);
+}
+
+.floatingArrow {
+  color: var(--color-lime);
+}
+
+/* ================= En-tête de la Sidebar ================= */
+.header {
+  padding: 24px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoIcon {
+  width: 42px;
+  height: 42px;
+  background: var(--gradient-lime);
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-glow-lime);
+  transition: transform 0.5s var(--ease-spring);
+}
+
+.brand:hover .logoIcon {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandTitle {
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--color-white);
+  letter-spacing: 0.04em;
+}
+
+.brandDot {
+  color: var(--color-lime);
+}
+
+.brandSubtitle {
+  font-size: 11px;
+  color: var(--color-midnight-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Bouton Fermer / Réduire dans l'en-tête */
+.toggleSidebarBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s var(--ease-out-expo);
+}
+
+.toggleSidebarBtn:hover {
+  background: var(--color-lime);
+  color: var(--color-midnight);
+  border-color: var(--color-lime);
+  box-shadow: var(--shadow-glow-lime);
+  transform: scale(1.06);
+}
+
+/* ================= Section Navigation ================= */
+.navSectionLabel {
+  padding: 20px 22px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #7D7D8C;
+}
+
+.navLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.nav {
+  flex: 1;
+  padding: 4px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  color: #C4C4D0;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.28s var(--ease-out-expo);
+}
+
+.navIconBox {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.navPill,
+.navBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #D0D0DC;
+}
+
+.navBadge {
+  background: rgba(198, 244, 50, 0.18);
+  color: var(--color-lime);
+}
+
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--color-white);
+  transform: translateX(4px);
+}
+
+.navItem:hover .navIconBox {
+  background: rgba(198, 244, 50, 0.18);
+  color: var(--color-lime);
+}
+
+.navItem.active {
+  background: var(--color-lime);
+  color: var(--color-midnight);
+  font-weight: 800;
+  box-shadow: var(--shadow-glow-lime);
+}
+
+.navItem.active .navIconBox {
+  background: var(--color-midnight);
+  color: var(--color-lime);
+}
+
+.navItem.active .navPill,
+.navItem.active .navBadge {
+  background: var(--color-midnight);
+  color: var(--color-lime);
+}
+
+/* Sous-bouton "Ajouter un bien" rattaché à Biens */
+.subNavItem {
+  margin-left: 26px;
+  margin-top: -2px;
+  margin-bottom: 4px;
+  padding: 8px 14px;
+  border-radius: 11px;
+  border-left: 2px solid rgba(198, 244, 50, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9E9EAE;
+  transition: all 0.25s var(--ease-out-expo);
+}
+
+.subNavItem:hover {
+  color: var(--color-lime);
+  background: rgba(198, 244, 50, 0.08);
+  border-left-color: var(--color-lime);
+  transform: translateX(4px);
+}
+
+.subActive {
+  color: var(--color-midnight) !important;
+  background: var(--color-lime) !important;
+  border-left-color: var(--color-midnight);
+  font-weight: 800;
+}
+
+/* ================= Carte Parc Immobilier Pro ================= */
+.promoBox {
+  margin: 12px 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #17171D 0%, #101014 100%);
+  border: 1px solid rgba(198, 244, 50, 0.26);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.promoTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.promoIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--color-lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promoTag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(198, 244, 50, 0.16);
+  color: var(--color-lime);
+}
+
+.promoTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-white);
+}
+
+.promoText {
+  font-size: 12px;
+  color: #9696A4;
+  line-height: 1.45;
+}
+
+/* ================= Pied de Sidebar ================= */
+.footer {
+  padding: 13px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.version {
+  font-size: 11px;
+  color: #7D7D8C;
+}
+
+.footerCollapseBtn {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-lime);
+  background: rgba(198, 244, 50, 0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: all 0.2s;
+}
+
+.footerCollapseBtn:hover {
+  background: var(--color-lime);
+  color: var(--color-midnight);
+}
+
+.overlay {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(11, 11, 12, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+  }
+}

@@ -1,0 +1,147 @@
+.kpiCard {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  transition:
+    transform 0.45s var(--ease-out-expo),
+    box-shadow 0.45s var(--ease-out-expo),
+    border-color 0.3s;
+}
+
+.kpiCard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-midnight);
+}
+
+/* Variante sombre Midnight Black */
+.brown {
+  background: var(--color-midnight);
+  color: var(--color-white);
+  border-color: var(--color-midnight-border);
+}
+
+.brown .title {
+  color: #9A9AA6;
+}
+
+.brown .value {
+  color: var(--color-white);
+}
+
+.brown .subtitle {
+  color: #B4B4C2;
+}
+
+/* Halo décoratif */
+.glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  opacity: 0.22;
+  transition: transform 0.6s var(--ease-out-expo), opacity 0.6s;
+  pointer-events: none;
+}
+
+.kpiCard:hover .glow {
+  transform: scale(1.35);
+  opacity: 0.35;
+}
+
+.green .glow { background: radial-gradient(circle, #C6F432 0%, transparent 70%); }
+.brown .glow { background: radial-gradient(circle, #C6F432 0%, transparent 70%); }
+.beige .glow { background: radial-gradient(circle, #0B0B0C 0%, transparent 70%); }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #6B6B78;
+}
+
+.iconWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s var(--ease-spring);
+}
+
+.kpiCard:hover .iconWrapper {
+  transform: rotate(-8deg) scale(1.1);
+}
+
+.green .iconWrapper {
+  background: var(--color-lime);
+  color: var(--color-midnight);
+  box-shadow: var(--shadow-glow-lime);
+}
+
+.brown .iconWrapper {
+  background: var(--color-lime);
+  color: var(--color-midnight);
+  box-shadow: var(--shadow-glow-lime);
+}
+
+.beige .iconWrapper {
+  background: var(--color-midnight);
+  color: var(--color-lime);
+}
+
+.value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--color-midnight);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  position: relative;
+  font-variant-numeric: tabular-nums;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #686876;
+  position: relative;
+}
+
+.progressTrack {
+  height: 6px;
+  border-radius: 999px;
+  background: #ECECF2;
+  overflow: hidden;
+}
+
+.brown .progressTrack {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.progressBar {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--color-lime);
+  animation: grow 1.4s var(--ease-out-expo) forwards;
+}
+
+@keyframes grow {
+  to { width: var(--target); }
+}
