@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint src",
+    "token": "tsx scripts/gen-token.ts",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:report": "jest --coverage"

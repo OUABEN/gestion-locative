@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { openapiSpec } from "./docs/openapi";
+import { authRouter } from "./routes/auth.routes";
 import { bienRouter } from "./routes/bien.routes";
 import { errorHandler } from "./middlewares/error-handler";
 import { AppError } from "./utils/app-error";
@@ -21,7 +22,10 @@ export const createApp = (): Express => {
   // Documentation Swagger UI sur /api-docs (spécification OpenAPI complète)
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
-  // Routes métier
+  // Routes d'authentification (Login / Register / Profil sur table PostgreSQL users)
+  app.use("/api/auth", authRouter);
+
+  // Routes métier Biens
   app.use("/api/biens", bienRouter);
 
   // Gestion des routes inexistantes (404)
@@ -34,4 +38,3 @@ export const createApp = (): Express => {
 
   return app;
 };
-
