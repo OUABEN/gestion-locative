@@ -1,4 +1,7 @@
 import json
+import os
+from copy import deepcopy
+from uuid import UUID
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
@@ -125,6 +128,20 @@ AFFECTATIONS = {
         )
     ],
 }
+
+
+# Scénario hybride explicite : seul le locataire vient du service de l'équipe.
+locataire_integration = os.environ.get("DARLOC_LOCATAIRE_INTEGRATION_ID", "")
+if locataire_integration:
+    UUID(locataire_integration)  # Refuser une configuration incorrecte au démarrage.
+    bail_integration = "BAIL-INTEGRATION-" + locataire_integration
+    BAUX[bail_integration] = dict(BAUX["BAIL-DEMO-002"],
+        bailId=bail_integration, locataireId=locataire_integration)
+    AFFECTATIONS[bail_integration] = deepcopy(AFFECTATIONS["BAIL-DEMO-002"])
+    for ligne in AFFECTATIONS[bail_integration]:
+        ligne["bailId"] = bail_integration
+        ligne["affectationId"] = "AFF-INT-" + locataire_integration
+        ligne["paiementId"] = "PAY-INT-" + locataire_integration
 
 
 class RequeteInvalide(Exception):

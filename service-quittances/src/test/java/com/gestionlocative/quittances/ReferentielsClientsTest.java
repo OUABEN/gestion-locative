@@ -31,6 +31,7 @@ class ReferentielsClientsTest {
     private HttpServer serveur;
     private HttpClient transport;
     private HttpLocataireClient locataires;
+    private HttpLocataireClient locatairesAhmed;
     private HttpBienBailClient biensBaux;
 
     private volatile int statut;
@@ -88,6 +89,8 @@ class ReferentielsClientsTest {
                 "/api/v1/locataires/{id}"
         );
 
+        locatairesAhmed = new HttpLocataireClient(client,
+                "/api/v1/locataires/{id}/quittance-summary", true);
         biensBaux = new HttpBienBailClient(
                 client,
                 "/api/v1/biens/{id}",
@@ -240,5 +243,52 @@ class ReferentielsClientsTest {
         );
 
         assertEquals("REPONSE_INCOHERENTE", erreur.getCode());
+    }
+
+    @Test
+    void doitAdapterLaSyntheseAhmedSansDeclarerEmailVerifie() {
+        reponse = """
+                {"id":"LOC-1","nom":"TEST","prenom":"Integration",
+                 "email":"locataire@example.test","nomComplet":"Integration TEST",
+                 "cin":"TEST123","telephone":"0600000000"}
+                """;
+        var resultat = locatairesAhmed.consulter("LOC-1");
+        assertEquals("1", resultat.versionContrat());
+        assertEquals("TEST", resultat.nom());
+        assertEquals("locataire@example.test", resultat.email());
+        assertEquals(Boolean.FALSE, resultat.emailVerifie());
+        assertEquals("/api/v1/locataires/LOC-1/quittance-summary", chemin.get());
+    }
+
+    @Test
+    void doitAdapterAhmedSansEmail() {
+        reponse = """
+                {"id":"LOC-1","nom":"TEST","prenom":"Integration","email":null}
+                """;
+        assertNull(locatairesAhmed.consulter("LOC-1").email());
+    }
+
+    @Test
+    void doitRefuserUneSyntheseAhmedIncompleteOuDifferente() {
+        for (String corps : new String[] {
+                "{}",
+                "{\"id\":\"LOC-2\",\"nom\":\"TEST\",\"prenom\":\"Integration\"}",
+                "{\"id\":\"LOC-1\",\"nom\":\" \",\"prenom\":\"Integration\"}"}) {
+            reponse = corps;
+            assertThrows(ServiceExterneException.class, () -> locatairesAhmed.consulter("LOC-1"));
+        }
+    }
+
+    @Test
+    void doitConserver404Ahmed() {
+        statut = 404;
+        var erreur = assertThrows(ServiceExterneException.class, () -> locatairesAhmed.consulter("LOC-1"));
+        assertEquals(Integer.valueOf(404), erreur.getStatutHttp());
+    }
+
+    @Test
+    void contratHabituelResteStrict() {
+        reponse = "{\"id\":\"LOC-1\",\"nom\":\"TEST\",\"prenom\":\"Integration\"}";
+        assertThrows(ServiceExterneException.class, () -> locataires.consulter("LOC-1"));
     }
 }

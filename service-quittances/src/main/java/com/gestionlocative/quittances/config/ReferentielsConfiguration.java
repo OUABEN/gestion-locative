@@ -44,8 +44,9 @@ public class ReferentielsConfiguration {
         Endpoint endpoint = properties.locataires();
 
         return new HttpLocataireClient(
-                construire(endpoint, transport),
-                endpoint.chemin()
+                construire(endpoint, transport, true),
+                endpoint.chemin(),
+                "LOCATAIRES_LOCAL".equals(endpoint.mode())
         );
     }
 
@@ -76,6 +77,10 @@ public class ReferentielsConfiguration {
     }
 
     private RestClient construire(Endpoint endpoint, HttpClient transport) {
+        return construire(endpoint, transport, false);
+    }
+
+    private RestClient construire(Endpoint endpoint, HttpClient transport, boolean locataires) {
         if (endpoint == null
                 || endpoint.baseUrl() == null
                 || endpoint.chemin() == null) {
@@ -106,7 +111,15 @@ public class ReferentielsConfiguration {
 
         String token = endpoint.token() == null ? "" : endpoint.token();
 
-        if ("SIMULATION".equals(endpoint.mode())) {
+        if ("LOCATAIRES_LOCAL".equals(endpoint.mode())) {
+            boolean boucleLocale = Set.of("127.0.0.1", "localhost", "::1", "[::1]").contains(uri.getHost());
+            boolean conteneurLocal = dockerDemo
+                    && "locataires-integration".equals(uri.getHost()) && uri.getPort() == 8082;
+            if (!locataires || !"http".equals(uri.getScheme())
+                    || !(boucleLocale || conteneurLocal) || !token.isBlank()) {
+                throw new IllegalArgumentException("LOCATAIRES_LOCAL exige le service local sans jeton.");
+            }
+        } else if ("SIMULATION".equals(endpoint.mode())) {
             if (!ReseauDemo.sourceAutorisee(uri, dockerDemo)
                     || !token.isBlank()) {
                 throw new IllegalArgumentException(
