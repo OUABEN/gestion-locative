@@ -1,0 +1,25 @@
+name: gestionlocative-quittances-dev
+
+services:
+  quittances-db:
+    image: postgres:17.11-bookworm
+    environment:
+      POSTGRES_DB: ${QUITTANCES_DB_NAME:?Base PostgreSQL manquante}
+      POSTGRES_USER: ${QUITTANCES_DB_USER:?Utilisateur PostgreSQL manquant}
+      POSTGRES_PASSWORD: ${QUITTANCES_DB_PASSWORD:?Mot de passe PostgreSQL manquant}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - quittances_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  quittances_pgdata:

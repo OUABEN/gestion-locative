@@ -1,0 +1,55 @@
+# Compilation Maven
+target/
+
+# Configuration locale IntelliJ IDEA
+.idea/
+*.iml
+
+# Variables et configurations locales sensibles
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.yml
+src/main/resources/application-local.properties
+
+# Journaux
+*.log
+logs/
+
+# Stockage documentaire local et sauvegardes
+storage/
+backups/
+
+# Fichiers Windows
+Thumbs.db
+Desktop.ini
+
+# Clés de démonstration JWT
+.local-jwt/
+/.local-signature/
+
+.local-signature/
+
+.sauvegardes/
+
+/sauvegardes/
+
+/.env
+
+/.local-jwt/
+
+/storage/
+
+# Fichiers locaux DarLoc
+.env
+.env.*
+!.env.example
+.local-jwt/
+.local-signature/
+storage/
+sauvegardes/
+target/
+*.p12
+*.pfx
+*.key
+*.jks

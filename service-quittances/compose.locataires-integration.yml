@@ -1,0 +1,18 @@
+# Complément de compose.darloc.yml : Locataires réel, autres dépendances simulées.
+services:
+  services-demo:
+    environment:
+      DARLOC_LOCATAIRE_INTEGRATION_ID: ${DARLOC_LOCATAIRE_INTEGRATION_ID:?Identifiant locataire requis}
+  quittances:
+    environment:
+      LOCATAIRES_MODE: LOCATAIRES_LOCAL
+      LOCATAIRES_BASE_URL: http://locataires-integration:8082
+      LOCATAIRES_CHEMIN: /api/v1/locataires/{id}/quittance-summary
+      LOCATAIRES_TOKEN: ""
+    networks:
+      - default
+      - locataires-integration
+networks:
+  locataires-integration:
+    external: true
+    name: darloc-locataires-integration
