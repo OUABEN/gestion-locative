@@ -1,0 +1,20 @@
+# Test hybride : Locataires et Biens réels ; propriété, bail et paiements fictifs.
+services:
+  services-demo:
+    environment:
+      DARLOC_BIEN_INTEGRATION_ID: ${DARLOC_BIEN_INTEGRATION_ID:?Bien requis}
+  quittances:
+    environment:
+      BIENS_MODE: BIENS_LOCAL
+      BIENS_BASE_URL: http://groupe16-biens-integration:8081
+      BIENS_CHEMIN: /api/biens/{id}
+      BIENS_TOKEN: ${DARLOC_BIENS_TOKEN:?Jeton de test requis}
+      DARLOC_BIEN_INTEGRATION_ID: ${DARLOC_BIEN_INTEGRATION_ID:?Bien requis}
+    networks:
+      - default
+      - locataires-integration
+      - biens-integration
+networks:
+  biens-integration:
+    external: true
+    name: groupe16-biens-net
