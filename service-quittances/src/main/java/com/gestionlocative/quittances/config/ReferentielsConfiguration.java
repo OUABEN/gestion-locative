@@ -28,6 +28,9 @@ public class ReferentielsConfiguration {
     private boolean dockerDemo;
 
 
+    @Value("${DARLOC_BIEN_INTEGRATION_ID:}")
+    private String bienIntegrationId = "";
+
     @Bean(name = "referentielsHttpTransport", destroyMethod = "close")
     public HttpClient referentielsHttpTransport() {
         return HttpClient.newBuilder()
@@ -58,6 +61,16 @@ public class ReferentielsConfiguration {
         Endpoint biens = properties.biens();
         Endpoint baux = properties.baux();
 
+        boolean biensLocal = "BIENS_LOCAL".equals(biens.mode());
+        if (biensLocal) {
+            if (!dockerDemo || !"SIMULATION".equals(baux.mode())
+                    || !"http://groupe16-biens-integration:8081".equals(biens.baseUrl())
+                    || !"/api/biens/{id}".equals(biens.chemin())) {
+                throw new IllegalArgumentException("BIENS_LOCAL exige Docker demo, le service Biens local et des baux simules.");
+            }
+            java.util.UUID.fromString(bienIntegrationId);
+            biens = new Endpoint("INTEGRATION", biens.baseUrl(), biens.chemin(), biens.token());
+        }
         RestClient biensClient = construire(biens, transport);
         RestClient bauxClient = construire(baux, transport);
 
@@ -68,12 +81,14 @@ public class ReferentielsConfiguration {
             );
         }
 
-        return new HttpBienBailClient(
+        BienBailClient delegate = new HttpBienBailClient(
                 biensClient,
                 biens.chemin(),
                 bauxClient,
                 baux.chemin()
         );
+        return biensLocal ? new com.gestionlocative.quittances.client.BiensLocalClient(
+                delegate, biensClient, bienIntegrationId) : delegate;
     }
 
     private RestClient construire(Endpoint endpoint, HttpClient transport) {

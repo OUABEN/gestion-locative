@@ -1,4 +1,4 @@
-﻿param([switch]$Reconstruire, [string]$LocataireIntegrationId)
+﻿param([switch]$Reconstruire, [string]$LocataireIntegrationId, [string]$BienIntegrationId)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 function Controle([string]$Action) {
@@ -25,6 +25,28 @@ if ($LocataireIntegrationId) {
     $env:DARLOC_LOCATAIRE_INTEGRATION_ID = $LocataireIntegrationId
     $composeArgs += @('-f', 'compose.locataires-integration.yml')
     Write-Output "Test hybride : bail BAIL-INTEGRATION-$LocataireIntegrationId ; octobre 2026."
+}
+if ($BienIntegrationId) {
+    if (-not $LocataireIntegrationId) { throw 'Le test Biens exige -LocataireIntegrationId.' }
+    $uuidBien = [guid]::Empty
+    if (-not [guid]::TryParse($BienIntegrationId, [ref]$uuidBien)) { throw 'UUID bien invalide.' }
+    $BienIntegrationId = $uuidBien.ToString()
+    $codeJwt = @'
+const jwt = require("jsonwebtoken");
+process.stdout.write(jwt.sign({sub:"11111111-1111-1111-1111-111111111111",role:"BAILLEUR"},process.env.JWT_SECRET,{algorithm:"HS256",expiresIn:"24h"}));
+'@
+    $tokenBiens = $codeJwt | docker exec -i groupe16-biens-integration node
+    Controle 'generation jeton Biens'
+    $tokenBiens = ($tokenBiens -join '').Trim()
+    $ficheBien = Invoke-RestMethod "http://127.0.0.1:18081/api/biens/$BienIntegrationId" -Headers @{Authorization="Bearer $tokenBiens"}
+    if ($ficheBien.id -ne $BienIntegrationId) { throw 'Bien non confirme.' }
+    $infoBiens = docker inspect groupe16-biens-integration | ConvertFrom-Json
+    Controle 'inspection Biens'
+    # Utiliser le nom existant, sans deconnecter le conteneur.
+    $env:DARLOC_BIEN_INTEGRATION_ID = $BienIntegrationId
+    $env:DARLOC_BIENS_TOKEN = $tokenBiens
+    $composeArgs += @('-f', 'compose.biens-integration.yml')
+    Write-Output "Test hybride Biens : BAIL-BIENS-$BienIntegrationId ; octobre 2026 ; bailleur fictif BAILLEUR-TEST."
 }
 $env:JAVA_HOME = 'C:\Program Files\Java\jdk-21.0.12.1'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
@@ -112,6 +134,8 @@ try {
     Write-Output 'Mailpit : http://127.0.0.1:8025'
 } finally {
     Remove-Item Env:DARLOC_SIGNATURE_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:DARLOC_BIENS_TOKEN -ErrorAction SilentlyContinue
+    Remove-Item Env:DARLOC_BIEN_INTEGRATION_ID -ErrorAction SilentlyContinue
     Remove-Item Env:DARLOC_LOCATAIRE_INTEGRATION_ID -ErrorAction SilentlyContinue
     $secret = $null
 }

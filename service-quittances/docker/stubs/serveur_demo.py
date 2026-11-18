@@ -137,11 +137,19 @@ if locataire_integration:
     bail_integration = "BAIL-INTEGRATION-" + locataire_integration
     BAUX[bail_integration] = dict(BAUX["BAIL-DEMO-002"],
         bailId=bail_integration, locataireId=locataire_integration)
+    bien_integration = os.environ.get("DARLOC_BIEN_INTEGRATION_ID", "")
+    if bien_integration:
+        UUID(bien_integration)
+        # Nouvelle référence : ne pas réutiliser le document déjà émis du test Locataires.
+        ancien_bail = bail_integration
+        bail_integration = "BAIL-BIENS-" + bien_integration
+        BAUX[bail_integration] = dict(BAUX.pop(ancien_bail),
+            bailId=bail_integration, bienId=bien_integration)
     AFFECTATIONS[bail_integration] = deepcopy(AFFECTATIONS["BAIL-DEMO-002"])
     for ligne in AFFECTATIONS[bail_integration]:
         ligne["bailId"] = bail_integration
-        ligne["affectationId"] = "AFF-INT-" + locataire_integration
-        ligne["paiementId"] = "PAY-INT-" + locataire_integration
+        ligne["affectationId"] = "AFF-INT-" + (bien_integration or locataire_integration)
+        ligne["paiementId"] = "PAY-INT-" + (bien_integration or locataire_integration)
 
 
 class RequeteInvalide(Exception):
