@@ -1,0 +1,128 @@
+# =====================================================================
+# docker-compose.biens.yml — Stack autonome du module Gestion des Biens
+# Usage :
+#   docker compose -f docker-compose.biens.yml up -d --build
+#   docker compose -f docker-compose.biens.yml down -v
+# =====================================================================
+name: gestion-locative-biens
+
+services:
+  # -------------------------------------------------------------------
+  # 1. Base de données PostgreSQL 16 (Module Biens) — Port hôte 5433
+  # -------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gl_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gl_biens_password}
+      POSTGRES_DB: ${POSTGRES_DB:-db_gestion_locative}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata_biens:/var/lib/postgresql/data
+      - ./database/init/01_users.sql:/docker-entrypoint-initdb.d/01_users.sql:ro
+      - ./database/init/02_biens.sql:/docker-entrypoint-initdb.d/02_biens.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-gl_user} -d $${POSTGRES_DB:-db_gestion_locative}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - gl_biens_net
+
+  # -------------------------------------------------------------------
+  # 2. Base PostgreSQL dédiée aux tests d'intégration — Port hôte 5434
+  # -------------------------------------------------------------------
+  db_test:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gl_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gl_biens_password}
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-db_gestion_locative_test}
+    ports:
+      - "${POSTGRES_TEST_HOST_PORT:-5434}:5432"
+    volumes:
+      - ./database/init/01_users.sql:/docker-entrypoint-initdb.d/01_users.sql:ro
+      - ./database/init/02_biens.sql:/docker-entrypoint-initdb.d/02_biens.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-gl_user} -d $${POSTGRES_TEST_DB:-db_gestion_locative_test}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - gl_biens_net
+
+  # -------------------------------------------------------------------
+  # 3. Microservice Backend Gestion des Biens — Port 8081
+  # -------------------------------------------------------------------
+  biens:
+    build:
+      context: ./backend/backend_gestion_biens
+    image: gestion-locative/backend_gestion_biens:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: "8081"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-db_gestion_locative}
+      DB_USER: ${POSTGRES_USER:-gl_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-gl_biens_password}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-gl_user}:${POSTGRES_PASSWORD:-gl_biens_password}@db:5432/${POSTGRES_DB:-db_gestion_locative}
+      JWT_SECRET: ${JWT_SECRET:-change_me_with_a_long_random_secret_of_at_least_32_chars}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      gl_biens_net:
+        aliases:
+          - backend_gestion_biens
+
+  # -------------------------------------------------------------------
+  # 4. Frontend React + Reverse Proxy Nginx — Port 3000 -> 80
+  # -------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        API_BIENS_URL: ${FRONTEND_API_BIENS_URL:-/api/biens}
+    image: gestion-locative/frontend_biens:local
+    restart: unless-stopped
+    environment:
+      BIENS_SERVICE_URL: http://biens:8081
+      LOCATAIRES_SERVICE_URL: http://backend_gestion_locataires:8082
+      LOYERS_SERVICE_URL: http://backend-gestion-loyers:8083
+      QUITTANCES_SERVICE_URL: http://backend-gestion-quittances:8084
+    ports:
+      - "3000:80"
+    depends_on:
+      biens:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gl_biens_net
+
+networks:
+  gl_biens_net:
+    name: gl_biens_net
+    driver: bridge
+
+volumes:
+  pgdata_biens:
