@@ -12,4 +12,21 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/tests/setup.js',
+    include: ['src/tests/**/*.test.{js,jsx}'],
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: '../docs/rapports/biens/TEST-FrontendBiens.xml',
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: '../docs/rapports/biens/coverage-frontend',
+      include: ['src/**/*.{js,jsx}'],
+      exclude: ['src/main.jsx', 'src/tests/**'],
+    },
+  },
 });

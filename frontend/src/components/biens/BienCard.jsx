@@ -16,7 +16,7 @@ export const BienCard = ({ bien, onDelete, index = 0 }) => {
       style={{ animationDelay: `${Math.min(index, 8) * 70}ms` }}
     >
       <Link to={`/biens/${bien.id}`} className={styles.media} aria-label={`Voir ${bien.adresse}`}>
-        <img src={getBienImage(bien.type)} alt={`${bien.type} à ${bien.ville}`} loading="lazy" className={styles.image} />
+        <img src={getBienImage(bien.type, bien.imageUrl)} alt={`${bien.type} à ${bien.ville}`} loading="lazy" className={styles.image} />
         <div className={styles.overlay} />
         <div className={styles.topRow}>
           <span className={styles.typeTag}>{bien.type}</span>

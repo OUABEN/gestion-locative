@@ -216,6 +216,7 @@ export const biensApi = {
         prixMensuel: Number(data.prixMensuel),
         charges: Number(data.charges) || 0,
         statut: 'LIBRE',
+        ...(data.imageUrl ? { imageUrl: data.imageUrl } : {}),
         createdAt: now,
         updatedAt: now,
       };
@@ -250,6 +251,7 @@ export const biensApi = {
             prixMensuel: Number(data.prixMensuel),
             charges: Number(data.charges) || 0,
             statut: data.statut || b.statut || 'LIBRE',
+            ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
             updatedAt: new Date().toISOString(),
           };
           return updatedItem;

@@ -15,4 +15,5 @@ export const bienSchema = z.object({
     .min(0, 'Les charges ne peuvent pas être négatives.')
     .default(0),
   statut: z.enum(['LIBRE', 'OCCUPE']).optional(),
+  imageUrl: z.string().optional().nullable(),
 });

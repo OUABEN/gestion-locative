@@ -297,7 +297,7 @@ export const BiensListPage = () => {
                   <tr key={bien.id} className="animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
                     <td className={styles.boldCell}>
                       <Link to={`/biens/${bien.id}`} className={styles.linkRow}>
-                        <img src={getBienImage(bien.type)} alt="" className={styles.rowThumb} loading="lazy" />
+                        <img src={getBienImage(bien.type, bien.imageUrl)} alt="" className={styles.rowThumb} loading="lazy" />
                         <span>{bien.adresse}</span>
                       </Link>
                     </td>

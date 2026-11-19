@@ -19,6 +19,8 @@ import {
   Save,
   Maximize,
   ExternalLink,
+  ImagePlus,
+  Upload,
 } from 'lucide-react';
 import { biensApi } from '../api/biensApi';
 import { useAuth } from '../context/AuthContext';
@@ -85,6 +87,7 @@ export const DashboardPage = () => {
       surface: 85,
       prixMensuel: 6500,
       charges: 400,
+      imageUrl: '',
     },
   });
 
@@ -92,6 +95,20 @@ export const DashboardPage = () => {
   const watchedVille = watch('ville');
   const watchedPrix = watch('prixMensuel');
   const watchedSurface = watch('surface');
+  const watchedImageUrl = watch('imageUrl');
+
+  const handleQuickImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setValue('imageUrl', reader.result, { shouldDirty: true });
+        addToast('Image chargée pour le bien.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const fetchBiens = async () => {
     setLoading(true);
@@ -343,7 +360,7 @@ export const DashboardPage = () => {
                     className={`${styles.activityRow} animate-fade-up`}
                     style={{ animationDelay: `${i * 55}ms` }}
                   >
-                    <img src={getBienImage(b.type)} alt="" className={styles.activityThumb} loading="lazy" />
+                    <img src={getBienImage(b.type, b.imageUrl)} alt="" className={styles.activityThumb} loading="lazy" />
                     <div className={styles.activityMain}>
                       <span className={styles.activityTitle}>{b.adresse}</span>
                       <span className={styles.activityMeta}>
@@ -547,6 +564,34 @@ export const DashboardPage = () => {
                   </div>
                   {errors.charges && <span className={styles.fieldErr}>{errors.charges.message}</span>}
                 </div>
+
+                <div className={`${styles.fieldGroup} ${styles.fullRow}`}>
+                  <label className={styles.fieldLabel} htmlFor="q-image">
+                    Photo du bien (Stockée en base PostgreSQL)
+                  </label>
+                  <div className={styles.quickImageBar}>
+                    <div className={styles.fieldInputWrap} style={{ flex: 1 }}>
+                      <ImagePlus size={17} className={styles.fieldIcon} />
+                      <input
+                        id="q-image"
+                        type="text"
+                        placeholder="Lien URL de l'image (https://...) ou importer depuis votre PC"
+                        {...register('imageUrl')}
+                        className={styles.fieldInput}
+                      />
+                    </div>
+                    <label className={styles.quickUploadBtn}>
+                      <Upload size={15} />
+                      <span>Importer photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleQuickImageUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className={styles.quickFormActions}>
@@ -564,7 +609,7 @@ export const DashboardPage = () => {
           <div className={styles.previewCol}>
             <div className={styles.previewCard}>
               <div className={styles.previewMedia}>
-                <img src={getBienImage(watchedType)} alt="Aperçu du bien" className={styles.previewImg} />
+                <img src={getBienImage(watchedType, watchedImageUrl)} alt="Aperçu du bien" className={styles.previewImg} />
                 <div className={styles.previewOverlay} />
                 <span className={styles.previewBadge}>{watchedType || 'Appartement'}</span>
                 <div className={styles.previewPrice}>

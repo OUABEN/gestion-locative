@@ -154,7 +154,7 @@ export const BienDetailPage = () => {
       </div>
 
       <section className={styles.cover}>
-        <img src={getBienImage(bien.type)} alt={`${bien.type} à ${bien.ville}`} className={styles.coverImage} />
+        <img src={getBienImage(bien.type, bien.imageUrl)} alt={`${bien.type} à ${bien.ville}`} className={styles.coverImage} />
         <div className={styles.coverOverlay} />
         <div className={styles.coverContent}>
           <div className={styles.coverBadges}>

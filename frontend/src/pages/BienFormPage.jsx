@@ -2,9 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Save, Building2, MapPin, Maximize, Coins } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  Building2,
+  MapPin,
+  Maximize,
+  Coins,
+  ImagePlus,
+  Upload,
+  X,
+} from 'lucide-react';
 import { biensApi } from '../api/biensApi';
 import { bienSchema } from '../utils/validators';
+import { getBienImage } from '../utils/bienImage';
 import { useToast } from '../context/ToastContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -24,6 +35,7 @@ export const BienFormPage = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(bienSchema),
@@ -35,10 +47,13 @@ export const BienFormPage = () => {
       prixMensuel: '',
       charges: 0,
       statut: 'LIBRE',
+      imageUrl: '',
     },
   });
 
-  // Si on est en mode édition, charger les données existantes
+  const watchedType = watch('type');
+  const watchedImageUrl = watch('imageUrl');
+
   useEffect(() => {
     if (isEditing) {
       const fetchBien = async () => {
@@ -51,6 +66,7 @@ export const BienFormPage = () => {
           setValue('prixMensuel', Number(bien.prixMensuel));
           setValue('charges', Number(bien.charges) || 0);
           setValue('statut', bien.statut || 'LIBRE');
+          setValue('imageUrl', bien.imageUrl || '');
         } catch (err) {
           addToast(err.response?.data?.message || 'Erreur lors du chargement du bien.', 'error');
           navigate('/biens');
@@ -62,16 +78,37 @@ export const BienFormPage = () => {
     }
   }, [id, isEditing, setValue, navigate, addToast]);
 
+  const handleImageFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      addToast('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setValue('imageUrl', reader.result, { shouldDirty: true });
+        addToast('Image chargée et prête à être enregistrée en base de données.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (data) => {
     setSubmitting(true);
     setBackendErrors([]);
     try {
+      const payload = {
+        ...data,
+        imageUrl: data.imageUrl && String(data.imageUrl).trim() !== '' ? String(data.imageUrl).trim() : null,
+      };
       if (isEditing) {
-        await biensApi.update(id, data);
+        await biensApi.update(id, payload);
         addToast('Le bien a été modifié avec succès.');
         navigate(`/biens/${id}`);
       } else {
-        const created = await biensApi.create(data);
+        const created = await biensApi.create(payload);
         addToast('Le nouveau bien a été créé avec succès.');
         navigate(`/biens/${created.id}`);
       }
@@ -102,7 +139,7 @@ export const BienFormPage = () => {
           {isEditing ? 'Modifier la fiche du bien' : 'Ajouter un nouveau bien'}
         </h1>
         <p className={styles.subtitle}>
-          Renseignez les détails techniques, locatifs et géographiques du logement.
+          Renseignez les détails techniques, locatifs, géographiques et la photo du logement.
         </p>
       </div>
 
@@ -242,6 +279,65 @@ export const BienFormPage = () => {
                 </select>
               </div>
             )}
+
+            {/* Barre d'ajout d'image (Upload fichier ou URL stockée en base PostgreSQL) */}
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+              <label htmlFor="imageUrl" className={styles.label}>
+                Photo du bien (Stockée en base de données)
+              </label>
+              <div className={styles.imageBarContainer}>
+                <div className={styles.imageBarInputs}>
+                  <div className={styles.inputWrapper} style={{ flex: 1 }}>
+                    <ImagePlus size={18} className={styles.inputIcon} />
+                    <input
+                      id="imageUrl"
+                      type="text"
+                      placeholder="Collez un lien d'image (https://...) ou importez un fichier depuis votre PC"
+                      {...register('imageUrl')}
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <label className={styles.uploadLabelBtn}>
+                    <Upload size={16} />
+                    <span>Importer image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      className={styles.hiddenFileInput}
+                    />
+                  </label>
+
+                  {watchedImageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setValue('imageUrl', '')}
+                      className={styles.clearImageBtn}
+                      title="Réinitialiser l'image"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <div className={styles.imagePreviewBox}>
+                  <img
+                    src={getBienImage(watchedType, watchedImageUrl)}
+                    alt="Aperçu du bien"
+                    className={styles.imagePreviewThumb}
+                  />
+                  <div className={styles.imagePreviewInfo}>
+                    <strong>
+                      {watchedImageUrl
+                        ? 'Image personnalisée sélectionnée (sera enregistrée en base PostgreSQL)'
+                        : `Image par défaut selon le type (${watchedType || 'Appartement'})`}
+                    </strong>
+                    <span>Formats acceptés : JPG, PNG, WEBP ou lien URL direct.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className={styles.formActions}>
