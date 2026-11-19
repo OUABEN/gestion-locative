@@ -455,6 +455,45 @@ describe("BienService - Tests Unitaires", () => {
       });
       expect(mockBienRepository.update).not.toHaveBeenCalled();
     });
+
+    it("[Garde défensive] lève une AppError 500 si le repository retourne null lors de l'update", async () => {
+      mockBienRepository.findById.mockResolvedValueOnce(sampleBien);
+      mockBienRepository.update.mockResolvedValueOnce(null);
+
+      await expect(
+        bienService.updateBien(sampleBien.id, {
+          adresse: "Rue Test",
+          ville: "Rabat",
+          type: "Studio",
+          surface: 30,
+          prixMensuel: 3000,
+        })
+      ).rejects.toMatchObject({ statusCode: 500 });
+    });
+
+    it("[Garde défensive] lève une AppError 500 si updateStatutAtomic échoue sans conflit ni 404", async () => {
+      mockBienRepository.updateStatutAtomic.mockResolvedValueOnce(null);
+      mockBienRepository.findById.mockResolvedValueOnce({
+        ...sampleBien,
+        statut: StatutBien.LIBRE,
+      });
+
+      await expect(
+        bienService.updateStatut(sampleBien.id, StatutBien.OCCUPE)
+      ).rejects.toMatchObject({ statusCode: 500 });
+    });
+
+    it("[Garde défensive] lève une AppError 500 si delete retourne false sur un bien LIBRE existant", async () => {
+      mockBienRepository.findById.mockResolvedValueOnce({
+        ...sampleBien,
+        statut: StatutBien.LIBRE,
+      });
+      mockBienRepository.delete.mockResolvedValueOnce(false);
+
+      await expect(bienService.deleteBien(sampleBien.id)).rejects.toMatchObject({
+        statusCode: 500,
+      });
+    });
   });
 
   describe("getAllBiens", () => {

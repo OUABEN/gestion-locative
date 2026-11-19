@@ -39,6 +39,7 @@ export class BienController {
         surface: Number(req.body.surface),
         prixMensuel: Number(req.body.prixMensuel),
         charges: req.body.charges !== undefined ? Number(req.body.charges) : 0,
+        ...(req.body.imageUrl ? { imageUrl: String(req.body.imageUrl) } : {}),
       };
 
       const created = await this.bienService.createBien(dto);
@@ -59,6 +60,7 @@ export class BienController {
         prixMensuel: Number(req.body.prixMensuel),
         charges: req.body.charges !== undefined ? Number(req.body.charges) : 0,
         statut: req.body.statut,
+        ...(req.body.imageUrl !== undefined ? { imageUrl: req.body.imageUrl ? String(req.body.imageUrl) : null } : {}),
       };
 
       const updated = await this.bienService.updateBien(id, dto);
@@ -99,4 +101,3 @@ export class BienController {
     }
   };
 }
-

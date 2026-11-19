@@ -12,7 +12,7 @@ export const createApp = (): Express => {
 
   // Middlewares généraux
   app.use(cors());
-  app.use(express.json());
+  app.use(express.json({ limit: "10mb" }));
 
   // Healthcheck sans authentification
   app.get("/health", (_req: Request, res: Response) => {
