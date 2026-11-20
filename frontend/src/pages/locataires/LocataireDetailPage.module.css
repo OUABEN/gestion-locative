@@ -1,0 +1,461 @@
+﻿.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-midnight-muted, #8E8E99);
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.backButton:hover {
+  color: var(--color-midnight, #0B0B0C);
+  background-color: var(--color-off-white, #F6F7F9);
+}
+
+.topActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.identityCard {
+  padding: 1.75rem;
+  background-color: var(--color-white, #FFFFFF);
+  border: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.identityHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background-color: var(--color-midnight, #0B0B0C);
+  color: var(--color-lime, #C6F432);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.headerTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-midnight-muted, #8E8E99);
+  letter-spacing: 0.05em;
+}
+
+.tenantName {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-midnight, #0B0B0C);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.cinBox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--color-midnight, #0B0B0C);
+  color: var(--color-lime, #C6F432);
+  font-family: monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+}
+
+.uuidBadge {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-midnight-muted, #8E8E99);
+  background-color: var(--color-off-white, #F6F7F9);
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  border: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.detailBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-midnight-muted, #8E8E99);
+  letter-spacing: 0.04em;
+}
+
+.detailValue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-midnight, #0B0B0C);
+}
+
+.docsSection {
+  padding-top: 1.5rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-midnight, #0B0B0C);
+  margin-top: 0;
+  margin-bottom: 0.85rem;
+}
+
+.docsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.docItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-off-white, #F6F7F9);
+  border: 1px solid var(--color-border-light, #E2E2E8);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+}
+
+.docIcon {
+  color: var(--color-midnight-muted, #8E8E99);
+  margin-right: 0.5rem;
+}
+
+.docName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-midnight, #0B0B0C);
+  flex: 1;
+}
+
+.docStatus {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2F4F00;
+  background-color: rgba(198, 244, 50, 0.2);
+  border: 1px solid rgba(198, 244, 50, 0.4);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.emptyDocsText {
+  font-size: 0.85rem;
+  color: var(--color-midnight-muted, #8E8E99);
+  margin: 0;
+}
+
+.bauxCard {
+  padding: 1.5rem;
+  background-color: var(--color-white, #FFFFFF);
+  border: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.cardHeaderWithAction {
+  margin-bottom: 1.25rem;
+}
+
+.cardHeading {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-midnight, #0B0B0C);
+  margin: 0;
+}
+
+.cardSubheading {
+  font-size: 0.85rem;
+  color: var(--color-midnight-muted, #8E8E99);
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.bauxList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bailCard {
+  background-color: var(--color-off-white, #F6F7F9);
+  border: 1px solid var(--color-border-light, #E2E2E8);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.bailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border-light, #E2E2E8);
+}
+
+.bailProperty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-midnight, #0B0B0C);
+}
+
+.bailBienId {
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.badgeActif {
+  background-color: rgba(198, 244, 50, 0.2);
+  color: #2F4F00;
+  border: 1px solid rgba(198, 244, 50, 0.5);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.badgeTermine {
+  background-color: var(--color-midnight, #0B0B0C);
+  color: var(--color-white, #FFFFFF);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.bailDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.bailDetailCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bailLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-midnight-muted, #8E8E99);
+}
+
+.bailAmount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-midnight, #0B0B0C);
+}
+
+.bailDeposit {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4A4A52;
+}
+
+.bailDates {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4A4A52;
+}
+
+.emptyBaux {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--color-midnight-muted, #8E8E99);
+  gap: 0.5rem;
+}
+
+.emptyBauxIcon {
+  opacity: 0.4;
+}
+
+.quittanceCard {
+  padding: 1.5rem;
+  background-color: #FAFAFC;
+  border: 1px dashed #CBD5E1;
+}
+
+.quittanceHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.quittanceIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background-color: var(--color-midnight, #0B0B0C);
+  color: var(--color-lime, #C6F432);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quittanceTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-midnight, #0B0B0C);
+  margin: 0;
+}
+
+.quittanceSubtitle {
+  font-size: 0.85rem;
+  color: var(--color-midnight-muted, #8E8E99);
+  margin: 0.2rem 0 0 0;
+}
+
+.quittancePayload {
+  background-color: var(--color-white, #FFFFFF);
+  border: 1px solid var(--color-border-light, #E2E2E8);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.payloadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #F1F1F4;
+  padding-bottom: 0.4rem;
+}
+
+.payloadRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.payloadKey {
+  font-weight: 600;
+  color: var(--color-midnight-muted, #8E8E99);
+}
+
+.payloadValue {
+  font-weight: 700;
+  color: var(--color-midnight, #0B0B0C);
+}
+
+.payloadCode {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background-color: #F1F1F5;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  color: #1E293B;
+}
+
+.quittanceActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  gap: 1rem;
+  color: var(--color-midnight-muted, #8E8E99);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(11, 11, 12, 0.1);
+  border-top-color: var(--color-midnight, #0B0B0C);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

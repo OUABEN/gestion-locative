@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend-locataire
+        working-directory: ./backend/backend_gestion_locataires
 
     steps:
       - name: Checkout repository
