@@ -1,10 +1,5 @@
-# Exclus du contexte de build Docker
-node_modules
-dist
-build
-target
-.env
-.env.*
-coverage
+﻿node_modules
+npm-debug.log
 .git
-*.log
+.gitignore
+coverage
