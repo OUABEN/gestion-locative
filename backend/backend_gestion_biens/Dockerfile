@@ -24,9 +24,11 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build --chown=node:node /app/dist ./dist
 
-# Utilisateur non-root fourni par l'image officielle node
 USER node
 
 EXPOSE 8081
-CMD ["node", "dist/server.js"]
 
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=10s \
+  CMD wget -qO- http://localhost:8081/health || exit 1
+
+CMD ["node", "dist/server.js"]

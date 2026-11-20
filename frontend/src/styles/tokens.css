@@ -1,0 +1,90 @@
+:root {
+  /* =====================================================================
+     PALETTE MODERNE : MIDNIGHT BLACK (#0B0B0C) · PURE WHITE (#FFFFFF) · LIME GREEN (#C6F432)
+     ===================================================================== */
+  --color-midnight: #0B0B0C;
+  --color-midnight-elevated: #141417;
+  --color-midnight-card: #18181C;
+  --color-midnight-border: #26262C;
+  --color-midnight-muted: #8E8E99;
+
+  --color-white: #FFFFFF;
+  --color-off-white: #F6F7F9;
+  --color-surface-subtle: #EFEFF3;
+  --color-border-light: #E2E2E8;
+
+  --color-lime: #C6F432;
+  --color-lime-hover: #B4E222;
+  --color-lime-dark: #5A7800;
+  --color-lime-soft: rgba(198, 244, 50, 0.16);
+  --color-lime-glow: rgba(198, 244, 50, 0.42);
+
+  /* Compatibilité avec les anciens tokens de composants */
+  --color-beige-light: #F5F6F8;
+  --color-beige: #E4E5EA;
+  --color-beige-dark: #CFCFD8;
+
+  --color-brown-dark: #0B0B0C;
+  --color-brown: #0B0B0C;
+  --color-brown-light: #26262C;
+
+  --color-green: #C6F432;
+  --color-green-hover: #B4E222;
+  --color-green-light: rgba(198, 244, 50, 0.2);
+
+  --color-red: #FF4D4F;
+  --color-red-light: #FFF1F0;
+
+  --color-surface-hover: #1F1F25;
+
+  /* Typographie */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Espacements */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Rayons de bordure */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* Ombres modernes */
+  --shadow-sm: 0 2px 8px rgba(11, 11, 12, 0.05);
+  --shadow-md: 0 8px 24px rgba(11, 11, 12, 0.08);
+  --shadow-lg: 0 16px 36px rgba(11, 11, 12, 0.14);
+  --shadow-xl: 0 24px 48px -12px rgba(11, 11, 12, 0.25);
+  --shadow-glow-lime: 0 10px 30px -6px rgba(198, 244, 50, 0.5);
+  --shadow-glow-green: 0 10px 30px -6px rgba(198, 244, 50, 0.45);
+
+  /* Transitions & Courbes */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Dégradés */
+  --gradient-midnight: linear-gradient(135deg, #16161A 0%, #0B0B0C 100%);
+  --gradient-lime: linear-gradient(135deg, #D4FF47 0%, #C6F432 60%, #AEE01B 100%);
+  --gradient-brown: linear-gradient(135deg, #1A1A1F 0%, #0B0B0C 100%);
+  --gradient-green: linear-gradient(135deg, #D4FF47 0%, #C6F432 60%, #AEE01B 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DarLoc · Documents</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" href="/css/quittances.css" th:href="@{/css/quittances.css}">
+    <script defer src="/js/quittances.js" th:src="@{/js/quittances.js}"></script>
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a class="brand" href="#/documents" aria-label="DarLoc, documents">
+            <span class="brand-icon" aria-hidden="true">D</span>
+            <span>Dar<span class="brand-accent">Loc</span><small>Gestion locative</small></span>
+        </a>
+        <p class="nav-label">QUITTANCES</p>
+        <nav aria-label="Navigation principale">
+            <a id="nav-tableau" href="#/tableau-de-bord" class="nav-entry"><span aria-hidden="true">▦</span> Tableau de bord</a>
+            <a id="nav-documents" href="#/documents" class="nav-entry"><span aria-hidden="true">▤</span> Documents</a>
+            <a id="nav-nouveau" href="#/nouveau" class="nav-entry" hidden><span aria-hidden="true">＋</span> Nouveau document</a>
+            <a id="nav-guide" href="#/guide" class="nav-entry"><span aria-hidden="true">?</span> Comprendre les actions</a>
+        </nav>
+        <div class="sidebar-bottom"><span class="status-dot" aria-hidden="true"></span> Espace documentaire</div>
+    </aside>
+    <div class="workspace">
+        <header class="topbar">
+            <div class="breadcrumb-label">Gestion locative <span aria-hidden="true">/</span> <strong id="breadcrumb">Documents</strong></div>
+            <div class="account"><span class="local-label">Environnement local</span><span id="role-label" hidden></span><button id="logout" type="button" class="button quiet" hidden>Se déconnecter</button></div>
+        </header>
+        <main id="main" tabindex="-1">
+            <noscript><p class="notice error">JavaScript doit être activé pour utiliser cet espace.</p></noscript>
+            <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+            <section id="screen" aria-live="off"></section>
+        </main>
+        <footer class="page-footer">DarLoc · Gestion locative <span>Montants en MAD</span></footer>
+    </div>
+</div>
+<dialog id="confirmation" aria-labelledby="confirmation-title" aria-describedby="confirmation-description">
+    <form id="confirmation-form">
+        <header class="modal-header"><h2 id="confirmation-title">Confirmer</h2><button type="button" id="close-confirmation" class="icon-button" aria-label="Fermer">×</button></header>
+        <div class="modal-content">
+            <p id="confirmation-description"></p>
+            <div id="reason-group" hidden><label for="reason">Motif d’annulation</label><textarea id="reason" rows="4" maxlength="2000"></textarea><small>Le motif sera conservé dans l’historique.</small></div>
+            <p id="modal-notice" class="notice error" role="alert" hidden></p>
+        </div>
+        <footer class="modal-footer"><button type="button" id="cancel-confirmation" class="button secondary">Retour</button><button id="submit-confirmation" type="submit" class="button primary">Confirmer</button></footer>
+    </form>
+</dialog>
+<div id="busy-overlay" class="busy-overlay" hidden role="status" aria-live="polite"><div><span class="spinner" aria-hidden="true"></span><strong id="busy-label">Enregistrement en cours</strong><small>Patientez pendant la réponse du serveur.</small></div></div>
+</body>
+</html>

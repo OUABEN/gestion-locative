@@ -1,0 +1,119 @@
+name: darloc-local
+services:
+  quittances-db:
+    image: postgres:17.11-bookworm
+    environment:
+      POSTGRES_DB: ${QUITTANCES_DB_NAME:?Base manquante}
+      POSTGRES_USER: ${QUITTANCES_DB_USER:?Utilisateur manquant}
+      POSTGRES_PASSWORD: ${QUITTANCES_DB_PASSWORD:?Mot de passe manquant}
+    ports: ["127.0.0.1:5434:5432"]
+    volumes: ["quittances_pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+  mailpit:
+    image: axllent/mailpit:v1.30.7
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: "500"
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+    volumes: ["mailpit_data:/data"]
+    restart: unless-stopped
+  services-demo:
+    image: python:3.12-slim-bookworm
+    user: "10001:10001"
+    command: ["python", "-u", "/demo/demarrer_stubs_docker.py"]
+    environment: {PYTHONDONTWRITEBYTECODE: "1"}
+    volumes:
+      - type: bind
+        source: ./docker/stubs/serveur_demo.py
+        target: /demo/serveur_demo.py
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./docker/demarrer_stubs_docker.py
+        target: /demo/demarrer_stubs_docker.py
+        read_only: true
+        bind: {create_host_path: false}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8091/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+  quittances:
+    image: darloc-quittances:local
+    build: .
+    ports: ["127.0.0.1:8084:8084"]
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8084"
+      DARLOC_DOCKER_DEMO: "true"
+      SPRING_CONFIG_IMPORT: "file:/app/.env[.properties],configtree:/run/secrets/"
+      QUITTANCES_DB_HOST: quittances-db
+      QUITTANCES_DB_PORT: "5432"
+      QUITTANCES_STORAGE_PATH: /app/storage/quittances
+      JWT_MODE: LOCAL
+      JWT_ISSUER: urn:gestionlocative:dev
+      JWT_AUDIENCE: service-quittances
+      JWT_PUBLIC_KEY_PATH: /app/keys/public.der
+      PAIEMENTS_MODE: SIMULATION
+      PAIEMENTS_BASE_URL: http://services-demo:8091
+      PAIEMENTS_TOKEN: ""
+      LOCATAIRES_MODE: SIMULATION
+      LOCATAIRES_BASE_URL: http://services-demo:8091
+      LOCATAIRES_TOKEN: ""
+      BIENS_MODE: SIMULATION
+      BIENS_BASE_URL: http://services-demo:8091
+      BIENS_TOKEN: ""
+      BAUX_MODE: SIMULATION
+      BAUX_BASE_URL: http://services-demo:8091
+      BAUX_TOKEN: ""
+      DARLOC_SIGNATURE_DEMO: "true"
+      DARLOC_SIGNATURE_PATH: /app/keys/darloc-demo.p12
+      DARLOC_MAILPIT_ACTIF: "true"
+      DARLOC_MAILPIT_PORT: "1025"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./.local-jwt/public.der
+        target: /app/keys/public.der
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ./.local-signature/darloc-demo.p12
+        target: /app/keys/darloc-demo.p12
+        read_only: true
+        bind: {create_host_path: false}
+      - type: volume
+        source: quittances_pdf
+        target: /app/storage/quittances
+    secrets:
+      - source: signature_password
+        target: DARLOC_SIGNATURE_PASSWORD
+    depends_on:
+      quittances-db: {condition: service_healthy}
+      services-demo: {condition: service_healthy}
+      mailpit: {condition: service_started}
+    restart: unless-stopped
+volumes:
+  quittances_pdf:
+    external: true
+    name: darloc_quittances_pdf
+  quittances_pgdata:
+    external: true
+    name: gestionlocative-quittances-dev_quittances_pgdata
+  mailpit_data:
+    external: true
+    name: darloc-mailpit_mailpit_data
+secrets:
+  signature_password:
+    environment: DARLOC_SIGNATURE_PASSWORD

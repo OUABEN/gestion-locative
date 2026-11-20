@@ -1,0 +1,2384 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DarLoc — service Quittances",
+    "version": "0.0.1-demo",
+    "description": "Contrat documentaire des routes effectivement présentes après les mises à jour émission et Mailpit. Mode de signature et email de démonstration explicitement identifiés. Pas de routes futures inventées."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8084",
+      "description": "Application locale Windows"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/v1/systeme/etat": {
+      "get": {
+        "operationId": "GETapiv1systemeetat",
+        "summary": "État du service",
+        "description": "Réponse applicative minimale. Ne constitue pas une vérification exhaustive de PostgreSQL et des services externes.",
+        "tags": [
+          "Système"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtatServiceResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/identite": {
+      "get": {
+        "operationId": "GETapiv1identite",
+        "summary": "Identité authentifiée",
+        "description": "JWT valide ; sujet et autorités Spring Security.",
+        "tags": [
+          "Système"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentiteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances": {
+      "get": {
+        "operationId": "GETapiv1quittances",
+        "summary": "Lister les documents",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission. Les filtres portent sur les données du document.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageQuittancesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "creeLe",
+                "periodeDebut",
+                "numero",
+                "totalPaye"
+              ],
+              "default": "creeLe"
+            }
+          },
+          {
+            "name": "sens",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            }
+          },
+          {
+            "name": "bailId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "numero",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "debut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclut les documents dont la fin de période est égale ou postérieure à cette date."
+          },
+          {
+            "name": "fin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclut les documents dont le début de période est égal ou antérieur à cette date."
+          }
+        ]
+      },
+      "post": {
+        "operationId": "POSTapiv1quittances",
+        "summary": "Préparer un brouillon",
+        "description": "Bailleur propriétaire uniquement. Consulte les sources métier ; ne crée aucun paiement. Le document reste non signé et non émis.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "201": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationQuittanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Règle métier non satisfaite.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dépendance ou configuration indisponible.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreationQuittanceRequest"
+              },
+              "example": {
+                "bailId": "BAIL-DEMO-001",
+                "periodeDebut": "2026-10-01",
+                "periodeFin": "2026-10-31"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances/{id}": {
+      "get": {
+        "operationId": "GETapiv1quittancesid",
+        "summary": "Consulter un document",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuittanceConsultationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/affectations": {
+      "get": {
+        "operationId": "GETapiv1quittancesidaffectations",
+        "summary": "Consulter les versements conservés",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission. Statuts figés à la préparation, pas un relevé financier actualisé.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AffectationQuittanceResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/preview": {
+      "get": {
+        "operationId": "GETapiv1quittancesidpreview",
+        "summary": "Prévisualiser le brouillon",
+        "description": "Bailleur propriétaire uniquement. Uniquement BROUILLON, EN_ATTENTE_VALIDATION ou EN_ATTENTE_SIGNATURE, non émis.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/valider": {
+      "post": {
+        "operationId": "POSTapiv1quittancesidvalider",
+        "summary": "Valider les informations",
+        "description": "Bailleur propriétaire uniquement. Place le document en attente de signature ; ne signe pas le PDF.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationQuittanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationQuittanceRequest"
+              },
+              "example": {
+                "confirmation": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances/{id}/annuler": {
+      "post": {
+        "operationId": "POSTapiv1quittancesidannuler",
+        "summary": "Annuler avec motif",
+        "description": "Bailleur propriétaire uniquement. Conserve le document et l’historique. Ne pas lancer sur un document à garder actif.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnulationQuittanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnulationQuittanceRequest"
+              },
+              "example": {
+                "motif": "Correction des données du document de test",
+                "confirmation": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances/{id}/remplacer": {
+      "post": {
+        "operationId": "POSTapiv1quittancesidremplacer",
+        "summary": "Préparer un remplacement",
+        "description": "Bailleur propriétaire uniquement. Le document d’origine doit être annulé ; le nouveau brouillon est lié au précédent.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "201": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemplacementQuittanceResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Règle métier non satisfaite.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dépendance ou configuration indisponible.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemplacementQuittanceRequest"
+              },
+              "example": {
+                "motif": "Correction des données du document de test",
+                "confirmation": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances/{id}/historique": {
+      "get": {
+        "operationId": "GETapiv1quittancesidhistorique",
+        "summary": "Consulter l’historique",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageHistoriqueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/archives-brouillon": {
+      "get": {
+        "operationId": "GETapiv1quittancesidarchivesbrouillon",
+        "summary": "Lister les archives",
+        "description": "Bailleur propriétaire uniquement.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageArchivesBrouillonResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "POSTapiv1quittancesidarchivesbrouillon",
+        "summary": "Archiver le brouillon",
+        "description": "Bailleur propriétaire uniquement. Une archive par version. Le document n’est pas émis.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "201": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArchiveBrouillonResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/archives-brouillon/{archiveId}/pdf": {
+      "get": {
+        "operationId": "GETapiv1quittancesidarchivesbrouillonarchiveIdpdf",
+        "summary": "Télécharger une archive",
+        "description": "Bailleur propriétaire uniquement. PDF privé vérifié avant téléchargement.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "archiveId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/emission-demo": {
+      "post": {
+        "operationId": "POSTapiv1quittancesidemissiondemo",
+        "summary": "Signer et émettre en démonstration",
+        "description": "Bailleur propriétaire uniquement. Mode LOCAL sur 127.0.0.1 ; confirmation, document validé, certificat de test et paiements inchangés requis. Signature détachée de test, sans identité certifiée.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmissionResultat"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dépendance ou configuration indisponible.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmissionDemande"
+              },
+              "example": {
+                "confirmation": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quittances/{id}/emission-demo/pdf": {
+      "get": {
+        "operationId": "GETapiv1quittancesidemissiondemopdf",
+        "summary": "Télécharger le PDF émis",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission. Fichier conservé, vérifié. Un fichier historique annulé reste téléchargeable et ne redevient pas actif.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/emission-demo/preuve": {
+      "get": {
+        "operationId": "GETapiv1quittancesidemissiondemopreuve",
+        "summary": "Télécharger la preuve de démonstration",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission. ZIP contenant PDF, signature détachée et certificat public. Aucune clé privée.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/emission-demo/verification": {
+      "get": {
+        "operationId": "GETapiv1quittancesidemissiondemoverification",
+        "summary": "Vérifier la preuve conservée",
+        "description": "Bailleur propriétaire ; locataire associé uniquement si le document a une date d’émission. Vérification technique avec le certificat stocké et la date déclarée d’émission ; pas de certification juridique.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verification"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/quittances/{id}/envois-mailpit": {
+      "get": {
+        "operationId": "GETapiv1quittancesidenvoismailpit",
+        "summary": "Historique des tentatives Mailpit",
+        "description": "Bailleur propriétaire uniquement. Une tentative en attente depuis plus de dix minutes devient INDETERMINE lors de cette consultation.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageEnvois"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "POSTapiv1quittancesidenvoismailpit",
+        "summary": "Envoyer dans Mailpit",
+        "description": "Bailleur propriétaire uniquement. Document DEMO-QT émis et actif. Destinataire fictif généré côté serveur. Même requeteId : pas de nouveau SMTP ; résultat existant. Réessai autorisé seulement après échec avant transmission et délai de 30 secondes.",
+        "tags": [
+          "Quittances"
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultat attendu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envoi"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrée invalide.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT absent, invalide ou expiré."
+          },
+          "403": {
+            "description": "Action non autorisée."
+          },
+          "404": {
+            "description": "Document absent ou hors périmètre.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflit métier, de version, de statut ou d’intégrité.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Réessai trop rapproché.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur interne.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dépendance ou configuration indisponible.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Envoi"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ProblemDetail"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "La même tentative est déjà en cours.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envoi"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvoiDemande"
+              },
+              "example": {
+                "requeteId": "5b8e42ae-d6a4-486d-96b5-e12b278aa905",
+                "confirmation": true
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "RS256 ; issuer/audience configurés. roles BAILLEUR ou LOCATAIRE, bailleur_id ou locataire_id selon rôle."
+      }
+    },
+    "schemas": {
+      "EtatServiceResponse": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "statut": {
+            "type": "string"
+          }
+        }
+      },
+      "IdentiteResponse": {
+        "type": "object",
+        "properties": {
+          "sujet": {
+            "type": "string"
+          },
+          "autorites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreationQuittanceRequest": {
+        "type": "object",
+        "properties": {
+          "bailId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "periodeDebut": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodeFin": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "bailId",
+          "periodeDebut",
+          "periodeFin"
+        ]
+      },
+      "CreationQuittanceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          }
+        }
+      },
+      "QuittanceConsultationResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numero": {
+            "type": "string",
+            "nullable": true
+          },
+          "bailId": {
+            "type": "string"
+          },
+          "locataireId": {
+            "type": "string"
+          },
+          "bienId": {
+            "type": "string"
+          },
+          "nomBailleur": {
+            "type": "string"
+          },
+          "nomLocataire": {
+            "type": "string"
+          },
+          "prenomLocataire": {
+            "type": "string"
+          },
+          "adresseBien": {
+            "type": "string"
+          },
+          "periodeDebut": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodeFin": {
+            "type": "string",
+            "format": "date"
+          },
+          "loyerDu": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "chargesDues": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "loyerPaye": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "chargesPayees": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "totalPaye": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "devise": {
+            "type": "string"
+          },
+          "typeDocument": {
+            "type": "string"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "emisLe": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "documentPrecedentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "motifRemplacement": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AffectationQuittanceResponse": {
+        "type": "object",
+        "properties": {
+          "affectationId": {
+            "type": "string"
+          },
+          "paiementId": {
+            "type": "string"
+          },
+          "periodeDebut": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodeFin": {
+            "type": "string",
+            "format": "date"
+          },
+          "nature": {
+            "type": "string"
+          },
+          "montant": {
+            "type": "number",
+            "multipleOf": 0.01,
+            "description": "Montant en MAD, précision de deux décimales. Le backend utilise BigDecimal."
+          },
+          "devise": {
+            "type": "string"
+          },
+          "statutSourceALaPreparation": {
+            "type": "string"
+          }
+        }
+      },
+      "PageQuittancesResponse": {
+        "type": "object",
+        "properties": {
+          "contenu": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuittanceConsultationResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taille": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValidationQuittanceRequest": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "confirmation"
+        ]
+      },
+      "ValidationQuittanceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          },
+          "valideLe": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AnnulationQuittanceRequest": {
+        "type": "object",
+        "properties": {
+          "motif": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "motif",
+          "confirmation"
+        ]
+      },
+      "AnnulationQuittanceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          },
+          "motif": {
+            "type": "string"
+          },
+          "annuleLe": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RemplacementQuittanceRequest": {
+        "type": "object",
+        "properties": {
+          "motif": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "motif",
+          "confirmation"
+        ]
+      },
+      "RemplacementQuittanceResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentPrecedentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          }
+        }
+      },
+      "ArchiveBrouillonResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quittanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionDocument": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nature": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "tailleOctets": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PageArchivesBrouillonResponse": {
+        "type": "object",
+        "properties": {
+          "contenu": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArchiveBrouillonResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taille": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PageHistoriqueResponse": {
+        "type": "object",
+        "properties": {
+          "contenu": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EvenementHistoriqueResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taille": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "EvenementHistoriqueResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "resultat": {
+            "type": "string"
+          },
+          "horodatage": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "statutAvant": {
+            "type": "string",
+            "nullable": true
+          },
+          "statutApres": {
+            "type": "string",
+            "nullable": true
+          },
+          "motif": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "EmissionDemande": {
+        "type": "object",
+        "properties": {
+          "confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "confirmation"
+        ]
+      },
+      "EmissionResultat": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numero": {
+            "type": "string"
+          },
+          "statut": {
+            "type": "string"
+          },
+          "statutSignature": {
+            "type": "string"
+          },
+          "modeSignature": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "emisLe": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Verification": {
+        "type": "object",
+        "properties": {
+          "modeSignature": {
+            "type": "string"
+          },
+          "integriteValide": {
+            "type": "boolean"
+          },
+          "signatureValide": {
+            "type": "boolean"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "numero": {
+            "type": "string"
+          }
+        }
+      },
+      "EnvoiDemande": {
+        "type": "object",
+        "properties": {
+          "requeteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "confirmation",
+          "requeteId"
+        ]
+      },
+      "Envoi": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinataire": {
+            "type": "string"
+          },
+          "statut": {
+            "type": "string",
+            "enum": [
+              "EN_ATTENTE_ENVOI",
+              "ENVOYE",
+              "ECHEC_ENVOI",
+              "INDETERMINE"
+            ],
+            "description": "ENVOYE signifie accepté par SMTP (Mailpit), pas livré au locataire."
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "termineLe": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "erreurCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PageEnvois": {
+        "type": "object",
+        "properties": {
+          "contenu": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Envoi"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taille": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        },
+        "description": "Les réponses des filtres de sécurité peuvent ne pas avoir ce corps JSON. Le champ code est facultatif."
+      }
+    }
+  }
+}

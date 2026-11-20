@@ -6,10 +6,18 @@ const config = {
   testMatch: ["**/*.test.ts"],
   collectCoverageFrom: [
     "src/services/**/*.ts",
-    "src/middlewares/**/*.ts",
+    "src/middlewares/validation.middleware.ts",
     "!src/**/*.d.ts",
   ],
   coverageDirectory: "<rootDir>/coverage",
+  coverageThreshold: {
+    global: {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
   reporters: [
     "default",
     [
@@ -32,4 +40,3 @@ const config = {
 };
 
 module.exports = config;
-

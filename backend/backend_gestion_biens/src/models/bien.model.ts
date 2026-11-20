@@ -22,6 +22,7 @@ export interface Bien {
   prixMensuel: number;
   charges: number;
   statut: StatutBien;
+  imageUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,7 @@ export interface CreateBienDto {
   surface: number;
   prixMensuel: number;
   charges?: number;
+  imageUrl?: string | null;
 }
 
 export interface UpdateBienDto {
@@ -43,6 +45,7 @@ export interface UpdateBienDto {
   prixMensuel: number;
   charges?: number;
   statut?: StatutBien;
+  imageUrl?: string | null;
 }
 
 export interface PatchStatutDto {
@@ -60,4 +63,3 @@ export interface DisponibiliteResponse {
   disponible: boolean;
   statut: StatutBien;
 }
-

@@ -1,0 +1,175 @@
+.topbar {
+  height: 74px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  gap: 14px;
+}
+
+/* Bouton Ouvrir / Fermer le menu latéral (toujours accessible) */
+.sidebarToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background-color: var(--color-midnight);
+  color: var(--color-white);
+  border: 1px solid var(--color-midnight);
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.28s var(--ease-out-expo);
+  white-space: nowrap;
+}
+
+.sidebarToggleBtn:hover {
+  background-color: var(--color-lime);
+  color: var(--color-midnight);
+  border-color: var(--color-lime);
+  box-shadow: var(--shadow-glow-lime);
+  transform: translateY(-1px);
+}
+
+/* Quand la sidebar est fermée, le bouton devient Lime Green pour attirer l'oeil */
+.sidebarToggleClosed {
+  background-color: var(--color-lime);
+  color: var(--color-midnight);
+  border-color: var(--color-lime);
+  box-shadow: var(--shadow-glow-lime);
+}
+
+/* Sélecteur segmenté Midnight Black / Lime Green / Pure White */
+.quickSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-midnight);
+  padding: 5px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(11, 11, 12, 0.12);
+}
+
+.switchItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.76);
+  transition: all 0.25s var(--ease-out-expo);
+  white-space: nowrap;
+}
+
+.switchItem:hover {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.switchActive {
+  background: var(--color-lime) !important;
+  color: var(--color-midnight) !important;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(198, 244, 50, 0.45);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 5px 6px;
+  border-radius: 999px;
+  background: var(--color-off-white);
+  border: 1px solid var(--color-border-light);
+}
+
+.avatarBox {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-midnight);
+  color: var(--color-lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.userRoleBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-midnight);
+  background: var(--color-lime);
+  padding: 1px 7px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: #555562;
+  margin-top: 1px;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  color: var(--color-white);
+  background-color: var(--color-midnight);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.25s var(--ease-out-expo);
+}
+
+.logoutBtn:hover {
+  background-color: var(--color-red);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 960px) {
+  .quickSwitch span,
+  .sidebarToggleBtn span {
+    display: none;
+  }
+  .switchItem,
+  .sidebarToggleBtn {
+    padding: 9px 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .userEmail {
+    display: none;
+  }
+  .logoutText {
+    display: none;
+  }
+  .logoutBtn {
+    padding: 9px;
+  }
+}

@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: service-quittances
+
+  config:
+    import: "optional:file:.env[.properties]"
+
+  datasource:
+    url: jdbc:postgresql://${QUITTANCES_DB_HOST:127.0.0.1}:${QUITTANCES_DB_PORT:5434}/${QUITTANCES_DB_NAME}
+    username: ${QUITTANCES_DB_USER}
+    password: ${QUITTANCES_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        type:
+          json_format_mapper: jackson
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    clean-disabled: true
+
+  sql:
+    init:
+      mode: never
+
+server:
+  address: 127.0.0.1
+  port: 8084
+  error:
+    include-message: never
+    include-stacktrace: never
+
+quittances:
+  stockage:
+    repertoire: ${QUITTANCES_STORAGE_PATH:./storage/quittances}
+    taille-max-octets: 20971520
+  securite:
+    mode: ${JWT_MODE:LOCAL}
+    issuer: ${JWT_ISSUER:urn:gestionlocative:dev}
+    audience: ${JWT_AUDIENCE:service-quittances}
+    cle-publique: ${JWT_PUBLIC_KEY_PATH:.local-jwt/public.der}
+  integration:
+    paiements:
+      mode: ${PAIEMENTS_MODE:SIMULATION}
+      base-url: ${PAIEMENTS_BASE_URL:http://127.0.0.1:8091}
+      chemin: "${PAIEMENTS_CHEMIN:/api/v1/paiements/affectations?bailId={bailId}&debut={debut}&fin={fin}}"
+      token: ${PAIEMENTS_TOKEN:}
+
+  referentiels:
+    locataires:
+      mode: ${LOCATAIRES_MODE:SIMULATION}
+      base-url: ${LOCATAIRES_BASE_URL:http://127.0.0.1:8092}
+      chemin: "${LOCATAIRES_CHEMIN:/api/v1/locataires/{id}}"
+      token: ${LOCATAIRES_TOKEN:}
+
+    biens:
+      mode: ${BIENS_MODE:SIMULATION}
+      base-url: ${BIENS_BASE_URL:http://127.0.0.1:8093}
+      chemin: "${BIENS_CHEMIN:/api/v1/biens/{id}}"
+      token: ${BIENS_TOKEN:}
+
+    baux:
+      mode: ${BAUX_MODE:SIMULATION}
+      base-url: ${BAUX_BASE_URL:http://127.0.0.1:8093}
+      chemin: "${BAUX_CHEMIN:/api/v1/baux/{id}/situation?debut={debut}&fin={fin}}"
+      token: ${BAUX_TOKEN:}
