@@ -152,20 +152,25 @@ class ReferentielsClientsTest {
     }
 
     @Test
-    void doitLireUnBien() {
+    void doitAdapterLeContratReelDuBienSansInventerLeBailleur() {
         reponse = """
                 {
-                  "versionContrat": "1",
                   "id": "BIEN-1",
                   "adresse": "Adresse fictive à Agadir",
-                  "bailleurId": "BAILLEUR-1"
+                  "ville": "Agadir",
+                  "type": "Appartement",
+                  "surface": 75,
+                  "prixMensuel": 3000,
+                  "charges": 200,
+                  "statut": "LIBRE"
                 }
                 """;
 
         var resultat = biensBaux.consulterBien("BIEN-1");
 
-        assertEquals("Adresse fictive à Agadir", resultat.adresse());
-        assertEquals("BAILLEUR-1", resultat.bailleurId());
+        assertEquals("Adresse fictive à Agadir, Agadir", resultat.adresse());
+        assertNull(resultat.bailleurId());
+        assertNull(resultat.versionContrat());
         assertEquals("/api/v1/biens/BIEN-1", chemin.get());
     }
 
@@ -230,10 +235,27 @@ class ReferentielsClientsTest {
     void doitRefuserUnBienSansAdresse() {
         reponse = """
                 {
-                  "versionContrat": "1",
                   "id": "BIEN-1",
                   "adresse": "",
-                  "bailleurId": "BAILLEUR-1"
+                  "ville": "Agadir"
+                }
+                """;
+
+        ServiceExterneException erreur = assertThrows(
+                ServiceExterneException.class,
+                () -> biensBaux.consulterBien("BIEN-1")
+        );
+
+        assertEquals("REPONSE_INCOHERENTE", erreur.getCode());
+    }
+
+    @Test
+    void doitRefuserUnBienSansVille() {
+        reponse = """
+                {
+                  "id": "BIEN-1",
+                  "adresse": "Adresse fictive",
+                  "ville": ""
                 }
                 """;
 
@@ -273,7 +295,8 @@ class ReferentielsClientsTest {
         for (String corps : new String[] {
                 "{}",
                 "{\"id\":\"LOC-2\",\"nom\":\"TEST\",\"prenom\":\"Integration\"}",
-                "{\"id\":\"LOC-1\",\"nom\":\" \",\"prenom\":\"Integration\"}"}) {
+                "{\"id\":\"LOC-1\",\"nom\":\" \",\"prenom\":\"Integration\"}",
+                "{\"id\":\"LOC-1\",\"nom\":\"TEST\"}"}) {
             reponse = corps;
             assertThrows(ServiceExterneException.class, () -> locatairesAhmed.consulter("LOC-1"));
         }
