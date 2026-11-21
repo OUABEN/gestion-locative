@@ -57,7 +57,8 @@ services:
       QUITTANCES_DB_HOST: quittances-db
       QUITTANCES_DB_PORT: "5432"
       QUITTANCES_STORAGE_PATH: /app/storage/quittances
-      JWT_MODE: LOCAL
+      JWT_MODE: "${JWT_MODE:-LOCAL}"
+      JWT_SECRET: "${JWT_SECRET:-}"
       JWT_ISSUER: urn:gestionlocative:dev
       JWT_AUDIENCE: service-quittances
       JWT_PUBLIC_KEY_PATH: /app/keys/public.der

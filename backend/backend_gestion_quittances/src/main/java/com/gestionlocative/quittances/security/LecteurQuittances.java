@@ -21,6 +21,13 @@ public record LecteurQuittances(
 
         boolean estBailleur = possedeRole(authentication, "ROLE_BAILLEUR");
         boolean estLocataire = possedeRole(authentication, "ROLE_LOCATAIRE");
+        boolean estGestionnaire = possedeRole(authentication, "ROLE_GESTIONNAIRE");
+
+        if (estGestionnaire) {
+            throw new AccessDeniedException(
+                    "Le périmètre documentaire du rôle GESTIONNAIRE n'est pas défini."
+            );
+        }
 
         if (estBailleur == estLocataire) {
             throw new AccessDeniedException(

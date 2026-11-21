@@ -3,20 +3,28 @@ package com.gestionlocative.quittances.security;
 import com.gestionlocative.quittances.config.ReseauDemo;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -29,6 +37,17 @@ public class SecurityConfiguration {
     @Value("${DARLOC_DOCKER_DEMO:false}")
     private boolean dockerDemo;
 
+    public static Collection<GrantedAuthority> autoritesRoleCommun(Jwt jwt) {
+        Object role = jwt.getClaims().get("role");
+        if ("BAILLEUR".equals(role)
+                || "GESTIONNAIRE".equals(role)
+                || "LOCATAIRE".equals(role)) {
+            return java.util.List.of(
+                    new SimpleGrantedAuthority("ROLE_" + role)
+            );
+        }
+        return new LinkedHashSet<>();
+    }
 
     @Bean
     public JwtDecoder jwtDecoder(
@@ -36,9 +55,10 @@ public class SecurityConfiguration {
             @Value("${quittances.securite.issuer}") String issuer,
             @Value("${quittances.securite.audience}") String audience,
             @Value("${quittances.securite.cle-publique}") String clePublique,
+            @Value("${quittances.securite.jwt-secret:}") String jwtSecret,
             @Value("${server.address}") String adresseServeur) throws Exception {
 
-        if (issuer.isBlank() || audience.isBlank()) {
+        if (!"COMMUN".equals(mode) && (issuer.isBlank() || audience.isBlank())) {
             throw new IllegalArgumentException(
                     "L'émetteur et l'audience JWT doivent être configurés."
             );
@@ -79,31 +99,62 @@ public class SecurityConfiguration {
                     .jwsAlgorithm(SignatureAlgorithm.RS256)
                     .build();
 
+        } else if ("COMMUN".equals(mode)) {
+            if (jwtSecret.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Le secret JWT commun doit être configuré."
+                );
+            }
+
+            byte[] secret = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            if (secret.length < 32) {
+                throw new IllegalArgumentException(
+                        "Le secret JWT commun doit contenir au moins 32 octets."
+                );
+            }
+
+            decoder = NimbusJwtDecoder
+                    .withSecretKey(new SecretKeySpec(secret, "HmacSHA256"))
+                    .macAlgorithm(MacAlgorithm.HS256)
+                    .build();
+
         } else {
             throw new IllegalArgumentException(
-                    "Le mode JWT doit être LOCAL ou INTEGRATION."
+                    "Le mode JWT doit être LOCAL, INTEGRATION ou COMMUN."
             );
         }
 
-        ValidationJwt.configurer(decoder, issuer, audience);
+        if ("COMMUN".equals(mode)) {
+            ValidationJwt.configurerCommun(decoder);
+            return new DecodeurJwtCommun(decoder);
+        } else {
+            ValidationJwt.configurer(decoder, issuer, audience);
+        }
 
         return decoder;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Value("${quittances.securite.mode}") String mode)
             throws Exception {
-
-        JwtGrantedAuthoritiesConverter roles =
-                new JwtGrantedAuthoritiesConverter();
-
-        roles.setAuthoritiesClaimName("roles");
-        roles.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter authentication =
                 new JwtAuthenticationConverter();
 
-        authentication.setJwtGrantedAuthoritiesConverter(roles);
+        if ("COMMUN".equals(mode)) {
+            authentication.setJwtGrantedAuthoritiesConverter(jwt ->
+                    autoritesRoleCommun(jwt)
+            );
+        } else {
+            JwtGrantedAuthoritiesConverter roles =
+                    new JwtGrantedAuthoritiesConverter();
+
+            roles.setAuthoritiesClaimName("roles");
+            roles.setAuthorityPrefix("ROLE_");
+            authentication.setJwtGrantedAuthoritiesConverter(roles);
+        }
 
         http
                 .sessionManagement(session -> session
