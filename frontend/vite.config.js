@@ -6,6 +6,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      '/api/quittances': {
+        target: 'http://127.0.0.1:8084',
+        changeOrigin: true,
+        rewrite: (path) =>
+          path.replace(/^\/api\/quittances(?=\/|$)/, ''),
+      },
       '/api': {
         target: 'http://127.0.0.1:8081',
         changeOrigin: true,
