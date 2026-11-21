@@ -21,6 +21,7 @@ export const QuittanceCreatePage = () => {
   const [periodeFin, setPeriodeFin] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [documentaryAccessForbidden, setDocumentaryAccessForbidden] = useState(false);
   const submissionLock = useRef(false);
 
   useEffect(() => {
@@ -66,6 +67,9 @@ export const QuittanceCreatePage = () => {
       navigate(`/quittances/${created.id}`);
     } catch (requestError) {
       setError(quittanceErrorMessage(requestError));
+      if (requestError?.status === 403) {
+        setDocumentaryAccessForbidden(true);
+      }
     } finally {
       setLoading(false);
       submissionLock.current = false;
@@ -92,7 +96,10 @@ export const QuittanceCreatePage = () => {
             La préparation d’une quittance est réservée au rôle BAILLEUR.
           </p>
         )}
-        {identity?.role === 'BAILLEUR' && <form className={styles.createForm} onSubmit={submit}>
+        {documentaryAccessForbidden && error && (
+          <p className={styles.inlineError} role="alert">{error}</p>
+        )}
+        {identity?.role === 'BAILLEUR' && !documentaryAccessForbidden && <form className={styles.createForm} onSubmit={submit}>
           <label>
             Identifiant du bail
             <input
@@ -125,7 +132,6 @@ export const QuittanceCreatePage = () => {
               />
             </label>
           </div>
-          {error && <p className={styles.inlineError} role="alert">{error}</p>}
           <div className={styles.formActions}>
             <Link to="/quittances">
               <Button variant="secondary" type="button">Annuler</Button>

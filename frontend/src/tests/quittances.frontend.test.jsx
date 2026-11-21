@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
-import { quittancesApi } from '../api/quittancesApi';
+import { QuittancesApiError, quittancesApi } from '../api/quittancesApi';
 import { QuittanceCreatePage } from '../pages/quittances/QuittanceCreatePage';
 import { QuittanceDetailPage } from '../pages/quittances/QuittanceDetailPage';
 import { QuittancesListPage } from '../pages/quittances/QuittancesListPage';
@@ -183,6 +183,60 @@ describe('Module Quittances — frontend React', () => {
     expect(screen.queryByText('Aucune quittance pour ces critères.')).not.toBeInTheDocument();
   });
 
+  it('affiche une seule erreur 403 pour un compte connecté sans accès documentaire', async () => {
+    vi.spyOn(quittancesApi, 'getIdentity').mockResolvedValue({
+      sujet: 'common-user-uuid',
+      autorites: ['ROLE_BAILLEUR'],
+    });
+    vi.spyOn(quittancesApi, 'list').mockRejectedValue(
+      new QuittancesApiError('Accès interdit', 403, { code: 'ACCES_INTERDIT' })
+    );
+    vi.spyOn(quittancesApi, 'getDashboard').mockRejectedValue(
+      new QuittancesApiError('Accès interdit', 403, { code: 'ACCES_INTERDIT' })
+    );
+
+    renderWithSession(<QuittancesListPage />);
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0]).toHaveTextContent(/Compte connecté.*accès documentaire nécessaire.*403/i);
+    expect(screen.queryByText('Aucune quittance pour ces critères.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Préparer une quittance/i })).not.toBeInTheDocument();
+  });
+
+  it('masque la préparation après un 403 métier sur la création', async () => {
+    vi.spyOn(quittancesApi, 'getIdentity').mockResolvedValue({
+      sujet: 'common-user-uuid',
+      autorites: ['ROLE_BAILLEUR'],
+    });
+    vi.spyOn(quittancesApi, 'createDraft').mockRejectedValue(
+      new QuittancesApiError(
+        'Vous n’êtes pas autorisé à préparer ce document.',
+        403,
+        { code: 'ACCES_INTERDIT' }
+      )
+    );
+    sessionStorage.setItem('token', TOKEN);
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/quittances/nouveau']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/quittances/nouveau" element={<QuittanceCreatePage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await user.type(await screen.findByLabelText(/Identifiant du bail/i), 'BAIL-42');
+    fireEvent.change(screen.getByLabelText('Début de période'), { target: { value: '2025-03-01' } });
+    fireEvent.change(screen.getByLabelText('Fin de période'), { target: { value: '2025-03-31' } });
+    await user.click(screen.getByRole('button', { name: 'Créer le brouillon' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Compte connecté.*403/i);
+    expect(screen.queryByRole('button', { name: 'Créer le brouillon' })).not.toBeInTheDocument();
+  });
+
   it('exige une confirmation explicite avant d’appeler la validation', async () => {
     prepareDetailMocks('ROLE_BAILLEUR', draftDocument({
       statut: 'EN_ATTENTE_VALIDATION',
@@ -261,7 +315,7 @@ describe('Client API Quittances', () => {
 
   it.each([
     [401, 'Session refusée'],
-    [403, 'Accès refusé'],
+    [403, 'Compte connecté'],
     [409, 'Conflit métier'],
     [503, 'Service indisponible'],
   ])('expose explicitement la réponse HTTP %i', async (status, expectedMessage) => {
