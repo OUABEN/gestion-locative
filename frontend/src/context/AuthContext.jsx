@@ -1,50 +1,78 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { decodeToken } from '../utils/jwt';
 
 const AuthContext = createContext(null);
+const SESSION_REJECTED_EVENT = 'auth:session-rejected';
+
+const removeStoredToken = () => {
+  sessionStorage.removeItem('token');
+  localStorage.removeItem('token');
+};
 
 const getInitialSession = () => {
   const stored = sessionStorage.getItem('token') || localStorage.getItem('token');
-  if (!stored) return { token: null, user: null };
+  if (!stored) return { token: null, user: null, sessionNotice: '' };
+
   const decoded = decodeToken(stored);
   if (decoded && !decoded.isExpired) {
     sessionStorage.setItem('token', stored);
     localStorage.setItem('token', stored);
-    return { token: stored, user: decoded };
+    return { token: stored, user: decoded, sessionNotice: '' };
   }
-  sessionStorage.removeItem('token');
-  localStorage.removeItem('token');
-  return { token: null, user: null };
+
+  removeStoredToken();
+  return {
+    token: null,
+    user: null,
+    sessionNotice: decoded?.isExpired
+      ? 'Votre session a expiré. Veuillez vous reconnecter.'
+      : 'Votre session est illisible ou incomplète. Veuillez vous reconnecter.',
+  };
 };
 
 export const AuthProvider = ({ children }) => {
-  const initial = getInitialSession();
+  const [initial] = useState(getInitialSession);
   const [token, setToken] = useState(initial.token);
   const [user, setUser] = useState(initial.user);
+  const [sessionNotice, setSessionNotice] = useState(initial.sessionNotice);
   const [loading] = useState(false);
 
+  useEffect(() => {
+    const handleRejectedSession = () => {
+      removeStoredToken();
+      setToken(null);
+      setUser(null);
+      setSessionNotice('Votre session a été refusée. Veuillez vous reconnecter.');
+    };
+
+    window.addEventListener(SESSION_REJECTED_EVENT, handleRejectedSession);
+    return () => {
+      window.removeEventListener(SESSION_REJECTED_EVENT, handleRejectedSession);
+    };
+  }, []);
+
   const loginWithToken = (rawToken) => {
-    const cleanToken = (rawToken || '').trim();
-    const decoded = decodeToken(cleanToken);
+    const decoded = decodeToken(rawToken);
     if (!decoded) {
-      throw new Error('Jeton JWT invalide ou illisible.');
+      throw new Error('Le jeton reçu du serveur est illisible ou incomplet.');
     }
     if (decoded.isExpired) {
-      throw new Error('Ce jeton JWT a expiré.');
+      throw new Error('Le jeton reçu du serveur a expiré.');
     }
-    // Sauvegarde synchrone immédiate avant toute navigation React Router
-    sessionStorage.setItem('token', cleanToken);
-    localStorage.setItem('token', cleanToken);
-    setToken(cleanToken);
+
+    sessionStorage.setItem('token', rawToken);
+    localStorage.setItem('token', rawToken);
+    setToken(rawToken);
     setUser(decoded);
+    setSessionNotice('');
     return decoded;
   };
 
   const logout = () => {
-    sessionStorage.removeItem('token');
-    localStorage.removeItem('token');
+    removeStoredToken();
     setToken(null);
     setUser(null);
+    setSessionNotice('');
   };
 
   const canWrite = user?.role === 'BAILLEUR' || user?.role === 'GESTIONNAIRE';
@@ -56,6 +84,7 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         canWrite,
+        sessionNotice,
         loginWithToken,
         logout,
       }}

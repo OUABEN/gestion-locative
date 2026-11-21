@@ -17,6 +17,7 @@ const createToken = (role = 'BAILLEUR') => {
   const payload = btoa(JSON.stringify({
     sub: 'common-user-uuid',
     role,
+    iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 3600,
   }));
   return `${header}.${payload}.signature`;

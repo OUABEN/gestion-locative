@@ -68,8 +68,8 @@ export const Topbar = ({ isSidebarOpen, onToggleSidebar }) => {
             <UserCircle size={22} />
           </div>
           <div className={styles.userDetails}>
-            <span className={styles.userRoleBadge}>{user?.role || 'UTILISATEUR'}</span>
-            <span className={styles.userEmail}>{user?.email || 'bailleur@gestion-locative.com'}</span>
+            <span className={styles.userRoleBadge}>{user?.role || '-'}</span>
+            <span className={styles.userEmail}>{user?.email || '-'}</span>
           </div>
         </div>
 

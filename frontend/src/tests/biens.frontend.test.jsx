@@ -45,6 +45,7 @@ function createMockJwt(payload) {
   const body = btoa(
     JSON.stringify({
       sub: '11111111-1111-1111-1111-111111111111',
+      iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 3600,
       ...payload,
     })
@@ -230,6 +231,8 @@ describe('Frontend Gestion des Biens — Tests Unitaires & Composants (Vitest + 
       const user = userEvent.setup();
       renderWithProviders(<LoginPage />, { initialEntries: ['/login'] });
 
+      await user.type(screen.getByLabelText(/Adresse e-mail/i), 'bailleur@test.ma');
+      await user.type(screen.getByLabelText('Mot de passe'), 'wrong-password');
       const submitBtn = screen.getByRole('button', { name: /Se connecter/i });
       await user.click(submitBtn);
 
@@ -238,10 +241,10 @@ describe('Frontend Gestion des Biens — Tests Unitaires & Composants (Vitest + 
       });
     });
 
-    it('redirige immédiatement vers le tableau de bord en 1 clic sur succès de connexion', async () => {
+    it('redirige vers le tableau de bord après une réponse serveur valide', async () => {
       const validToken = createMockJwt({
         role: 'BAILLEUR',
-        email: 'bailleur@gestion-locative.com',
+        email: 'bailleur@test.ma',
         prenom: 'Mehdi',
       });
       authApi.login.mockResolvedValueOnce({ token: validToken });
@@ -255,6 +258,8 @@ describe('Frontend Gestion des Biens — Tests Unitaires & Composants (Vitest + 
         { initialEntries: ['/login'] }
       );
 
+      await user.type(screen.getByLabelText(/Adresse e-mail/i), 'bailleur@test.ma');
+      await user.type(screen.getByLabelText('Mot de passe'), 'valid-password');
       await user.click(screen.getByRole('button', { name: /Se connecter/i }));
 
       await waitFor(() => {
