@@ -10,6 +10,9 @@ import { BiensListPage } from './pages/BiensListPage';
 import { BienDetailPage } from './pages/BienDetailPage';
 import { BienFormPage } from './pages/BienFormPage';
 import { ModuleHubPage } from './pages/ModuleHubPage';
+import { QuittancesListPage } from './pages/quittances/QuittancesListPage';
+import { QuittanceCreatePage } from './pages/quittances/QuittanceCreatePage';
+import { QuittanceDetailPage } from './pages/quittances/QuittanceDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export const App = () => {
@@ -52,7 +55,9 @@ export const App = () => {
         {/* Modules complémentaires de la plateforme Gestion Locative */}
         <Route path="locataires" element={<ModuleHubPage moduleKey="locataires" />} />
         <Route path="loyers" element={<ModuleHubPage moduleKey="loyers" />} />
-        <Route path="quittances" element={<ModuleHubPage moduleKey="quittances" />} />
+        <Route path="quittances" element={<QuittancesListPage />} />
+        <Route path="quittances/nouveau" element={<QuittanceCreatePage />} />
+        <Route path="quittances/:id" element={<QuittanceDetailPage />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
