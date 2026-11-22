@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Gestion des Biens — Suite API Complète (QL)" tests="25" time="0.888">
+  <testsuite name="1. Auth / 1.1 Register Bailleur éphémère (201)" id="cdc5cb70-0a2c-4012-98ed-1c23ae685d3a" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.198">
+    <testcase name="Statut HTTP 201 Created" time="0.198" classname="1Auth11RegisterBailleurEphemere201"/>
+    <testcase name="Token JWT et utilisateur retournés" time="0.198" classname="1Auth11RegisterBailleurEphemere201"/>
+  </testsuite>
+  <testsuite name="1. Auth / 1.2 Register Locataire éphémère (201)" id="03744810-b2c1-4054-9438-b9771a4ecbec" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.109">
+    <testcase name="Statut HTTP 201 Created" time="0.109" classname="1Auth12RegisterLocataireEphemere201"/>
+    <testcase name="Rôle LOCATAIRE attribué" time="0.109" classname="1Auth12RegisterLocataireEphemere201"/>
+  </testsuite>
+  <testsuite name="1. Auth / 1.3 Login Bailleur éphémère (200)" id="0f8363e9-4170-47e5-986b-e7f45eefb2c7" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.073">
+    <testcase name="Statut HTTP 200 OK" time="0.073" classname="1Auth13LoginBailleurEphemere200"/>
+    <testcase name="Jeton JWT régénéré avec succès" time="0.073" classname="1Auth13LoginBailleurEphemere200"/>
+  </testsuite>
+  <testsuite name="1. Auth / 1.4 Login avec mot de passe erroné (401)" id="a449459c-f4b7-42a3-836f-48626ba8dc8b" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.085">
+    <testcase name="Statut HTTP 401 Unauthorized" time="0.085" classname="1Auth14LoginAvecMotDePasseErrone401"/>
+    <testcase name="Message d erreur explicite" time="0.085" classname="1Auth14LoginAvecMotDePasseErrone401"/>
+  </testsuite>
+  <testsuite name="1. Auth / 1.5 Login champs manquants (400)" id="473eeb7b-f03c-4d8f-a554-3705a3e88a42" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Statut HTTP 400 Bad Request" time="0.009" classname="1Auth15LoginChampsManquants400"/>
+    <testcase name="Détail des erreurs de validation retourné" time="0.009" classname="1Auth15LoginChampsManquants400"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.1 Créer un bien valide (LIBRE, charges 0 par défaut) (201)" id="ba0a536b-9432-4621-a2f2-e9cba97784dc" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.028">
+    <testcase name="Statut HTTP 201 Created" time="0.028" classname="2CrudBiens21CreerUnBienValideLibreCharges0ParDefaut201"/>
+    <testcase name="Bien créé avec statut LIBRE et charges par défaut" time="0.028" classname="2CrudBiens21CreerUnBienValideLibreCharges0ParDefaut201"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.2 Lister les biens sans filtre (200)" id="420f73a4-952f-4720-90a8-c8961bddd2dc" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="Statut HTTP 200 OK" time="0.012" classname="2CrudBiens22ListerLesBiensSansFiltre200"/>
+    <testcase name="La réponse est un tableau JSON de biens" time="0.012" classname="2CrudBiens22ListerLesBiensSansFiltre200"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.3 Lister les biens avec filtres (ville, statut, type) (200)" id="16e5e7df-a48c-417e-a32b-d98f7d8b5439" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.020">
+    <testcase name="Statut HTTP 200 OK" time="0.020" classname="2CrudBiens23ListerLesBiensAvecFiltresVilleStatutType200"/>
+    <testcase name="Tous les résultats correspondent aux critères" time="0.020" classname="2CrudBiens23ListerLesBiensAvecFiltresVilleStatutType200"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.4 Obtenir le détail du bien créé (200)" id="57faa3dc-146d-423a-b90b-b9c2816a3894" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.025">
+    <testcase name="Statut HTTP 200 OK" time="0.025" classname="2CrudBiens24ObtenirLeDetailDuBienCree200"/>
+    <testcase name="UUID correspond à createdBienId" time="0.025" classname="2CrudBiens24ObtenirLeDetailDuBienCree200"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.5 Modifier le bien (PUT) (200)" id="23056428-c831-43f7-9867-07b2cc77fdbe" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="Statut HTTP 200 OK" time="0.038" classname="2CrudBiens25ModifierLeBienPut200"/>
+    <testcase name="Nouvelles données appliquées avec succès" time="0.038" classname="2CrudBiens25ModifierLeBienPut200"/>
+  </testsuite>
+  <testsuite name="2. CRUD Biens / 2.6 Supprimer le bien LIBRE créé (204)" id="819ad802-d2ff-4c61-bedc-403e1308560b" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.060">
+    <testcase name="Statut HTTP 204 No Content" time="0.060" classname="2CrudBiens26SupprimerLeBienLibreCree204"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.1 Créer un bien pour le cycle d occupation (201)" id="af9267a7-1a1a-4a0d-85a1-a1be0c370feb" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Statut HTTP 201 Created" time="0.007" classname="3ReglesMetierAmpStatuts31CreerUnBienPourLeCycleDOccupation201"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.2 Vérifier disponibilité initiale (200 - disponible=true)" id="4131d818-448b-4a68-aa4f-ab0f21f706c9" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Statut HTTP 200 OK" time="0.009" classname="3ReglesMetierAmpStatuts32VerifierDisponibiliteInitiale200DisponibleTrue"/>
+    <testcase name="Le bien est disponible" time="0.009" classname="3ReglesMetierAmpStatuts32VerifierDisponibiliteInitiale200DisponibleTrue"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.3 PATCH statut vers OCCUPE (200)" id="12fb0397-8351-48ed-9230-47168a193f69" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Statut HTTP 200 OK" time="0.007" classname="3ReglesMetierAmpStatuts33PatchStatutVersOccupe200"/>
+    <testcase name="Statut mis à jour vers OCCUPE" time="0.007" classname="3ReglesMetierAmpStatuts33PatchStatutVersOccupe200"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.4 PATCH statut vers OCCUPE déjà en place (409 Conflict)" id="5315430c-52bd-4c26-a804-7bc7d413da3f" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.029">
+    <testcase name="Statut HTTP 409 Conflict" time="0.029" classname="3ReglesMetierAmpStatuts34PatchStatutVersOccupeDejaEnPlace409Conflict"/>
+    <testcase name="Alerte conflit retournée" time="0.029" classname="3ReglesMetierAmpStatuts34PatchStatutVersOccupeDejaEnPlace409Conflict"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.5 DELETE d un bien OCCUPE refusé (409 Conflict)" id="003221ac-33ea-4158-b26c-c3ae51e729ef" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.019">
+    <testcase name="Statut HTTP 409 Conflict" time="0.019" classname="3ReglesMetierAmpStatuts35DeleteDUnBienOccupeRefuse409Conflict"/>
+    <testcase name="Message de refus pour bien occupé" time="0.019" classname="3ReglesMetierAmpStatuts35DeleteDUnBienOccupeRefuse409Conflict"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.6 PATCH statut invalide (ex: RESERVE) (400 Bad Request)" id="41110a56-9619-4f79-b0fc-4efe1a9300ee" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.023">
+    <testcase name="Statut HTTP 400 Bad Request" time="0.023" classname="3ReglesMetierAmpStatuts36PatchStatutInvalideExReserve400BadRequest"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.7 GET détail avec identifiant non-UUID (400 Bad Request)" id="eb312319-a04d-4f39-bdbc-3052003ca925" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Statut HTTP 400 Bad Request" time="0.008" classname="3ReglesMetierAmpStatuts37GetDetailAvecIdentifiantNonUuid400BadRequest"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.8 GET détail avec UUID inexistant (404 Not Found)" id="a197797f-c0c2-4883-86d7-bd617cc4dc4a" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Statut HTTP 404 Not Found" time="0.005" classname="3ReglesMetierAmpStatuts38GetDetailAvecUuidInexistant404NotFound"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.9 Nettoyage : Libérer et Supprimer le bien (200 puis 204)" id="ca2032d9-3f68-42f9-90e1-fdd6d989aef9" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.051">
+    <testcase name="Statut HTTP 200 OK lors du retour à LIBRE" time="0.051" classname="3ReglesMetierAmpStatuts39NettoyageLibererEtSupprimerLeBien200Puis204"/>
+  </testsuite>
+  <testsuite name="3. Règles Métier &amp; Statuts / 3.10 Suppression finale du bien libéré (204)" id="482e459e-7c57-48c7-8170-9c051ea3bf23" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.026">
+    <testcase name="Statut HTTP 204 No Content" time="0.026" classname="3ReglesMetierAmpStatuts310SuppressionFinaleDuBienLibere204"/>
+  </testsuite>
+  <testsuite name="4. Sécurité &amp; Rôles / 4.1 Requête sans jeton JWT Authorization (401)" id="ebbaa6bf-1981-430f-9c52-8f81abb1f672" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Statut HTTP 401 Unauthorized" time="0.008" classname="4SecuriteAmpRoles41RequeteSansJetonJwtAuthorization401"/>
+  </testsuite>
+  <testsuite name="4. Sécurité &amp; Rôles / 4.2 Requête avec jeton corrompu / invalide (401)" id="bafa2dd8-cc29-4cd9-b148-842ccaed82d6" timestamp="2026-11-20T13:39:34.649Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="Statut HTTP 401 Unauthorized" time="0.012" classname="4SecuriteAmpRoles42RequeteAvecJetonCorrompuInvalide401"/>
+  </testsuite>
+  <testsuite name="4. Sécurité &amp; Rôles / 4.3 LOCATAIRE tente POST /api/biens en écriture (403 Forbidden)" id="1b647337-3b88-4162-aeff-9782ce1b2d5d" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.016">
+    <testcase name="Statut HTTP 403 Forbidden" time="0.016" classname="4SecuriteAmpRoles43LocataireTentePostApiBiensEnEcriture403Forbidden"/>
+    <testcase name="Message d interdiction explicite" time="0.016" classname="4SecuriteAmpRoles43LocataireTentePostApiBiensEnEcriture403Forbidden"/>
+  </testsuite>
+  <testsuite name="4. Sécurité &amp; Rôles / 4.4 LOCATAIRE autorisé sur GET /api/biens en lecture (200 OK)" id="48152ca5-eabe-4101-ba8f-2effb89b4a8c" timestamp="2026-11-20T13:39:34.649Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Statut HTTP 200 OK" time="0.011" classname="4SecuriteAmpRoles44LocataireAutoriseSurGetApiBiensEnLecture200Ok"/>
+    <testcase name="Le locataire reçoit le catalogue en lecture" time="0.011" classname="4SecuriteAmpRoles44LocataireAutoriseSurGetApiBiensEnLecture200Ok"/>
+  </testsuite>
+</testsuites>

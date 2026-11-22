@@ -1,0 +1,15 @@
+{
+  "name": "biens-postman-tests",
+  "version": "1.0.0",
+  "description": "Tests API Newman / Postman pour le module Gestion des Biens",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run biens.postman_collection.json --env-var baseUrl=http://localhost:8081 -r cli,htmlextra --reporter-htmlextra-export ../../../docs/qualite/biens/newman/newman-report.html",
+    "test:cli": "newman run biens.postman_collection.json --env-var baseUrl=http://localhost:8081 -r cli"
+  },
+  "dependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
+
