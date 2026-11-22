@@ -37,6 +37,7 @@ import com.gestionlocative.quittances.security.LecteurQuittances;
 import com.gestionlocative.quittances.security.DecodeurJwtCommun;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ValidationJwtTest {
@@ -141,17 +142,72 @@ class ValidationJwtTest {
         JwtDecoder decodeurCommun = decodeurCommun(
                 "secret-fictif-commun-quittances-32-octets"
         );
+        String sub = "59bc86bc-06e3-45a1-82bb-539bbaf671eb";
         String token = signerCommun(
                 "secret-fictif-commun-quittances-32-octets",
                 JWSAlgorithm.HS256,
-                "compte-uuid",
+                sub,
                 "BAILLEUR",
                 Instant.now().plusSeconds(900),
                 true
         );
 
-        assertEquals("compte-uuid", decodeurCommun.decode(token).getSubject());
-        assertEquals("BAILLEUR", decodeurCommun.decode(token).getClaim("role"));
+        Jwt jetonDecode = decodeurCommun.decode(token);
+
+        assertEquals(sub, jetonDecode.getSubject());
+        assertEquals("BAILLEUR", jetonDecode.getClaim("role"));
+        assertEquals(sub, jetonDecode.getClaimAsString("bailleur_id"));
+        JwtAuthenticationToken authentication =
+                new JwtAuthenticationToken(
+                        jetonDecode,
+                        SecurityConfiguration.autoritesRoleCommun(jetonDecode)
+                );
+        assertEquals(
+                sub,
+                LecteurQuittances.depuis(authentication).identifiant()
+        );
+    }
+
+    @Test
+    void doitDeriverBailleurDuSubEtIgnorerUnBailleurIdFourni() throws Exception {
+        String secret = "secret-fictif-commun-quittances-32-octets";
+        String sub = "8f58f2dd-2302-4c65-96db-2c25cff527c1";
+        JwtDecoder decodeurCommun = decodeurCommun(secret);
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject(sub)
+                .issueTime(Date.from(Instant.now().minusSeconds(60)))
+                .expirationTime(Date.from(Instant.now().plusSeconds(900)))
+                .claim("role", "BAILLEUR")
+                .claim("bailleur_id", "AUTRE-BAILLEUR")
+                .build();
+        SignedJWT token = new SignedJWT(
+                new JWSHeader(JWSAlgorithm.HS256),
+                claims
+        );
+        token.sign(new MACSigner(secret.getBytes(StandardCharsets.UTF_8)));
+
+        Jwt jetonDecode = decodeurCommun.decode(token.serialize());
+
+        assertEquals(sub, jetonDecode.getClaimAsString("bailleur_id"));
+    }
+
+    @Test
+    void neDerivePasDeRattachementBailleurPourUnLocataire() throws Exception {
+        JwtDecoder decodeurCommun = decodeurCommun(
+                "secret-fictif-commun-quittances-32-octets"
+        );
+        String token = signerCommun(
+                "secret-fictif-commun-quittances-32-octets",
+                JWSAlgorithm.HS256,
+                "0e8c1ad4-fb25-4879-a912-1e9ff4319260",
+                "LOCATAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        Jwt jetonDecode = decodeurCommun.decode(token);
+
+        assertNull(jetonDecode.getClaim("bailleur_id"));
     }
 
     @Test

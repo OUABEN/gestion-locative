@@ -191,10 +191,11 @@ class PreparationQuittanceServiceTest {
 
     @Test
     void doitRefuserUnAutreBailleurAvantLesAutresLectures() {
+        String subBailleur = UUID.randomUUID().toString();
         RegleMetierException erreur = assertThrows(
                 RegleMetierException.class,
                 () -> preparation.preparer(
-                        "AUTRE-BAILLEUR", bailId, DEBUT, FIN
+                        subBailleur, bailId, DEBUT, FIN
                 )
         );
 

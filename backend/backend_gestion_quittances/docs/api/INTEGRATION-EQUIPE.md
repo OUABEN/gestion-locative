@@ -48,15 +48,19 @@ Les montants externes des exemples sont des chaînes décimales acceptées par l
 
 ## Authentification du consommateur de Quittances
 
-Envoi du JWT dans `Authorization: Bearer <jeton>`. Vérification RS256, issuer, audience et dates selon la configuration existante.
-Le contrat actuel utilise `roles` contenant BAILLEUR ou LOCATAIRE, et respectivement `bailleur_id` ou `locataire_id`. L'identité d'audit utilise sub et iss.
-Les opérations de consultation utilisent un rôle métier unique. La création a un contrôle spécifique dans son controller ; harmoniser ce point avec le contrat partagé au moment de l'intégration.
+Envoi du JWT dans `Authorization: Bearer <jeton>`. En modes LOCAL et INTEGRATION, Quittances conserve la validation RS256, issuer, audience, dates, `roles` et identifiants métier existants.
+En mode COMMUN, Quittances vérifie le JWT HS256 avant d'utiliser ses claims. Pour BAILLEUR, l'identifiant métier est dérivé du `sub` vérifié (`users.id`) ; le jeton commun n'a pas besoin du claim `bailleur_id`. LOCATAIRE n'est pas dérivé du `sub` tant que son rattachement n'est pas confirmé. GESTIONNAIRE ne reçoit pas d'accès documentaire global.
+La consultation et la création utilisent le même lecteur d'identité authentifiée. La création vérifie toujours que le bail, le bien et leurs identifiants bailleur concordent.
 Aucun endpoint d'authentification supplémentaire n'est créé dans ce module. Ne pas transmettre les clés privées ou des jetons réels avec la documentation.
 
 ## Points encore ouverts
 
 - Endpoints et jeux de données des trois véritables services : à confirmer et tester ensemble.
+- Mohamed doit encore intégrer la colonne `bailleur_id` des biens, renseignée côté serveur depuis le JWT vérifié. Tant que les réponses réelles du bail et du bien ne permettent pas de vérifier le même bailleur, la préparation est refusée ; Quittances ne remplace pas ces données par celles du compte connecté.
+- Le rattachement `users.id` / `locataire_id` reste à valider avec Ahmed ; aucun `sub` locataire n'est supposé.
 - Propriétaire des baux, règles de périodes, évolutions de montants : à confirmer.
+- Les routes et la complétude des affectations de paiement restent à confirmer avec Ayoub ; les reçus restent bloqués en cas de réponse externe absente ou incohérente.
+- Le reverse proxy partagé et sa configuration de développement restent à coordonner avec Ayoub.
 - Issuer/audience/claims/scopes communs : à harmoniser.
 - Emails réels : utiliser l'adresse vérifiée du service Locataires et un SMTP configuré. Aujourd'hui, Mailpit reçoit une adresse fictive générée côté Quittances.
 - Notifications de paiements annulés/remboursés et réconciliation : contrat événementiel et idempotence à définir, endpoints non présents à ce stade.
@@ -86,9 +90,10 @@ Cette règle est une proposition d'intégration et doit être coordonnée avec A
 
 ### Identité et compatibilité JWT à résoudre
 
-Avant d'utiliser le module avec une session commune, l'authentification doit émettre un JWT compatible avec `ValidationJwt` de Quittances : RS256, `iss`, `aud`, `sub`, `iat`, `exp`, `roles` contenant un seul rôle pris en charge, ainsi que `bailleur_id` pour BAILLEUR ou `locataire_id` pour LOCATAIRE. `GET /api/v1/identite` renvoie `{ "sujet": "...", "autorites": ["ROLE_BAILLEUR"] }`; le frontend s'appuie sur cette identité validée par Quittances, pas sur le rôle décodé côté navigateur.
+Le mode COMMUN accepte le JWT HS256 actuel avec `role`, `sub` UUID, `iat` et `exp`. Pour le rôle BAILLEUR, Quittances dérive l'identifiant métier du `sub` seulement après vérification cryptographique ; tout claim `bailleur_id` présent dans ce jeton est ignoré au profit du `sub`. Aucun identifiant de propriétaire fourni par une requête ne remplace cette identité.
+Cette règle n'accorde pas d'accès aux documents d'un autre bailleur : les consultations restent filtrées par `bailleur_id` et la préparation contrôle les identifiants du bail et du bien. La propagation officielle de `bailleur_id` aux biens reste à intégrer côté Biens. Le lien du compte commun au locataire reste à confirmer ; les demandes locataire sans `locataire_id` sont refusées. `GET /api/v1/identite` renvoie `{ "sujet": "...", "autorites": ["ROLE_BAILLEUR"] }`; le frontend s'appuie sur cette identité validée par Quittances, pas sur le rôle décodé côté navigateur.
 
-Le backend commun actuel émet un jeton HS256 avec un claim `role` singulier et un `sub` UUID; issuer, audience, tableau `roles` et identifiant métier attendu par Quittances ne sont pas harmonisés. Il n'existe pas de correspondance automatique entre les UUID utilisateurs communs et les identifiants métier Quittances. La génération/signature du jeton et le mapping des identités doivent être coordonnés avec Mohamed. Aucun secret de signature ne doit être ajouté au frontend.
+Les modes LOCAL et INTEGRATION gardent leurs contrats RS256, issuer, audience, `roles` et identifiants métier existants. Aucun secret de signature ne doit être ajouté au frontend.
 
 Les contrôles visuels de rôle ne remplacent pas ceux du backend. GESTIONNAIRE n'est pas pris en charge par Quittances. Tant que les claims ne sont pas harmonisés, le frontend affichera explicitement les refus 401/403; aucune session de secours n'est créée.
 

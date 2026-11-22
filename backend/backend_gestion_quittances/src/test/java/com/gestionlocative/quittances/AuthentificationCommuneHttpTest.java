@@ -149,25 +149,57 @@ class AuthentificationCommuneHttpTest {
     }
 
     @Test
-    void doitAutoriserIdentiteSansRattachementMaisRefuserCreation() throws Exception {
+    void doitAutoriserLaListeAvecLeSubCommeIdentiteBailleur() throws Exception {
+        String sub = "59bc86bc-06e3-45a1-82bb-539bbaf671eb";
         String token = signerHs256(
-                "compte-sans-rattachement",
+                sub,
                 "BAILLEUR",
                 Instant.now().plusSeconds(900),
                 true
         );
 
-        assertEquals(200,
-                appelerGet("/api/v1/identite", token).statusCode());
-        assertEquals(403,
-                appelerPost("/api/v1/quittances", token,
-                        """
-                        {
-                          "bailId":"BAIL-TEST",
-                          "periodeDebut":"2026-10-01",
-                          "periodeFin":"2026-10-31"
-                        }
-                        """).statusCode());
+        HttpResponse<String> reponse =
+                appelerGet("/api/v1/quittances", token);
+
+        assertEquals(200, reponse.statusCode());
+    }
+
+    @Test
+    void doitRefuserLesDocumentsSansJwt() throws Exception {
+        assertEquals(
+                401,
+                appelerGet("/api/v1/quittances", null).statusCode()
+        );
+    }
+
+    @Test
+    void doitRefuserLeRoleGestionnairePourLesDocuments() throws Exception {
+        String token = signerHs256(
+                "compte-gestionnaire-test",
+                "GESTIONNAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        assertEquals(
+                403,
+                appelerGet("/api/v1/quittances", token).statusCode()
+        );
+    }
+
+    @Test
+    void doitRefuserLeLocataireSansRattachementConfirme() throws Exception {
+        String token = signerHs256(
+                "compte-locataire-sans-rattachement",
+                "LOCATAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        assertEquals(
+                403,
+                appelerGet("/api/v1/quittances", token).statusCode()
+        );
     }
 
     private HttpResponse<String> appelerGet(String chemin, String token)
@@ -177,26 +209,6 @@ class AuthentificationCommuneHttpTest {
                 .timeout(Duration.ofSeconds(10))
                 .header("Accept", "application/json")
                 .GET();
-        if (token != null) {
-            requete.header("Authorization", "Bearer " + token);
-        }
-        return HttpClient.newHttpClient().send(
-                requete.build(),
-                HttpResponse.BodyHandlers.ofString()
-        );
-    }
-
-    private HttpResponse<String> appelerPost(
-            String chemin,
-            String token,
-            String corps
-    ) throws Exception {
-        HttpRequest.Builder requete = HttpRequest.newBuilder()
-                .uri(URI.create("http://127.0.0.1:" + port + chemin))
-                .timeout(Duration.ofSeconds(10))
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(corps));
         if (token != null) {
             requete.header("Authorization", "Bearer " + token);
         }
