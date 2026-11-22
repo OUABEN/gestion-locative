@@ -10,15 +10,15 @@
         <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; decodeToken décode un JWT valide, détecte un token expiré et retourne null sur un token invalide" time="0.0271811">
             <system-err>
 Erreur lors du décodage du token JWT : InvalidTokenError: Invalid token specified: missing part #2
-    at jwtDecode (file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/jwt-decode/build/esm/index.js:42:15)
-    at Module.decodeToken (C:/Users/OUALI/Downloads/gestion-locative/frontend/src/utils/jwt.js:6:30)
-    at C:/Users/OUALI/Downloads/gestion-locative/frontend/src/tests/biens.frontend.test.jsx:150:14
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:1695:35
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:2864:26
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3402:20
+    at jwtDecode (file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/jwt-decode/build/esm/index.js:42:15)
+    at Module.decodeToken (C:/Users/Ahmed/GestionLocative-Locataires/frontend/src/utils/jwt.js:6:30)
+    at C:/Users/Ahmed/GestionLocative-Locataires/frontend/src/tests/biens.frontend.test.jsx:150:14
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:1695:35
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:2864:26
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3402:20
     at new Promise (&lt;anonymous&gt;)
-    at runWithCancel (file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3397:10)
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3381:20
+    at runWithCancel (file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3397:10)
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3381:20
     at new Promise (&lt;anonymous&gt;)
 
             </system-err>

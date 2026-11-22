@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -6,6 +6,14 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
+      '/api/locataires': {
+        target: 'http://127.0.0.1:8082',
+        changeOrigin: true,
+      },
+      '/api/baux': {
+        target: 'http://127.0.0.1:8082',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://127.0.0.1:8081',
         changeOrigin: true,

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -11,12 +11,13 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronRight,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Sidebar.module.css';
 
 export const Sidebar = ({ isOpen, onToggle, onCloseMobile }) => {
-  const { canWrite } = useAuth();
+  const { user, canWrite } = useAuth();
 
   return (
     <>
@@ -115,6 +116,7 @@ export const Sidebar = ({ isOpen, onToggle, onCloseMobile }) => {
 
           <NavLink
             to="/locataires"
+            end
             onClick={onCloseMobile}
             className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
           >
@@ -123,6 +125,28 @@ export const Sidebar = ({ isOpen, onToggle, onCloseMobile }) => {
             </span>
             <span className={styles.navLabel}>Locataires</span>
           </NavLink>
+
+          {canWrite && (
+            <NavLink
+              to="/locataires/nouveau"
+              onClick={onCloseMobile}
+              className={({ isActive }) => `${styles.subNavItem} ${isActive ? styles.subActive : ''}`}
+            >
+              <PlusCircle size={15} />
+              <span>Nouveau locataire</span>
+            </NavLink>
+          )}
+
+          {user?.role === 'LOCATAIRE' && (
+            <NavLink
+              to="/locataires/mon-espace"
+              onClick={onCloseMobile}
+              className={({ isActive }) => `${styles.subNavItem} ${isActive ? styles.subActive : ''}`}
+            >
+              <UserCheck size={15} />
+              <span>Mon espace</span>
+            </NavLink>
+          )}
 
           <NavLink
             to="/loyers"
