@@ -99,6 +99,88 @@ Le rapport HTML complet contient 285 fichiers pour 3 141 680 octets (environ
   des noms de propriétés de configuration, pas leurs valeurs.
 - Aucun rapport Word ni capture d’écran n’a été produit.
 
+## Phase 2 — Checkstyle et SonarQube
+
+### Checkstyle
+
+| Élément | Résultat |
+| --- | --- |
+| Maven Checkstyle Plugin | 3.6.0 |
+| Checkstyle | 10.23.1 |
+| JVM/Maven | JDK 21.0.12.1 / Maven 3.9.16 |
+| Sources analysées | 68 fichiers Java : 47 production, 21 tests |
+| Tests Maven exécutés par cette analyse | Aucun |
+| Total de violations | 1 604 |
+| Gravité `error` | 0 |
+| Gravité `warning` | 1 604 |
+| Résultat de la commande | `BUILD SUCCESS` |
+
+Les 1 604 violations se répartissent en 773 sur les sources de production et
+831 sur les sources de test. L’import inutilisé précédemment signalé dans
+`ControlePrealableEmissionServiceTest.java` a été retiré; aucune violation de
+gravité `error` ne subsiste.
+
+Commande exécutée depuis la racine :
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+  ".\qualite-logicielle\quittances\run-checkstyle.ps1" `
+  -JavaHome "C:\Program Files\Java\jdk-21.0.12.1"
+```
+
+Répartition par règle (même catégorie que dans le XML, suffixe `Check` retiré) :
+
+| Règle | Violations |
+| --- | ---: |
+| `WhitespaceAfter` | 646 |
+| `WhitespaceAround` | 395 |
+| `EmptyLineSeparator` | 282 |
+| `LineLength` | 125 |
+| `NeedBraces` | 54 |
+| `OneStatementPerLine` | 51 |
+| `AvoidStarImport` | 40 |
+| `MultipleVariableDeclarations` | 9 |
+| `MethodName` | 2 |
+
+Les violations restantes d’espacement, longueur de ligne, accolades et imports
+génériques sont des écarts de style/maintenabilité; aucun fichier métier n’a
+été retouché pour réduire le total. Les fichiers concernés et leurs positions
+figurent dans les rapports; les plus chargés sont
+`SuiviScenarios.java` (380), `EnvoiMailpitTransactions.java` (255),
+`EnvoiMailpitServiceTest.java` (148) et `EmissionDemoServiceTest.java` (147).
+
+Rapports conservés dans `docs/qualite/quittances/checkstyle/` :
+
+- `checkstyle-result.xml` : 68 fichiers analysés et violations détaillées;
+- `checkstyle.html` et ses ressources : rapport lisible.
+
+Le dossier contient 39 fichiers pour 1 276 895 octets. Les chemins absolus du
+poste sont normalisés en chemins relatifs dans le XML; cette normalisation ne
+change pas les règles, gravités, positions ni messages. L’HTML et le XML ne
+contiennent aucun chemin utilisateur. Le rapport Maven affiche un avertissement
+non bloquant sur l’absence d’URL du projet parent.
+
+La vérification n’est pas liée au cycle Maven `test`/`verify`, et
+`failOnViolation=false`/`failsOnError=false` laissent observer les violations
+sans bloquer les tests ou le build habituel. Les erreurs d’exécution Maven
+restent fatales au runner.
+
+### SonarQube
+
+Aucune analyse SonarQube n’a été effectuée : `sonar-scanner` n’est pas installé,
+aucune installation n’a été trouvée dans le répertoire standard examiné et le
+port de référence `127.0.0.1:9000` n’est pas accessible. Aucun serveur n’a été
+démarré et aucun conteneur n’a été touché.
+
+La configuration reproductible est
+`qualite-logicielle/quittances/sonar-project.properties`; elle limite l’analyse
+au Java du backend Quittances et référence JaCoCo XML et Surefire. Le scanner
+nécessitera un serveur autorisé, le CLI installé, les classes compilées et les
+rapports JUnit disponibles. Un éventuel jeton est fourni uniquement via
+l’environnement et n’est pas enregistré dans les fichiers. La configuration
+Sonar de Biens analyse TypeScript/React et son Compose/script n’a pas été
+réutilisé ni exécuté.
+
 ## Reproduction
 
 La procédure complète et ses prérequis sont décrits dans

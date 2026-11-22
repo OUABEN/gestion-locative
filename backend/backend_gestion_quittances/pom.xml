@@ -114,6 +114,38 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.23.1</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <configLocation>../../qualite-logicielle/quittances/checkstyle.xml</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <includeResources>false</includeResources>
+                    <includeTestResources>false</includeTestResources>
+                    <excludeGeneratedSources>true</excludeGeneratedSources>
+                    <consoleOutput>false</consoleOutput>
+                    <logViolationsToConsole>false</logViolationsToConsole>
+                    <logViolationCountToConsole>true</logViolationCountToConsole>
+                    <failOnViolation>false</failOnViolation>
+                    <failsOnError>false</failsOnError>
+                    <outputFileFormat>xml</outputFileFormat>
+                    <outputFile>
+                        ${project.basedir}/../../docs/qualite/quittances/checkstyle/checkstyle-result.xml
+                    </outputFile>
+                    <linkXRef>false</linkXRef>
+                    <outputDirectory>
+                        ${project.basedir}/../../docs/qualite/quittances/checkstyle
+                    </outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
