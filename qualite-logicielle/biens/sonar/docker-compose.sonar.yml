@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube_biens
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar_secret_pw
+      - SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    depends_on:
+      - sonar-db
+    networks:
+      - sonar_net
+
+  sonar-db:
+    image: postgres:15-alpine
+    container_name: sonarqube_biens_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar_secret_pw
+      - POSTGRES_DB=sonar
+    volumes:
+      - sonar_db_data:/var/lib/postgresql/data
+    networks:
+      - sonar_net
+
+networks:
+  sonar_net:
+    driver: bridge
+
+volumes:
+  sonar_db_data:

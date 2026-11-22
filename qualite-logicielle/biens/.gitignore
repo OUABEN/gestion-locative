@@ -1,0 +1,4 @@
+# Ignorer les dépendances et caches d'outils QL
+node_modules/
+.nyc_output/
+*.log

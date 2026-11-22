@@ -1,10 +1,15 @@
-# Exclus du contexte de build Docker
-node_modules
-dist
-build
-target
+.git
+.gitignore
 .env
 .env.*
-coverage
-.git
+!.env.example
+.local-jwt/
+.local-signature/
+storage/
+target/
+backups/
+sauvegardes/
+.sauvegardes/
 *.log
+src/main/resources/application-local.yml
+src/main/resources/application-local.properties

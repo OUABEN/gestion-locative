@@ -30,9 +30,9 @@ export default defineConfig({
       junit: '../docs/rapports/biens/TEST-FrontendBiens.xml',
     },
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
-      reportsDirectory: '../docs/rapports/biens/coverage-frontend',
+      provider: 'istanbul',
+      reporter: ['text', 'html', 'lcov', 'json-summary'],
+      reportsDirectory: '../docs/qualite/biens/istanbul-frontend',
       include: ['src/**/*.{js,jsx}'],
       exclude: ['src/main.jsx', 'src/tests/**'],
     },

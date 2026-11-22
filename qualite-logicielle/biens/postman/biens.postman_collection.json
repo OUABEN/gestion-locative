@@ -1,0 +1,1128 @@
+{
+  "info": {
+    "name": "Gestion des Biens — Suite API Complète (QL)",
+    "_postman_id": "5d9e1364-c209-4449-91b6-62b133e46e34",
+    "description": "Suite complète de tests d API pour le module Gestion des Biens (Auth, CRUD, Règles Métier, RBAC).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "1.1 Register Bailleur éphémère (201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = Date.now();",
+                  "pm.environment.set('uniqueSuffix', ts);",
+                  "pm.environment.set('bailleurEmail', `bailleur_${ts}@test-ql.ma`);",
+                  "pm.environment.set('bailleurPassword', 'SecretPass123!');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Token JWT et utilisateur retournés', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.expect(json.user).to.have.property('email');",
+                  "    pm.expect(json.user.role).to.eql('BAILLEUR');",
+                  "    pm.environment.set('token', json.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{bailleurEmail}}\",\n  \"password\": \"{{bailleurPassword}}\",\n  \"nom\": \"Bailleur Test\",\n  \"prenom\": \"Mohamed\",\n  \"role\": \"BAILLEUR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.2 Register Locataire éphémère (201)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ts = pm.environment.get('uniqueSuffix') || Date.now();",
+                  "pm.environment.set('locataireEmail', `locataire_${ts}@test-ql.ma`);",
+                  "pm.environment.set('locatairePassword', 'SecretPass123!');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Rôle LOCATAIRE attribué', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.user.role).to.eql('LOCATAIRE');",
+                  "    pm.environment.set('tokenLocataire', json.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{locataireEmail}}\",\n  \"password\": \"{{locatairePassword}}\",\n  \"nom\": \"Locataire Test\",\n  \"prenom\": \"Karim\",\n  \"role\": \"LOCATAIRE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login Bailleur éphémère (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Jeton JWT régénéré avec succès', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.environment.set('token', json.token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{bailleurEmail}}\",\n  \"password\": \"{{bailleurPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.4 Login avec mot de passe erroné (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test('Message d erreur explicite', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{bailleurEmail}}\",\n  \"password\": \"MauvaisMotDePasse!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.5 Login champs manquants (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Détail des erreurs de validation retourné', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{bailleurEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. CRUD Biens",
+      "item": [
+        {
+          "name": "2.1 Créer un bien valide (LIBRE, charges 0 par défaut) (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Bien créé avec statut LIBRE et charges par défaut', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json.statut).to.eql('LIBRE');",
+                  "    pm.expect(Number(json.charges)).to.eql(0);",
+                  "    pm.environment.set('createdBienId', json.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adresse\": \"14 Boulevard Zerktouni\",\n  \"ville\": \"Casablanca\",\n  \"type\": \"Appartement\",\n  \"surface\": 85.5,\n  \"prixMensuel\": 7500,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1545324418-cc1a3fa10c00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.2 Lister les biens sans filtre (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('La réponse est un tableau JSON de biens', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.3 Lister les biens avec filtres (ville, statut, type) (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Tous les résultats correspondent aux critères', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "    json.forEach(b => {",
+                  "        pm.expect(b.ville.toLowerCase()).to.eql('casablanca');",
+                  "        pm.expect(b.statut).to.eql('LIBRE');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens?ville=Casablanca&statut=LIBRE&type=Appartement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ],
+              "query": [
+                {
+                  "key": "ville",
+                  "value": "Casablanca"
+                },
+                {
+                  "key": "statut",
+                  "value": "LIBRE"
+                },
+                {
+                  "key": "type",
+                  "value": "Appartement"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.4 Obtenir le détail du bien créé (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('UUID correspond à createdBienId', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.id).to.eql(pm.environment.get('createdBienId'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{createdBienId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{createdBienId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.5 Modifier le bien (PUT) (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Nouvelles données appliquées avec succès', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(Number(json.prixMensuel)).to.eql(8000);",
+                  "    pm.expect(Number(json.charges)).to.eql(350);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adresse\": \"14 Boulevard Zerktouni, Étage 5\",\n  \"ville\": \"Casablanca\",\n  \"type\": \"Appartement\",\n  \"surface\": 90,\n  \"prixMensuel\": 8000,\n  \"charges\": 350,\n  \"statut\": \"LIBRE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{createdBienId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{createdBienId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.6 Supprimer le bien LIBRE créé (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{createdBienId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{createdBienId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Règles Métier & Statuts",
+      "item": [
+        {
+          "name": "3.1 Créer un bien pour le cycle d occupation (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.environment.set('bienOccupeId', pm.response.json().id);",
+                  "pm.environment.set('activeBienId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adresse\": \"45 Avenue Hassan II\",\n  \"ville\": \"Rabat\",\n  \"type\": \"Villa\",\n  \"surface\": 250,\n  \"prixMensuel\": 18000,\n  \"charges\": 800\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Vérifier disponibilité initiale (200 - disponible=true)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Le bien est disponible', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.disponible).to.eql(true);",
+                  "    pm.expect(json.statut).to.eql('LIBRE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}/disponibilite",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}",
+                "disponibilite"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.3 PATCH statut vers OCCUPE (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Statut mis à jour vers OCCUPE', function () {",
+                  "    pm.expect(pm.response.json().statut).to.eql('OCCUPE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"OCCUPE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}",
+                "statut"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.4 PATCH statut vers OCCUPE déjà en place (409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 409 Conflict', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Alerte conflit retournée', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('déjà dans le statut');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"OCCUPE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}",
+                "statut"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.5 DELETE d un bien OCCUPE refusé (409 Conflict)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 409 Conflict', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Message de refus pour bien occupé', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('actuellement OCCUPE');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.6 PATCH statut invalide (ex: RESERVE) (400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"RESERVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}",
+                "statut"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.7 GET détail avec identifiant non-UUID (400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/pas-un-uuid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "pas-un-uuid"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.8 GET détail avec UUID inexistant (404 Not Found)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 404 Not Found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/00000000-0000-4000-8000-000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "00000000-0000-4000-8000-000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.9 Nettoyage : Libérer et Supprimer le bien (200 puis 204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK lors du retour à LIBRE', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"LIBRE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}/statut",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}",
+                "statut"
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.10 Suppression finale du bien libéré (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens/{{bienOccupeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens",
+                "{{bienOccupeId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Sécurité & Rôles",
+      "item": [
+        {
+          "name": "4.1 Requête sans jeton JWT Authorization (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.2 Requête avec jeton corrompu / invalide (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 401 Unauthorized', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer jeton-totalement-invalide"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.3 LOCATAIRE tente POST /api/biens en écriture (403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 403 Forbidden', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "pm.test('Message d interdiction explicite', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.message).to.include('Accès refusé');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenLocataire}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adresse\": \"12 Rue Royale\",\n  \"ville\": \"Rabat\",\n  \"type\": \"Studio\",\n  \"surface\": 30,\n  \"prixMensuel\": 3000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        },
+        {
+          "name": "4.4 LOCATAIRE autorisé sur GET /api/biens en lecture (200 OK)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Statut HTTP 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Le locataire reçoit le catalogue en lecture', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenLocataire}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/biens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "biens"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

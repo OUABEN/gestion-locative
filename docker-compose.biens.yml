@@ -107,7 +107,7 @@ services:
       LOYERS_SERVICE_URL: http://backend-gestion-loyers:8083
       QUITTANCES_SERVICE_URL: http://backend-gestion-quittances:8084
     ports:
-      - "3000:80"
+      - "${FRONTEND_HOST_PORT:-3005}:80"
     depends_on:
       biens:
         condition: service_healthy
