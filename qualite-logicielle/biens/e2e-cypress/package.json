@@ -1,0 +1,17 @@
+{
+  "name": "gestion-biens-e2e-cypress",
+  "version": "1.0.0",
+  "description": "Suite de tests E2E Cypress pour le module Gestion des Biens (QL)",
+  "private": true,
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run --headless --browser chrome",
+    "test:e2e": "cypress run --headless --spec cypress/e2e/biens-e2e.cy.js --reporter mochawesome --reporter-options reportDir=../../docs/qualite/biens/cypress,overwrite=false,html=true,json=true"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
+  }
+}
