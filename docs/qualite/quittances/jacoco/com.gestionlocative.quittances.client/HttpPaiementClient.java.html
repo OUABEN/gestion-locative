@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HttpPaiementClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.client</a> &gt; <span class="el_source">HttpPaiementClient.java</span></div><h1>HttpPaiementClient.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.client;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import com.gestionlocative.quittances.dto.PaiementsPeriodeResponse;
+import com.gestionlocative.quittances.dto.SituationPeriode.Affectation;
+import com.gestionlocative.quittances.exception.RegleMetierException;
+import com.gestionlocative.quittances.exception.ServiceExterneException;
+
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
+
+public class HttpPaiementClient implements PaiementClient {
+
+    private final RestClient restClient;
+    private final String chemin;
+
+<span class="fc" id="L23">    public HttpPaiementClient(RestClient restClient, String chemin) {</span>
+<span class="fc" id="L24">        this.restClient = Objects.requireNonNull(restClient);</span>
+<span class="fc" id="L25">        this.chemin = Objects.requireNonNull(chemin);</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public List&lt;Affectation&gt; consulterAffectations(
+            String bailId,
+            LocalDate debut,
+            LocalDate fin) {
+
+<span class="pc bpc" id="L34" title="3 of 6 branches missed.">        if (bailId == null || bailId.isBlank() || bailId.length() &gt; 100) {</span>
+<span class="nc" id="L35">            throw new RegleMetierException(</span>
+                    &quot;IDENTIFIANT_INVALIDE&quot;,
+                    &quot;L'identifiant du bail est invalide.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L41" title="3 of 6 branches missed.">        if (debut == null || fin == null || fin.isBefore(debut)) {</span>
+<span class="nc" id="L42">            throw new RegleMetierException(</span>
+                    &quot;PERIODE_INVALIDE&quot;,
+                    &quot;La période demandée est invalide.&quot;
+            );
+        }
+
+        PaiementsPeriodeResponse reponse;
+
+        try {
+<span class="fc" id="L51">            reponse = restClient.get()</span>
+<span class="fc" id="L52">                    .uri(chemin, Map.of(</span>
+                            &quot;bailId&quot;, bailId,
+<span class="fc" id="L54">                            &quot;debut&quot;, debut.toString(),</span>
+<span class="fc" id="L55">                            &quot;fin&quot;, fin.toString()</span>
+                    ))
+<span class="fc" id="L57">                    .retrieve()</span>
+<span class="fc" id="L58">                    .body(PaiementsPeriodeResponse.class);</span>
+
+<span class="fc" id="L60">        } catch (RestClientResponseException exception) {</span>
+<span class="fc" id="L61">            throw new ServiceExterneException(</span>
+                    &quot;PAIEMENTS&quot;,
+                    &quot;ERREUR_HTTP_EXTERNE&quot;,
+                    &quot;Le service Paiements a refusé ou échoué à traiter la demande.&quot;,
+<span class="fc" id="L65">                    exception.getStatusCode().value()</span>
+            );
+
+<span class="fc" id="L68">        } catch (ResourceAccessException exception) {</span>
+<span class="fc" id="L69">            throw new ServiceExterneException(</span>
+                    &quot;PAIEMENTS&quot;,
+                    &quot;SERVICE_INJOIGNABLE&quot;,
+                    &quot;Le service Paiements est inaccessible ou le délai est dépassé.&quot;,
+                    null
+            );
+
+<span class="fc" id="L76">        } catch (RestClientException exception) {</span>
+<span class="fc" id="L77">            throw new ServiceExterneException(</span>
+                    &quot;PAIEMENTS&quot;,
+                    &quot;REPONSE_ILLISIBLE&quot;,
+                    &quot;La réponse du service Paiements ne peut pas être interprétée.&quot;,
+                    null
+            );
+<span class="fc" id="L83">        }</span>
+
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (reponse == null</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                || !&quot;1&quot;.equals(reponse.versionContrat())</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                || !Boolean.TRUE.equals(reponse.complet())</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">                || !bailId.equals(reponse.bailId())</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                || !debut.equals(reponse.periodeDebut())</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">                || !fin.equals(reponse.periodeFin())) {</span>
+
+<span class="fc" id="L92">            throw new ServiceExterneException(</span>
+                    &quot;PAIEMENTS&quot;,
+                    &quot;REPONSE_INCOHERENTE&quot;,
+                    &quot;La réponse Paiements est vide, incomplète ou ne correspond pas à la demande.&quot;,
+                    null
+            );
+        }
+
+<span class="fc" id="L100">        return reponse.affectations();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

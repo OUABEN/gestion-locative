@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReseauDemo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.config</a> &gt; <span class="el_source">ReseauDemo.java</span></div><h1>ReseauDemo.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.config;
+
+import java.net.URI;
+import java.util.Set;
+
+/** Mode Docker local explicite : les ports doivent être publiés sur 127.0.0.1. */
+public final class ReseauDemo {
+    private ReseauDemo() { }
+    public static boolean ecouteAutorisee(String adresse, boolean dockerDemo) {
+<span class="pc bpc" id="L10" title="1 of 4 branches missed.">        return &quot;127.0.0.1&quot;.equals(adresse)</span>
+<span class="pc bnc" id="L11" title="All 2 branches missed.">                || (dockerDemo &amp;&amp; &quot;0.0.0.0&quot;.equals(adresse));</span>
+    }
+    public static boolean sourceAutorisee(URI uri, boolean dockerDemo) {
+<span class="fc" id="L14">        String hote = uri.getHost();</span>
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">        if (hote == null) return false;</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (Set.of(&quot;127.0.0.1&quot;, &quot;localhost&quot;, &quot;::1&quot;, &quot;[::1]&quot;).contains(hote)) return true;</span>
+<span class="pc bpc" id="L17" title="2 of 4 branches missed.">        return dockerDemo &amp;&amp; &quot;services-demo&quot;.equals(hote)</span>
+<span class="pc bpc" id="L18" title="2 of 4 branches missed.">                &amp;&amp; &quot;http&quot;.equals(uri.getScheme()) &amp;&amp; uri.getPort() == 8091;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

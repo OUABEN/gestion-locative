@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.security</a> &gt; <span class="el_source">SecurityConfiguration.java</span></div><h1>SecurityConfiguration.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.security;
+
+import com.gestionlocative.quittances.config.ReseauDemo;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration(proxyBeanMethods = false)
+@EnableMethodSecurity
+<span class="fc" id="L36">public class SecurityConfiguration {</span>
+    @Value(&quot;${DARLOC_DOCKER_DEMO:false}&quot;)
+    private boolean dockerDemo;
+
+    public static Collection&lt;GrantedAuthority&gt; autoritesRoleCommun(Jwt jwt) {
+<span class="fc" id="L41">        Object role = jwt.getClaims().get(&quot;role&quot;);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (&quot;BAILLEUR&quot;.equals(role)</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">                || &quot;GESTIONNAIRE&quot;.equals(role)</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">                || &quot;LOCATAIRE&quot;.equals(role)) {</span>
+<span class="fc" id="L45">            return java.util.List.of(</span>
+                    new SimpleGrantedAuthority(&quot;ROLE_&quot; + role)
+            );
+        }
+<span class="nc" id="L49">        return new LinkedHashSet&lt;&gt;();</span>
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(
+            @Value(&quot;${quittances.securite.mode}&quot;) String mode,
+            @Value(&quot;${quittances.securite.issuer}&quot;) String issuer,
+            @Value(&quot;${quittances.securite.audience}&quot;) String audience,
+            @Value(&quot;${quittances.securite.cle-publique}&quot;) String clePublique,
+            @Value(&quot;${quittances.securite.jwt-secret:}&quot;) String jwtSecret,
+            @Value(&quot;${server.address}&quot;) String adresseServeur) throws Exception {
+
+<span class="pc bpc" id="L61" title="5 of 6 branches missed.">        if (!&quot;COMMUN&quot;.equals(mode) &amp;&amp; (issuer.isBlank() || audience.isBlank())) {</span>
+<span class="nc" id="L62">            throw new IllegalArgumentException(</span>
+                    &quot;L'émetteur et l'audience JWT doivent être configurés.&quot;
+            );
+        }
+
+        NimbusJwtDecoder decoder;
+
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (&quot;LOCAL&quot;.equals(mode)) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (!ReseauDemo.ecouteAutorisee(adresseServeur, dockerDemo)</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                    || !&quot;urn:gestionlocative:dev&quot;.equals(issuer)</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">                    || !&quot;service-quittances&quot;.equals(audience)) {</span>
+<span class="nc" id="L73">                throw new IllegalArgumentException(</span>
+                        &quot;Le mode JWT LOCAL est réservé à la démonstration sur 127.0.0.1.&quot;
+                );
+            }
+
+<span class="nc" id="L78">            byte[] contenu = Files.readAllBytes(Path.of(clePublique));</span>
+
+<span class="nc" id="L80">            RSAPublicKey cle = (RSAPublicKey) KeyFactory.getInstance(&quot;RSA&quot;)</span>
+<span class="nc" id="L81">                    .generatePublic(new X509EncodedKeySpec(contenu));</span>
+
+<span class="nc" id="L83">            decoder = NimbusJwtDecoder.withPublicKey(cle)</span>
+<span class="nc" id="L84">                    .signatureAlgorithm(SignatureAlgorithm.RS256)</span>
+<span class="nc" id="L85">                    .build();</span>
+
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        } else if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
+<span class="nc" id="L88">            URI uri = URI.create(issuer);</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (!&quot;https&quot;.equals(uri.getScheme())</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                    || uri.getHost() == null</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                    || uri.getUserInfo() != null) {</span>
+<span class="nc" id="L93">                throw new IllegalArgumentException(</span>
+                        &quot;Le mode INTEGRATION exige un émetteur HTTPS valide.&quot;
+                );
+            }
+
+<span class="nc" id="L98">            decoder = NimbusJwtDecoder.withIssuerLocation(issuer)</span>
+<span class="nc" id="L99">                    .jwsAlgorithm(SignatureAlgorithm.RS256)</span>
+<span class="nc" id="L100">                    .build();</span>
+
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        } else if (&quot;COMMUN&quot;.equals(mode)) {</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if (jwtSecret.isBlank()) {</span>
+<span class="nc" id="L104">                throw new IllegalArgumentException(</span>
+                        &quot;Le secret JWT commun doit être configuré.&quot;
+                );
+            }
+
+<span class="fc" id="L109">            byte[] secret = jwtSecret.getBytes(StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">            if (secret.length &lt; 32) {</span>
+<span class="nc" id="L111">                throw new IllegalArgumentException(</span>
+                        &quot;Le secret JWT commun doit contenir au moins 32 octets.&quot;
+                );
+            }
+
+<span class="fc" id="L116">            decoder = NimbusJwtDecoder</span>
+<span class="fc" id="L117">                    .withSecretKey(new SecretKeySpec(secret, &quot;HmacSHA256&quot;))</span>
+<span class="fc" id="L118">                    .macAlgorithm(MacAlgorithm.HS256)</span>
+<span class="fc" id="L119">                    .build();</span>
+
+<span class="fc" id="L121">        } else {</span>
+<span class="nc" id="L122">            throw new IllegalArgumentException(</span>
+                    &quot;Le mode JWT doit être LOCAL, INTEGRATION ou COMMUN.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (&quot;COMMUN&quot;.equals(mode)) {</span>
+<span class="fc" id="L128">            ValidationJwt.configurerCommun(decoder);</span>
+<span class="fc" id="L129">            return new DecodeurJwtCommun(decoder);</span>
+        } else {
+<span class="nc" id="L131">            ValidationJwt.configurer(decoder, issuer, audience);</span>
+        }
+
+<span class="nc" id="L134">        return decoder;</span>
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            @Value(&quot;${quittances.securite.mode}&quot;) String mode)
+            throws Exception {
+
+<span class="fc" id="L143">        JwtAuthenticationConverter authentication =</span>
+                new JwtAuthenticationConverter();
+
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (&quot;COMMUN&quot;.equals(mode)) {</span>
+<span class="fc" id="L147">            authentication.setJwtGrantedAuthoritiesConverter(jwt -&gt;</span>
+<span class="fc" id="L148">                    autoritesRoleCommun(jwt)</span>
+            );
+        } else {
+<span class="nc" id="L151">            JwtGrantedAuthoritiesConverter roles =</span>
+                    new JwtGrantedAuthoritiesConverter();
+
+<span class="nc" id="L154">            roles.setAuthoritiesClaimName(&quot;roles&quot;);</span>
+<span class="nc" id="L155">            roles.setAuthorityPrefix(&quot;ROLE_&quot;);</span>
+<span class="nc" id="L156">            authentication.setJwtGrantedAuthoritiesConverter(roles);</span>
+        }
+
+<span class="fc" id="L159">        http</span>
+<span class="fc" id="L160">                .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L161">                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+                )
+<span class="fc" id="L163">                .csrf(csrf -&gt; csrf</span>
+<span class="fc" id="L164">                        .ignoringRequestMatchers(&quot;/api/**&quot;)</span>
+                )
+<span class="fc" id="L166">                .authorizeHttpRequests(authorisations -&gt; authorisations</span>
+<span class="fc" id="L167">                        .requestMatchers(</span>
+                                HttpMethod.GET,
+                                &quot;/&quot;,
+                                &quot;/quittances&quot;,
+                                &quot;/css/quittances.css&quot;,
+                                &quot;/js/quittances.js&quot;,
+                                &quot;/js/panneau-document.js&quot;,
+                                &quot;/vendor/bootstrap/bootstrap.min.css&quot;
+<span class="fc" id="L175">                        ).permitAll()</span>
+<span class="fc" id="L176">                        .requestMatchers(</span>
+                                HttpMethod.GET,
+                                &quot;/api/v1/systeme/etat&quot;
+<span class="fc" id="L179">                        ).permitAll()</span>
+<span class="fc" id="L180">                        .requestMatchers(</span>
+                                HttpMethod.GET,
+                                &quot;/api/v1/identite&quot;
+<span class="fc" id="L183">                        ).authenticated()</span>
+<span class="fc" id="L184">                        .requestMatchers(</span>
+                                &quot;/api/v1/quittances&quot;,
+                                &quot;/api/v1/quittances/**&quot;
+<span class="fc" id="L187">                        ).hasAnyRole(&quot;BAILLEUR&quot;, &quot;LOCATAIRE&quot;)</span>
+<span class="fc" id="L188">                        .anyRequest().denyAll()</span>
+                )
+<span class="fc" id="L190">                .oauth2ResourceServer(oauth -&gt; oauth</span>
+<span class="fc" id="L191">                        .jwt(jwt -&gt; jwt</span>
+<span class="fc" id="L192">                                .jwtAuthenticationConverter(authentication)</span>
+                        )
+                );
+
+<span class="fc" id="L196">        return http.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReferentielsConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.config</a> &gt; <span class="el_source">ReferentielsConfiguration.java</span></div><h1>ReferentielsConfiguration.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.config;
+
+import java.net.URI;
+import org.springframework.beans.factory.annotation.Value;
+import java.net.http.HttpClient;
+import java.time.Duration;
+import java.util.Set;
+
+import com.gestionlocative.quittances.client.BienBailClient;
+import com.gestionlocative.quittances.client.HttpBienBailClient;
+import com.gestionlocative.quittances.client.HttpLocataireClient;
+import com.gestionlocative.quittances.client.LocataireClient;
+import com.gestionlocative.quittances.config.ReferentielsProperties.Endpoint;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+
+@Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(ReferentielsProperties.class)
+<span class="fc" id="L26">public class ReferentielsConfiguration {</span>
+    @Value(&quot;${DARLOC_DOCKER_DEMO:false}&quot;)
+    private boolean dockerDemo;
+
+
+<span class="fc" id="L31">    @Value(&quot;${DARLOC_BIEN_INTEGRATION_ID:}&quot;)</span>
+    private String bienIntegrationId = &quot;&quot;;
+
+    @Bean(name = &quot;referentielsHttpTransport&quot;, destroyMethod = &quot;close&quot;)
+    public HttpClient referentielsHttpTransport() {
+<span class="fc" id="L36">        return HttpClient.newBuilder()</span>
+<span class="fc" id="L37">                .connectTimeout(Duration.ofSeconds(2))</span>
+<span class="fc" id="L38">                .followRedirects(HttpClient.Redirect.NEVER)</span>
+<span class="fc" id="L39">                .build();</span>
+    }
+
+    @Bean
+    public LocataireClient locataireClient(
+            ReferentielsProperties properties,
+            @Qualifier(&quot;referentielsHttpTransport&quot;) HttpClient transport) {
+
+<span class="fc" id="L47">        Endpoint endpoint = properties.locataires();</span>
+
+<span class="fc" id="L49">        return new HttpLocataireClient(</span>
+<span class="fc" id="L50">                construire(endpoint, transport, true),</span>
+<span class="fc" id="L51">                endpoint.chemin(),</span>
+<span class="fc" id="L52">                &quot;LOCATAIRES_LOCAL&quot;.equals(endpoint.mode())</span>
+        );
+    }
+
+    @Bean
+    public BienBailClient bienBailClient(
+            ReferentielsProperties properties,
+            @Qualifier(&quot;referentielsHttpTransport&quot;) HttpClient transport) {
+
+<span class="fc" id="L61">        Endpoint biens = properties.biens();</span>
+<span class="fc" id="L62">        Endpoint baux = properties.baux();</span>
+
+<span class="fc" id="L64">        boolean biensLocal = &quot;BIENS_LOCAL&quot;.equals(biens.mode());</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (biensLocal) {</span>
+<span class="fc bfc" id="L66" title="All 4 branches covered.">            if (!dockerDemo || !&quot;SIMULATION&quot;.equals(baux.mode())</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                    || !&quot;http://groupe16-biens-integration:8081&quot;.equals(biens.baseUrl())</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">                    || !&quot;/api/biens/{id}&quot;.equals(biens.chemin())) {</span>
+<span class="fc" id="L69">                throw new IllegalArgumentException(&quot;BIENS_LOCAL exige Docker demo, le service Biens local et des baux simules.&quot;);</span>
+            }
+<span class="fc" id="L71">            java.util.UUID.fromString(bienIntegrationId);</span>
+<span class="fc" id="L72">            biens = new Endpoint(&quot;INTEGRATION&quot;, biens.baseUrl(), biens.chemin(), biens.token());</span>
+        }
+<span class="fc" id="L74">        RestClient biensClient = construire(biens, transport);</span>
+<span class="fc" id="L75">        RestClient bauxClient = construire(baux, transport);</span>
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (!baux.chemin().contains(&quot;{debut}&quot;)</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                || !baux.chemin().contains(&quot;{fin}&quot;)) {</span>
+<span class="nc" id="L79">            throw new IllegalArgumentException(</span>
+                    &quot;Le chemin des baux doit contenir debut et fin.&quot;
+            );
+        }
+
+<span class="fc" id="L84">        BienBailClient delegate = new HttpBienBailClient(</span>
+                biensClient,
+<span class="fc" id="L86">                biens.chemin(),</span>
+                bauxClient,
+<span class="fc" id="L88">                baux.chemin()</span>
+        );
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        return biensLocal ? new com.gestionlocative.quittances.client.BiensLocalClient(</span>
+<span class="fc" id="L91">                delegate, biensClient, bienIntegrationId) : delegate;</span>
+    }
+
+    private RestClient construire(Endpoint endpoint, HttpClient transport) {
+<span class="fc" id="L95">        return construire(endpoint, transport, false);</span>
+    }
+
+    private RestClient construire(Endpoint endpoint, HttpClient transport, boolean locataires) {
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if (endpoint == null</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                || endpoint.baseUrl() == null</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                || endpoint.chemin() == null) {</span>
+<span class="nc" id="L102">            throw new IllegalArgumentException(</span>
+                    &quot;La configuration du service externe est incomplète.&quot;
+            );
+        }
+
+<span class="fc" id="L107">        URI uri = URI.create(endpoint.baseUrl());</span>
+
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (uri.getHost() == null</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">                || !Set.of(&quot;http&quot;, &quot;https&quot;).contains(uri.getScheme())</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">                || uri.getUserInfo() != null</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                || uri.getQuery() != null</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">                || uri.getFragment() != null) {</span>
+<span class="nc" id="L114">            throw new IllegalArgumentException(</span>
+                    &quot;L'adresse du service externe est invalide.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (!endpoint.chemin().startsWith(&quot;/&quot;)</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                || endpoint.chemin().startsWith(&quot;//&quot;)</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">                || !endpoint.chemin().contains(&quot;{id}&quot;)) {</span>
+<span class="nc" id="L122">            throw new IllegalArgumentException(</span>
+                    &quot;Le chemin doit être relatif au service et contenir id.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        String token = endpoint.token() == null ? &quot;&quot; : endpoint.token();</span>
+
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (&quot;LOCATAIRES_LOCAL&quot;.equals(endpoint.mode())) {</span>
+<span class="fc" id="L130">            boolean boucleLocale = Set.of(&quot;127.0.0.1&quot;, &quot;localhost&quot;, &quot;::1&quot;, &quot;[::1]&quot;).contains(uri.getHost());</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            boolean conteneurLocal = dockerDemo</span>
+<span class="pc bpc" id="L132" title="1 of 4 branches missed.">                    &amp;&amp; &quot;locataires-integration&quot;.equals(uri.getHost()) &amp;&amp; uri.getPort() == 8082;</span>
+<span class="pc bpc" id="L133" title="1 of 8 branches missed.">            if (!locataires || !&quot;http&quot;.equals(uri.getScheme())</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                    || !(boucleLocale || conteneurLocal) || !token.isBlank()) {</span>
+<span class="fc" id="L135">                throw new IllegalArgumentException(&quot;LOCATAIRES_LOCAL exige le service local sans jeton.&quot;);</span>
+            }
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        } else if (&quot;SIMULATION&quot;.equals(endpoint.mode())) {</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if (!ReseauDemo.sourceAutorisee(uri, dockerDemo)</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">                    || !token.isBlank()) {</span>
+<span class="nc" id="L140">                throw new IllegalArgumentException(</span>
+                        &quot;La simulation exige une adresse locale et aucun jeton réel.&quot;
+                );
+            }
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        } else if (&quot;INTEGRATION&quot;.equals(endpoint.mode())) {</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">            if (token.isBlank()) {</span>
+<span class="fc" id="L146">                throw new IllegalArgumentException(</span>
+                        &quot;Un jeton de service est requis pour l'intégration.&quot;
+                );
+            }
+        } else {
+<span class="nc" id="L151">            throw new IllegalArgumentException(</span>
+                    &quot;Le mode doit être SIMULATION ou INTEGRATION.&quot;
+            );
+        }
+
+<span class="fc" id="L156">        JdkClientHttpRequestFactory factory =</span>
+                new JdkClientHttpRequestFactory(transport);
+
+<span class="fc" id="L159">        factory.setReadTimeout(Duration.ofSeconds(5));</span>
+
+<span class="fc" id="L161">        RestClient.Builder builder = RestClient.builder()</span>
+<span class="fc" id="L162">                .baseUrl(endpoint.baseUrl())</span>
+<span class="fc" id="L163">                .requestFactory(factory)</span>
+<span class="fc" id="L164">                .defaultHeader(</span>
+                        HttpHeaders.ACCEPT,
+                        MediaType.APPLICATION_JSON_VALUE
+                );
+
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (&quot;INTEGRATION&quot;.equals(endpoint.mode())) {</span>
+<span class="fc" id="L170">            builder.defaultHeaders(headers -&gt; headers.setBearerAuth(token));</span>
+        }
+
+<span class="fc" id="L173">        return builder.build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

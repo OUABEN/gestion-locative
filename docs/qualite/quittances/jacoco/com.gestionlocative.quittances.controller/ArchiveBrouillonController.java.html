@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArchiveBrouillonController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.controller</a> &gt; <span class="el_source">ArchiveBrouillonController.java</span></div><h1>ArchiveBrouillonController.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.controller;
+
+import com.gestionlocative.quittances.dto.ArchiveBrouillonResponse;
+import com.gestionlocative.quittances.dto.PageArchivesBrouillonResponse;
+import com.gestionlocative.quittances.service.ConsultationArchivesBrouillonService;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.gestionlocative.quittances.service.ArchivageBrouillonService;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.UUID;
+
+@RestController
+public class ArchiveBrouillonController {
+
+    private final ArchivageBrouillonService service;
+
+    private final ConsultationArchivesBrouillonService consultation;
+
+    public ArchiveBrouillonController(
+            ArchivageBrouillonService service,
+<span class="fc" id="L32">            ConsultationArchivesBrouillonService consultation) {</span>
+<span class="fc" id="L33">        this.service = service;</span>
+<span class="fc" id="L34">        this.consultation = consultation;</span>
+<span class="fc" id="L35">    }</span>
+
+    @GetMapping(&quot;/api/v1/quittances/{id}/archives-brouillon&quot;)
+    public ResponseEntity&lt;PageArchivesBrouillonResponse&gt; consulter(
+            Authentication authentication,
+            @PathVariable(&quot;id&quot;) UUID id,
+            @RequestParam(name = &quot;page&quot;, defaultValue = &quot;0&quot;) int page,
+            @RequestParam(name = &quot;taille&quot;, defaultValue = &quot;10&quot;) int taille) {
+<span class="nc" id="L43">        return ResponseEntity.ok()</span>
+<span class="nc" id="L44">                .cacheControl(CacheControl.noStore())</span>
+<span class="nc" id="L45">                .body(consultation.consulter(authentication, id, page, taille));</span>
+    }
+
+    @PostMapping(&quot;/api/v1/quittances/{id}/archives-brouillon&quot;)
+    public ResponseEntity&lt;ArchiveBrouillonResponse&gt; archiver(
+            Authentication authentication,
+            @PathVariable(&quot;id&quot;) UUID id
+    ) throws IOException {
+<span class="fc" id="L53">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L54">                .body(service.archiver(authentication, id));</span>
+    }
+
+    @GetMapping(
+            value = &quot;/api/v1/quittances/{id}/archives-brouillon/{archiveId}/pdf&quot;,
+            produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    public ResponseEntity&lt;byte[]&gt; telecharger(
+            Authentication authentication,
+            @PathVariable(&quot;id&quot;) UUID id,
+            @PathVariable(&quot;archiveId&quot;) UUID archiveId
+    ) {
+<span class="fc" id="L66">        byte[] contenu = service.telecharger(</span>
+                authentication,
+                id,
+                archiveId
+        );
+
+<span class="fc" id="L72">        String disposition = ContentDisposition.attachment()</span>
+<span class="fc" id="L73">                .filename(&quot;brouillon-&quot; + id + &quot;-&quot; + archiveId + &quot;.pdf&quot;)</span>
+<span class="fc" id="L74">                .build()</span>
+<span class="fc" id="L75">                .toString();</span>
+
+<span class="fc" id="L77">        return ResponseEntity.ok()</span>
+<span class="fc" id="L78">                .contentType(MediaType.APPLICATION_PDF)</span>
+<span class="fc" id="L79">                .contentLength(contenu.length)</span>
+<span class="fc" id="L80">                .cacheControl(CacheControl.noStore())</span>
+<span class="fc" id="L81">                .header(HttpHeaders.CONTENT_DISPOSITION, disposition)</span>
+<span class="fc" id="L82">                .body(contenu);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReconciliationPaiementsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.suivi</a> &gt; <span class="el_source">ReconciliationPaiementsService.java</span></div><h1>ReconciliationPaiementsService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.suivi;
+
+import com.gestionlocative.quittances.client.PaiementClient;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ReconciliationPaiementsService {
+    private final ReferencePaiementsService references;
+    private final PaiementClient paiements;
+<span class="fc" id="L16">    public ReconciliationPaiementsService(ReferencePaiementsService references, PaiementClient paiements) {</span>
+<span class="fc" id="L17">        this.references = references; this.paiements = paiements;</span>
+<span class="fc" id="L18">    }</span>
+<span class="nc" id="L19">    public record Rapport(UUID documentId, String resultat, Instant verifieLe, List&lt;ComparateurPaiements.Ecart&gt; ecarts) {}</span>
+    @Transactional(propagation = Propagation.NEVER)
+    public Rapport controler(Authentication auth, UUID id) {
+        // Vérification des droits avant l'appel externe, sans transaction ouverte pendant cet appel.
+<span class="nc" id="L23">        var reference = references.lire(auth, id);</span>
+<span class="nc" id="L24">        var d = reference.document();</span>
+<span class="nc" id="L25">        var actuelles = paiements.consulterAffectations(d.bailId(), d.periodeDebut(), d.periodeFin());</span>
+<span class="nc" id="L26">        var ecarts = ComparateurPaiements.comparer(d.bailId(), d.periodeDebut(), d.periodeFin(), reference.affectations(), actuelles);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        return new Rapport(id, ecarts.isEmpty() ? &quot;CONFORME&quot; : &quot;ECARTS_DETECTES&quot;, Instant.now(), ecarts);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

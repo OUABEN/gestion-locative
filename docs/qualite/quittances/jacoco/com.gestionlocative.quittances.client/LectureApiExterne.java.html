@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LectureApiExterne.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.client</a> &gt; <span class="el_source">LectureApiExterne.java</span></div><h1>LectureApiExterne.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.client;
+
+import java.util.Map;
+
+import com.gestionlocative.quittances.exception.RegleMetierException;
+import com.gestionlocative.quittances.exception.ServiceExterneException;
+
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
+
+public final class LectureApiExterne {
+
+    private LectureApiExterne() {
+    }
+
+    public static &lt;T&gt; T lire(
+            RestClient client,
+            String service,
+            String chemin,
+            Map&lt;String, ?&gt; parametres,
+            Class&lt;T&gt; type) {
+
+        try {
+<span class="fc" id="L26">            T resultat = client.get()</span>
+<span class="fc" id="L27">                    .uri(chemin, parametres)</span>
+<span class="fc" id="L28">                    .retrieve()</span>
+<span class="fc" id="L29">                    .body(type);</span>
+
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            if (resultat == null) {</span>
+<span class="nc" id="L32">                throw incoherence(service);</span>
+            }
+
+<span class="fc" id="L35">            return resultat;</span>
+
+<span class="fc" id="L37">        } catch (RestClientResponseException exception) {</span>
+<span class="fc" id="L38">            throw new ServiceExterneException(</span>
+                    service,
+                    &quot;ERREUR_HTTP_EXTERNE&quot;,
+                    &quot;Le service externe a refusé ou échoué à traiter la demande.&quot;,
+<span class="fc" id="L42">                    exception.getStatusCode().value()</span>
+            );
+
+<span class="nc" id="L45">        } catch (ResourceAccessException exception) {</span>
+<span class="nc" id="L46">            throw new ServiceExterneException(</span>
+                    service,
+                    &quot;SERVICE_INJOIGNABLE&quot;,
+                    &quot;Le service externe est inaccessible ou le délai est dépassé.&quot;,
+                    null
+            );
+
+<span class="nc" id="L53">        } catch (RestClientException exception) {</span>
+<span class="nc" id="L54">            throw new ServiceExterneException(</span>
+                    service,
+                    &quot;REPONSE_ILLISIBLE&quot;,
+                    &quot;La réponse du service externe ne peut pas être interprétée.&quot;,
+                    null
+            );
+        }
+    }
+
+    public static void verifierIdentifiant(String id) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (!identifiantValide(id)) {</span>
+<span class="nc" id="L65">            throw new RegleMetierException(</span>
+                    &quot;IDENTIFIANT_INVALIDE&quot;,
+                    &quot;L'identifiant demandé est invalide.&quot;
+            );
+        }
+<span class="fc" id="L70">    }</span>
+
+    public static boolean identifiantValide(String id) {
+<span class="pc bpc" id="L73" title="3 of 6 branches missed.">        return id != null &amp;&amp; !id.isBlank() &amp;&amp; id.length() &lt;= 100;</span>
+    }
+
+    public static boolean textePresent(String texte) {
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        return texte != null &amp;&amp; !texte.isBlank();</span>
+    }
+
+    public static ServiceExterneException incoherence(String service) {
+<span class="fc" id="L81">        return new ServiceExterneException(</span>
+                service,
+                &quot;REPONSE_INCOHERENTE&quot;,
+                &quot;La réponse externe est incomplète ou ne correspond pas à la demande.&quot;,
+                null
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

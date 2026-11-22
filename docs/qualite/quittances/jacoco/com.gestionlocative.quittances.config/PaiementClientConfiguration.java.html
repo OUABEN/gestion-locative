@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaiementClientConfiguration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.config</a> &gt; <span class="el_source">PaiementClientConfiguration.java</span></div><h1>PaiementClientConfiguration.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.config;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
+import java.util.Set;
+
+import com.gestionlocative.quittances.client.HttpPaiementClient;
+import com.gestionlocative.quittances.client.PaiementClient;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+
+@Configuration(proxyBeanMethods = false)
+<span class="fc" id="L21">public class PaiementClientConfiguration {</span>
+    @Value(&quot;${DARLOC_DOCKER_DEMO:false}&quot;)
+    private boolean dockerDemo;
+
+
+    @Bean(name = &quot;paiementHttpTransport&quot;, destroyMethod = &quot;close&quot;)
+    public HttpClient paiementHttpTransport() {
+<span class="fc" id="L28">        return HttpClient.newBuilder()</span>
+<span class="fc" id="L29">                .connectTimeout(Duration.ofSeconds(2))</span>
+<span class="fc" id="L30">                .followRedirects(HttpClient.Redirect.NEVER)</span>
+<span class="fc" id="L31">                .build();</span>
+    }
+
+    @Bean
+    public PaiementClient paiementClient(
+            @Qualifier(&quot;paiementHttpTransport&quot;) HttpClient transport,
+            @Value(&quot;${quittances.integration.paiements.base-url}&quot;) String baseUrl,
+            @Value(&quot;${quittances.integration.paiements.chemin}&quot;) String chemin,
+            @Value(&quot;${quittances.integration.paiements.mode}&quot;) String mode,
+            @Value(&quot;${quittances.integration.paiements.token:}&quot;) String token) {
+
+<span class="fc" id="L42">        URI uri = URI.create(baseUrl);</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (uri.getHost() == null</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                || !Set.of(&quot;http&quot;, &quot;https&quot;).contains(uri.getScheme())</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">                || uri.getUserInfo() != null</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">                || uri.getQuery() != null</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                || uri.getFragment() != null) {</span>
+<span class="nc" id="L49">            throw new IllegalArgumentException(</span>
+                    &quot;L'adresse du service Paiements est invalide.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (!chemin.startsWith(&quot;/&quot;)</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                || chemin.startsWith(&quot;//&quot;)</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{bailId}&quot;)</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{debut}&quot;)</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{fin}&quot;)) {</span>
+<span class="nc" id="L59">            throw new IllegalArgumentException(</span>
+                    &quot;Le chemin Paiements doit contenir les paramètres attendus.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (&quot;SIMULATION&quot;.equals(mode)) {</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">            if (!ReseauDemo.sourceAutorisee(uri, dockerDemo)) {</span>
+<span class="nc" id="L66">                throw new IllegalArgumentException(</span>
+                        &quot;Le mode SIMULATION est limité à une adresse locale.&quot;
+                );
+            }
+
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if (!token.isBlank()) {</span>
+<span class="nc" id="L72">                throw new IllegalArgumentException(</span>
+                        &quot;Ne configure pas de jeton réel en mode SIMULATION.&quot;
+                );
+            }
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        } else if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            if (token.isBlank()) {</span>
+<span class="nc" id="L79">                throw new IllegalArgumentException(</span>
+                        &quot;Un jeton de service est requis en mode INTEGRATION.&quot;
+                );
+            }
+
+        } else {
+<span class="nc" id="L85">            throw new IllegalArgumentException(</span>
+                    &quot;Le mode Paiements doit être SIMULATION ou INTEGRATION.&quot;
+            );
+        }
+
+<span class="fc" id="L90">        JdkClientHttpRequestFactory factory =</span>
+                new JdkClientHttpRequestFactory(transport);
+
+<span class="fc" id="L93">        factory.setReadTimeout(Duration.ofSeconds(5));</span>
+
+<span class="fc" id="L95">        RestClient.Builder builder = RestClient.builder()</span>
+<span class="fc" id="L96">                .baseUrl(baseUrl)</span>
+<span class="fc" id="L97">                .requestFactory(factory)</span>
+<span class="fc" id="L98">                .defaultHeader(</span>
+                        HttpHeaders.ACCEPT,
+                        MediaType.APPLICATION_JSON_VALUE
+                );
+
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
+<span class="nc" id="L104">            builder.defaultHeaders(headers -&gt; headers.setBearerAuth(token));</span>
+        }
+
+<span class="fc" id="L107">        return new HttpPaiementClient(builder.build(), chemin);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnvoiMailpitController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.notification</a> &gt; <span class="el_source">EnvoiMailpitController.java</span></div><h1>EnvoiMailpitController.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.notification;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/api/v1/quittances/{id}/envois-mailpit&quot;)
+public class EnvoiMailpitController {
+    private final EnvoiMailpitService service;
+    private final EnvoiMailpitTransactions transactions;
+<span class="fc" id="L11">    public EnvoiMailpitController(EnvoiMailpitService service,EnvoiMailpitTransactions transactions){this.service=service;this.transactions=transactions;}</span>
+<span class="nc" id="L12">    public record Demande(UUID requeteId,Boolean confirmation){}</span>
+    @PostMapping
+    public org.springframework.http.ResponseEntity&lt;EnvoiMailpitTransactions.Envoi&gt; envoyer(Authentication auth,@PathVariable UUID id,@RequestBody Demande demande){
+<span class="nc" id="L15">        var resultat=service.envoyer(auth,id,demande.requeteId(),demande.confirmation());</span>
+<span class="nc bnc" id="L16" title="All 3 branches missed.">        int statut=switch(resultat.statut()){case &quot;ENVOYE&quot; -&gt; 200;case &quot;EN_ATTENTE_ENVOI&quot; -&gt; 202;default -&gt; 503;};</span>
+<span class="nc" id="L17">        return org.springframework.http.ResponseEntity.status(statut).body(resultat);</span>
+    }
+    @GetMapping
+    public EnvoiMailpitTransactions.Page lister(Authentication auth,@PathVariable UUID id,
+<span class="nc" id="L21">        @RequestParam(defaultValue=&quot;0&quot;) int page,@RequestParam(defaultValue=&quot;10&quot;) int taille){return transactions.lister(auth,id,page,taille);}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

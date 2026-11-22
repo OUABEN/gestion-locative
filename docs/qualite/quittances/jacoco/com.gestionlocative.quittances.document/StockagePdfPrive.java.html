@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockagePdfPrive.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.document</a> &gt; <span class="el_source">StockagePdfPrive.java</span></div><h1>StockagePdfPrive.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.document;
+
+import com.gestionlocative.quittances.exception.StockagePdfException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.UUID;
+
+@Component
+public class StockagePdfPrive {
+
+    private final Path racine;
+    private final long tailleMax;
+
+    public StockagePdfPrive(
+            @Value(&quot;${quittances.stockage.repertoire}&quot;) String repertoire,
+            @Value(&quot;${quittances.stockage.taille-max-octets:20971520}&quot;)
+            long tailleMax
+<span class="fc" id="L35">    ) throws IOException {</span>
+<span class="pc bpc" id="L36" title="2 of 4 branches missed.">        if (repertoire == null || repertoire.isBlank()) {</span>
+<span class="nc" id="L37">            throw new IllegalArgumentException(</span>
+                    &quot;Le répertoire de stockage est obligatoire.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        if (tailleMax &lt; 1024 || tailleMax &gt; 104857600) {</span>
+<span class="nc" id="L43">            throw new IllegalArgumentException(</span>
+                    &quot;La limite doit être comprise entre 1 Kio et 100 Mio.&quot;
+            );
+        }
+
+<span class="fc" id="L48">        this.tailleMax = tailleMax;</span>
+
+<span class="fc" id="L50">        Path chemin = Path.of(repertoire)</span>
+<span class="fc" id="L51">                .toAbsolutePath()</span>
+<span class="fc" id="L52">                .normalize();</span>
+
+<span class="fc" id="L54">        Files.createDirectories(chemin);</span>
+
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (Files.isSymbolicLink(chemin)</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">                || !Files.isDirectory(chemin, LinkOption.NOFOLLOW_LINKS)) {</span>
+<span class="nc" id="L58">            throw new IOException(</span>
+                    &quot;Le répertoire de stockage doit être un dossier réel.&quot;
+            );
+        }
+
+<span class="fc" id="L63">        this.racine = chemin.toRealPath();</span>
+<span class="fc" id="L64">        restreindrePermissionsPosix(racine);</span>
+<span class="fc" id="L65">    }</span>
+
+    public PdfStocke enregistrer(byte[] contenu) {
+<span class="fc" id="L68">        verifierContenu(contenu);</span>
+
+<span class="fc" id="L70">        byte[] copie = contenu.clone();</span>
+<span class="fc" id="L71">        String empreinte = calculerSha256(copie);</span>
+
+<span class="fc" id="L73">        Path dossier = null;</span>
+
+        try {
+<span class="fc" id="L76">            String reference = UUID.randomUUID().toString();</span>
+<span class="fc" id="L77">            Path candidat = racine.resolve(reference);</span>
+
+<span class="fc" id="L79">            Files.createDirectory(candidat);</span>
+<span class="fc" id="L80">            dossier = candidat;</span>
+
+<span class="fc" id="L82">            restreindrePermissionsPosix(dossier);</span>
+
+<span class="fc" id="L84">            Path temporaire = dossier.resolve(&quot;document.part&quot;);</span>
+<span class="fc" id="L85">            Path destination = dossier.resolve(&quot;document.pdf&quot;);</span>
+
+<span class="fc" id="L87">            try (FileChannel canal = FileChannel.open(</span>
+                    temporaire,
+                    StandardOpenOption.CREATE_NEW,
+                    StandardOpenOption.WRITE,
+                    LinkOption.NOFOLLOW_LINKS
+            )) {
+<span class="fc" id="L93">                ByteBuffer tampon = ByteBuffer.wrap(copie);</span>
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                while (tampon.hasRemaining()) {</span>
+<span class="fc" id="L96">                    canal.write(tampon);</span>
+                }
+
+<span class="fc" id="L99">                canal.force(true);</span>
+            }
+
+<span class="fc" id="L102">            Files.move(</span>
+                    temporaire,
+                    destination,
+                    StandardCopyOption.ATOMIC_MOVE
+            );
+
+<span class="fc" id="L108">            return new PdfStocke(</span>
+                    reference,
+                    empreinte,
+                    copie.length
+            );
+
+<span class="nc" id="L114">        } catch (IOException exception) {</span>
+<span class="nc" id="L115">            nettoyerEcritureIncomplete(dossier, exception);</span>
+
+<span class="nc" id="L117">            throw new StockagePdfException(</span>
+                    &quot;ECRITURE_PDF_IMPOSSIBLE&quot;,
+                    &quot;Le PDF n'a pas pu être conservé.&quot;,
+                    exception
+            );
+        }
+    }
+
+    public byte[] lire(
+            String reference,
+            String empreinteAttendue
+    ) {
+<span class="fc" id="L129">        Path dossier = resoudreReference(reference);</span>
+<span class="fc" id="L130">        verifierEmpreinteAttendue(empreinteAttendue);</span>
+
+        try {
+<span class="fc" id="L133">            BasicFileAttributes attributsDossier = Files.readAttributes(</span>
+                    dossier,
+                    BasicFileAttributes.class,
+                    LinkOption.NOFOLLOW_LINKS
+            );
+
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">            if (!attributsDossier.isDirectory()</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">                    || attributsDossier.isSymbolicLink()) {</span>
+<span class="nc" id="L141">                throw new StockagePdfException(</span>
+                        &quot;REFERENCE_PDF_INVALIDE&quot;,
+                        &quot;La référence ne désigne pas un dossier autorisé.&quot;
+                );
+            }
+
+<span class="fc" id="L147">            Path fichier = dossier.resolve(&quot;document.pdf&quot;);</span>
+
+<span class="fc" id="L149">            BasicFileAttributes attributsFichier = Files.readAttributes(</span>
+                    fichier,
+                    BasicFileAttributes.class,
+                    LinkOption.NOFOLLOW_LINKS
+            );
+
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">            if (!attributsFichier.isRegularFile()</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">                    || attributsFichier.isSymbolicLink()) {</span>
+<span class="nc" id="L157">                throw new StockagePdfException(</span>
+                        &quot;REFERENCE_PDF_INVALIDE&quot;,
+                        &quot;La référence ne désigne pas un fichier autorisé.&quot;
+                );
+            }
+
+<span class="fc" id="L163">            byte[] contenu = lireAvecLimite(fichier);</span>
+
+<span class="fc" id="L165">            byte[] attendue = HexFormat.of().parseHex(empreinteAttendue);</span>
+<span class="fc" id="L166">            byte[] obtenue = HexFormat.of().parseHex(</span>
+<span class="fc" id="L167">                    calculerSha256(contenu)</span>
+            );
+
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (!MessageDigest.isEqual(attendue, obtenue)) {</span>
+<span class="fc" id="L171">                throw new StockagePdfException(</span>
+                        &quot;INTEGRITE_PDF_INVALIDE&quot;,
+                        &quot;Le contenu du PDF ne correspond plus à son empreinte.&quot;
+                );
+            }
+
+<span class="fc" id="L177">            return contenu;</span>
+
+<span class="fc" id="L179">        } catch (NoSuchFileException exception) {</span>
+<span class="fc" id="L180">            throw new StockagePdfException(</span>
+                    &quot;PDF_ABSENT&quot;,
+                    &quot;Le fichier PDF est absent du stockage.&quot;,
+                    exception
+            );
+
+<span class="nc" id="L186">        } catch (IOException exception) {</span>
+<span class="nc" id="L187">            throw new StockagePdfException(</span>
+                    &quot;LECTURE_PDF_IMPOSSIBLE&quot;,
+                    &quot;Le fichier PDF ne peut pas être lu.&quot;,
+                    exception
+            );
+        }
+    }
+
+    private byte[] lireAvecLimite(Path fichier) throws IOException {
+<span class="fc" id="L196">        try (FileChannel canal = FileChannel.open(</span>
+                fichier,
+                StandardOpenOption.READ,
+                LinkOption.NOFOLLOW_LINKS
+        );
+<span class="fc" id="L201">             ByteArrayOutputStream sortie = new ByteArrayOutputStream()) {</span>
+
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">            if (canal.size() &gt; tailleMax) {</span>
+<span class="nc" id="L204">                throw tailleDepassee();</span>
+            }
+
+<span class="fc" id="L207">            ByteBuffer tampon = ByteBuffer.allocate(8192);</span>
+<span class="fc" id="L208">            long total = 0;</span>
+            int lus;
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            while ((lus = canal.read(tampon)) != -1) {</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">                if (lus == 0) {</span>
+<span class="nc" id="L213">                    continue;</span>
+                }
+
+<span class="fc" id="L216">                total += lus;</span>
+
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">                if (total &gt; tailleMax) {</span>
+<span class="nc" id="L219">                    throw tailleDepassee();</span>
+                }
+
+<span class="fc" id="L222">                sortie.write(tampon.array(), 0, lus);</span>
+<span class="fc" id="L223">                tampon.clear();</span>
+            }
+
+<span class="fc" id="L226">            return sortie.toByteArray();</span>
+        }
+    }
+
+    private Path resoudreReference(String reference) {
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (reference == null) {</span>
+<span class="nc" id="L232">            throw referenceInvalide();</span>
+        }
+
+        try {
+<span class="fc" id="L236">            UUID identifiant = UUID.fromString(reference);</span>
+
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">            if (!identifiant.toString().equals(reference)) {</span>
+<span class="nc" id="L239">                throw referenceInvalide();</span>
+            }
+
+<span class="fc" id="L242">        } catch (IllegalArgumentException exception) {</span>
+<span class="fc" id="L243">            throw referenceInvalide();</span>
+<span class="fc" id="L244">        }</span>
+
+<span class="fc" id="L246">        Path dossier = racine.resolve(reference).normalize();</span>
+
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">        if (!racine.equals(dossier.getParent())) {</span>
+<span class="nc" id="L249">            throw referenceInvalide();</span>
+        }
+
+<span class="fc" id="L252">        return dossier;</span>
+    }
+
+    private void verifierContenu(byte[] contenu) {
+<span class="pc bpc" id="L256" title="2 of 4 branches missed.">        if (contenu == null || contenu.length &lt; 5) {</span>
+<span class="nc" id="L257">            throw new StockagePdfException(</span>
+                    &quot;CONTENU_PDF_INVALIDE&quot;,
+                    &quot;Le contenu PDF est absent ou invalide.&quot;
+            );
+        }
+
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        if (contenu.length &gt; tailleMax) {</span>
+<span class="fc" id="L264">            throw tailleDepassee();</span>
+        }
+
+<span class="pc bpc" id="L267" title="4 of 10 branches missed.">        if (contenu[0] != '%'</span>
+                || contenu[1] != 'P'
+                || contenu[2] != 'D'
+                || contenu[3] != 'F'
+                || contenu[4] != '-') {
+<span class="fc" id="L272">            throw new StockagePdfException(</span>
+                    &quot;CONTENU_PDF_INVALIDE&quot;,
+                    &quot;Le contenu ne possède pas l'en-tête PDF attendu.&quot;
+            );
+        }
+<span class="fc" id="L277">    }</span>
+
+    private void verifierEmpreinteAttendue(String empreinte) {
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if (empreinte == null</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">                || !empreinte.matches(&quot;[0-9a-f]{64}&quot;)) {</span>
+<span class="nc" id="L282">            throw new StockagePdfException(</span>
+                    &quot;EMPREINTE_PDF_INVALIDE&quot;,
+                    &quot;L'empreinte attendue doit être un SHA-256 hexadécimal.&quot;
+            );
+        }
+<span class="fc" id="L287">    }</span>
+
+    private static String calculerSha256(byte[] contenu) {
+        try {
+<span class="fc" id="L291">            MessageDigest calculateur =</span>
+<span class="fc" id="L292">                    MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
+
+<span class="fc" id="L294">            return HexFormat.of().formatHex(</span>
+<span class="fc" id="L295">                    calculateur.digest(contenu)</span>
+            );
+
+<span class="nc" id="L298">        } catch (NoSuchAlgorithmException exception) {</span>
+<span class="nc" id="L299">            throw new IllegalStateException(</span>
+                    &quot;SHA-256 est indisponible dans cet environnement Java.&quot;,
+                    exception
+            );
+        }
+    }
+
+    private void restreindrePermissionsPosix(Path dossier)
+            throws IOException {
+<span class="fc" id="L308">        if (Files.getFileStore(dossier)</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">                .supportsFileAttributeView(PosixFileAttributeView.class)) {</span>
+<span class="nc" id="L310">            Files.setPosixFilePermissions(</span>
+                    dossier,
+<span class="nc" id="L312">                    PosixFilePermissions.fromString(&quot;rwx------&quot;)</span>
+            );
+        }
+<span class="fc" id="L315">    }</span>
+
+    private void nettoyerEcritureIncomplete(
+            Path dossier,
+            IOException erreurInitiale
+    ) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        if (dossier == null) {</span>
+<span class="nc" id="L322">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L326">            Files.deleteIfExists(dossier.resolve(&quot;document.part&quot;));</span>
+<span class="nc" id="L327">            Files.deleteIfExists(dossier.resolve(&quot;document.pdf&quot;));</span>
+<span class="nc" id="L328">            Files.deleteIfExists(dossier);</span>
+
+<span class="nc" id="L330">        } catch (IOException erreurNettoyage) {</span>
+<span class="nc" id="L331">            erreurInitiale.addSuppressed(erreurNettoyage);</span>
+<span class="nc" id="L332">        }</span>
+<span class="nc" id="L333">    }</span>
+
+    private StockagePdfException referenceInvalide() {
+<span class="fc" id="L336">        return new StockagePdfException(</span>
+                &quot;REFERENCE_PDF_INVALIDE&quot;,
+                &quot;La référence documentaire est invalide.&quot;
+        );
+    }
+
+    private StockagePdfException tailleDepassee() {
+<span class="fc" id="L343">        return new StockagePdfException(</span>
+                &quot;PDF_TROP_VOLUMINEUX&quot;,
+                &quot;Le PDF dépasse la taille maximale autorisée.&quot;
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

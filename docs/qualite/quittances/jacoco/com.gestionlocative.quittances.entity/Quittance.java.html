@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Quittance.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.entity</a> &gt; <span class="el_source">Quittance.java</span></div><h1>Quittance.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.entity;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+@Entity
+@Table(name = &quot;quittance&quot;)
+public class Quittance {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = &quot;id&quot;, nullable = false, updatable = false)
+    private UUID id;
+
+    @Column(name = &quot;numero&quot;, length = 40, unique = true)
+    private String numero;
+
+    @Column(name = &quot;bail_id&quot;, nullable = false, length = 100)
+    private String bailId;
+
+    @Column(name = &quot;locataire_id&quot;, nullable = false, length = 100)
+    private String locataireId;
+
+    @Column(name = &quot;bien_id&quot;, nullable = false, length = 100)
+    private String bienId;
+
+    @Column(name = &quot;bailleur_id&quot;, nullable = false, length = 100)
+    private String bailleurId;
+
+    @Column(name = &quot;periode_debut&quot;, nullable = false)
+    private LocalDate periodeDebut;
+
+    @Column(name = &quot;periode_fin&quot;, nullable = false)
+    private LocalDate periodeFin;
+
+    @Column(name = &quot;loyer_du&quot;, nullable = false, precision = 12, scale = 2)
+    private BigDecimal loyerDu;
+
+    @Column(name = &quot;charges_dues&quot;, nullable = false, precision = 12, scale = 2)
+    private BigDecimal chargesDues;
+
+    @Column(name = &quot;loyer_paye&quot;, nullable = false, precision = 12, scale = 2)
+    private BigDecimal loyerPaye;
+
+    @Column(name = &quot;charges_payees&quot;, nullable = false, precision = 12, scale = 2)
+    private BigDecimal chargesPayees;
+
+    @Column(name = &quot;total_paye&quot;, nullable = false, precision = 12, scale = 2)
+    private BigDecimal totalPaye;
+
+    @Column(name = &quot;devise&quot;, nullable = false, length = 3)
+    private String devise;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = &quot;type_document&quot;, nullable = false, length = 30)
+    private TypeDocument typeDocument;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = &quot;statut&quot;, nullable = false, length = 30)
+    private StatutQuittance statut;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = &quot;statut_signature&quot;, nullable = false, length = 30)
+    private StatutSignature statutSignature;
+
+    @Column(name = &quot;cree_le&quot;, nullable = false, updatable = false)
+    private Instant creeLe;
+
+    @Column(name = &quot;emis_le&quot;)
+    private Instant emisLe;
+
+    @Column(name = &quot;pdf_reference&quot;, length = 255)
+    private String pdfReference;
+
+    @Column(name = &quot;pdf_sha256&quot;, length = 64)
+    private String pdfSha256;
+
+    @Column(name = &quot;motif_annulation&quot;, length = 2000)
+    private String motifAnnulation;
+
+    @Column(name = &quot;document_precedent_id&quot;)
+    private UUID documentPrecedentId;
+
+    @Column(name = &quot;motif_remplacement&quot;, length = 2000)
+    private String motifRemplacement;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = &quot;donnees_figees&quot;, nullable = false, columnDefinition = &quot;jsonb&quot;)
+    private Map&lt;String, String&gt; donneesFigees;
+
+    @Version
+    @Column(name = &quot;version&quot;, nullable = false)
+    private Long version;
+
+<span class="fc" id="L117">    protected Quittance() {</span>
+<span class="fc" id="L118">    }</span>
+
+    public static Quittance creerBrouillon(
+            String bailId,
+            String locataireId,
+            String bienId,
+            String bailleurId,
+            LocalDate periodeDebut,
+            LocalDate periodeFin,
+            BigDecimal loyerDu,
+            BigDecimal chargesDues,
+            BigDecimal loyerPaye,
+            BigDecimal chargesPayees,
+            TypeDocument typeDocument,
+            Map&lt;String, String&gt; donneesFigees) {
+
+<span class="fc" id="L134">        Quittance quittance = new Quittance();</span>
+
+<span class="fc" id="L136">        quittance.bailId = Objects.requireNonNull(bailId);</span>
+<span class="fc" id="L137">        quittance.locataireId = Objects.requireNonNull(locataireId);</span>
+<span class="fc" id="L138">        quittance.bienId = Objects.requireNonNull(bienId);</span>
+<span class="fc" id="L139">        quittance.bailleurId = Objects.requireNonNull(bailleurId);</span>
+
+<span class="fc" id="L141">        quittance.periodeDebut = Objects.requireNonNull(periodeDebut);</span>
+<span class="fc" id="L142">        quittance.periodeFin = Objects.requireNonNull(periodeFin);</span>
+
+<span class="fc" id="L144">        quittance.loyerDu = normaliserMontant(loyerDu);</span>
+<span class="fc" id="L145">        quittance.chargesDues = normaliserMontant(chargesDues);</span>
+<span class="fc" id="L146">        quittance.loyerPaye = normaliserMontant(loyerPaye);</span>
+<span class="fc" id="L147">        quittance.chargesPayees = normaliserMontant(chargesPayees);</span>
+
+<span class="fc" id="L149">        quittance.totalPaye = quittance.loyerPaye.add(quittance.chargesPayees);</span>
+<span class="fc" id="L150">        quittance.devise = &quot;MAD&quot;;</span>
+
+<span class="fc" id="L152">        quittance.typeDocument = Objects.requireNonNull(typeDocument);</span>
+<span class="fc" id="L153">        quittance.statut = StatutQuittance.BROUILLON;</span>
+<span class="fc" id="L154">        quittance.statutSignature = StatutSignature.NON_SIGNE;</span>
+<span class="fc" id="L155">        quittance.creeLe = Instant.now();</span>
+
+<span class="fc" id="L157">        quittance.donneesFigees = new HashMap&lt;&gt;(</span>
+<span class="fc" id="L158">                Map.copyOf(Objects.requireNonNull(donneesFigees))</span>
+        );
+
+<span class="fc" id="L161">        return quittance;</span>
+    }
+
+    private static BigDecimal normaliserMontant(BigDecimal montant) {
+<span class="fc" id="L165">        return Objects.requireNonNull(montant)</span>
+<span class="fc" id="L166">                .setScale(2, RoundingMode.UNNECESSARY);</span>
+    }
+
+    public UUID getId() {
+<span class="fc" id="L170">        return id;</span>
+    }
+
+    public String getNumero() {
+<span class="fc" id="L174">        return numero;</span>
+    }
+
+    public String getBailId() {
+<span class="fc" id="L178">        return bailId;</span>
+    }
+
+    public String getLocataireId() {
+<span class="fc" id="L182">        return locataireId;</span>
+    }
+
+    public String getBienId() {
+<span class="fc" id="L186">        return bienId;</span>
+    }
+
+    public String getBailleurId() {
+<span class="fc" id="L190">        return bailleurId;</span>
+    }
+
+    public LocalDate getPeriodeDebut() {
+<span class="fc" id="L194">        return periodeDebut;</span>
+    }
+
+    public LocalDate getPeriodeFin() {
+<span class="fc" id="L198">        return periodeFin;</span>
+    }
+
+    public BigDecimal getLoyerDu() {
+<span class="fc" id="L202">        return loyerDu;</span>
+    }
+
+    public BigDecimal getChargesDues() {
+<span class="fc" id="L206">        return chargesDues;</span>
+    }
+
+    public BigDecimal getLoyerPaye() {
+<span class="fc" id="L210">        return loyerPaye;</span>
+    }
+
+    public BigDecimal getChargesPayees() {
+<span class="fc" id="L214">        return chargesPayees;</span>
+    }
+
+    public BigDecimal getTotalPaye() {
+<span class="fc" id="L218">        return totalPaye;</span>
+    }
+    public void validerPourSignature() {
+<span class="pc bpc" id="L221" title="3 of 4 branches missed.">        boolean statutAutorise =</span>
+                statut == StatutQuittance.BROUILLON
+                        || statut == StatutQuittance.EN_ATTENTE_VALIDATION;
+
+<span class="pc bpc" id="L225" title="3 of 6 branches missed.">        if (!statutAutorise</span>
+                || statutSignature != StatutSignature.NON_SIGNE
+                || emisLe != null) {
+<span class="nc" id="L228">            throw new IllegalStateException(</span>
+                    &quot;Ce document ne peut pas être validé pour signature.&quot;
+            );
+        }
+
+<span class="fc" id="L233">        statut = StatutQuittance.EN_ATTENTE_SIGNATURE;</span>
+<span class="fc" id="L234">        statutSignature = StatutSignature.EN_ATTENTE;</span>
+<span class="fc" id="L235">    }</span>
+    public String getDevise() {
+<span class="fc" id="L237">        return devise;</span>
+    }
+
+    public TypeDocument getTypeDocument() {
+<span class="fc" id="L241">        return typeDocument;</span>
+    }
+
+    public StatutQuittance getStatut() {
+<span class="fc" id="L245">        return statut;</span>
+    }
+
+    public StatutSignature getStatutSignature() {
+<span class="fc" id="L249">        return statutSignature;</span>
+    }
+
+    public Instant getCreeLe() {
+<span class="fc" id="L253">        return creeLe;</span>
+    }
+
+    public Instant getEmisLe() {
+<span class="fc" id="L257">        return emisLe;</span>
+    }
+
+    public String getPdfReference() {
+<span class="fc" id="L261">        return pdfReference;</span>
+    }
+
+    public String getPdfSha256() {
+<span class="fc" id="L265">        return pdfSha256;</span>
+    }
+
+    public String getMotifAnnulation() {
+<span class="nc" id="L269">        return motifAnnulation;</span>
+    }
+
+    public UUID getDocumentPrecedentId() {
+<span class="fc" id="L273">        return documentPrecedentId;</span>
+    }
+
+    public String getMotifRemplacement() {
+<span class="fc" id="L277">        return motifRemplacement;</span>
+    }
+
+    public Map&lt;String, String&gt; getDonneesFigees() {
+<span class="fc" id="L281">        return Map.copyOf(donneesFigees);</span>
+    }
+
+    public Long getVersion() {
+<span class="fc" id="L285">        return version;</span>
+    }
+    public void annuler(String motif) {
+<span class="pc bpc" id="L288" title="2 of 4 branches missed.">        if (statut == StatutQuittance.ANNULE</span>
+                || statut == StatutQuittance.REMPLACE) {
+<span class="nc" id="L290">            throw new IllegalStateException(</span>
+                    &quot;Ce document ne peut plus être annulé.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        if (motif == null</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">                || motif.isBlank()</span>
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">                || motif.strip().length() &gt; 2000) {</span>
+<span class="nc" id="L298">            throw new IllegalArgumentException(</span>
+                    &quot;Un motif de 1 à 2000 caractères est obligatoire.&quot;
+            );
+        }
+
+<span class="fc" id="L303">        motifAnnulation = motif.strip();</span>
+<span class="fc" id="L304">        statut = StatutQuittance.ANNULE;</span>
+
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        if (statutSignature == StatutSignature.EN_ATTENTE) {</span>
+<span class="fc" id="L307">            statutSignature = StatutSignature.NON_SIGNE;</span>
+        }
+<span class="fc" id="L309">    }</span>
+    public void rattacherDocumentPrecedent(
+            java.util.UUID precedentId,
+            String motif
+    ) {
+<span class="pc bpc" id="L314" title="3 of 6 branches missed.">        if (statut != StatutQuittance.BROUILLON</span>
+                || emisLe != null
+                || documentPrecedentId != null) {
+<span class="nc" id="L317">            throw new IllegalStateException(</span>
+                    &quot;Le lien de remplacement ne peut pas être modifié.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L322" title="2 of 4 branches missed.">        if (precedentId == null || precedentId.equals(id)) {</span>
+<span class="nc" id="L323">            throw new IllegalArgumentException(</span>
+                    &quot;Le document précédent est invalide.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">        if (motif == null</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">                || motif.isBlank()</span>
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">                || motif.strip().length() &gt; 2000) {</span>
+<span class="nc" id="L331">            throw new IllegalArgumentException(</span>
+                    &quot;Un motif de remplacement est obligatoire.&quot;
+            );
+        }
+
+<span class="fc" id="L336">        documentPrecedentId = precedentId;</span>
+<span class="fc" id="L337">        motifRemplacement = motif.strip();</span>
+<span class="fc" id="L338">    }</span>
+    public void emettreDemonstration(String reference, Instant date, String empreinte) {
+<span class="pc bpc" id="L340" title="3 of 6 branches missed.">        if (statut != StatutQuittance.EN_ATTENTE_SIGNATURE</span>
+                || statutSignature != StatutSignature.EN_ATTENTE || emisLe != null) {
+<span class="nc" id="L342">            throw new IllegalStateException(&quot;Le document doit être validé avant émission.&quot;);</span>
+        }
+<span class="pc bpc" id="L344" title="4 of 8 branches missed.">        if (reference == null || !reference.matches(&quot;DEMO-QT-[0-9]{4}-[0-9]+&quot;)</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">                || date == null || empreinte == null || !empreinte.matches(&quot;[0-9a-f]{64}&quot;)) {</span>
+<span class="nc" id="L346">            throw new IllegalArgumentException(&quot;Preuve d'émission incorrecte.&quot;);</span>
+        }
+<span class="fc" id="L348">        numero = reference;</span>
+<span class="fc" id="L349">        emisLe = date;</span>
+<span class="fc" id="L350">        pdfReference = &quot;db-demo:&quot; + id;</span>
+<span class="fc" id="L351">        pdfSha256 = empreinte;</span>
+<span class="fc" id="L352">        statutSignature = StatutSignature.SIGNE_VERIFIE;</span>
+<span class="fc" id="L353">        statut = StatutQuittance.EMIS;</span>
+<span class="fc" id="L354">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

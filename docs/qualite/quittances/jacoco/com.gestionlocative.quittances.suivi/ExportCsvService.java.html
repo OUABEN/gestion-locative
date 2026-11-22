@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExportCsvService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.suivi</a> &gt; <span class="el_source">ExportCsvService.java</span></div><h1>ExportCsvService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.suivi;
+
+import com.gestionlocative.quittances.dto.QuittanceConsultationResponse;
+import com.gestionlocative.quittances.service.ConsultationQuittanceService;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+@Service
+public class ExportCsvService {
+    private final ConsultationQuittanceService consultation;
+<span class="fc" id="L19">    public ExportCsvService(ConsultationQuittanceService consultation) { this.consultation = consultation; }</span>
+    // Toutes les pages voient le même état de la base pendant cet export.
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ, timeout = 30)
+    public byte[] exporter(Authentication auth, String tri, String sens, String bailId, String numero,
+                           String statut, LocalDate debut, LocalDate fin) {
+<span class="fc" id="L24">        StringBuilder csv = new StringBuilder(&quot;\uFEFF&quot;);</span>
+<span class="fc" id="L25">        csv.append(ligne(&quot;Identifiant&quot;, &quot;Numero&quot;, &quot;Bail&quot;, &quot;Locataire&quot;, &quot;Bien&quot;, &quot;Debut&quot;, &quot;Fin&quot;, &quot;Type&quot;, &quot;Statut&quot;,</span>
+                &quot;Loyer du&quot;, &quot;Charges dues&quot;, &quot;Loyer paye&quot;, &quot;Charges payees&quot;, &quot;Total paye&quot;, &quot;Devise&quot;, &quot;Cree le&quot;, &quot;Emis le&quot;, &quot;Document precedent&quot;));
+<span class="fc" id="L27">        int page = 0;</span>
+        while (true) {
+<span class="fc" id="L29">            var resultat = consultation.lister(auth, page, 100, tri, sens, bailId, numero, statut, debut, fin);</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            if (resultat.totalElements() &gt; 5000) throw new ResponseStatusException(HttpStatus.valueOf(422),</span>
+                    &quot;L'export est limité à 5 000 documents. Précisez les filtres.&quot;);
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            for (var d : resultat.contenu()) csv.append(document(d));</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (++page &gt;= resultat.totalPages()) break;</span>
+<span class="fc" id="L34">        }</span>
+<span class="fc" id="L35">        return csv.toString().getBytes(StandardCharsets.UTF_8);</span>
+    }
+    private String document(QuittanceConsultationResponse d) {
+<span class="fc" id="L38">        return ligne(d.id(), d.numero(), d.bailId(), d.locataireId(), d.bienId(), d.periodeDebut(), d.periodeFin(),</span>
+<span class="fc" id="L39">                d.typeDocument(), d.statut(), d.loyerDu(), d.chargesDues(), d.loyerPaye(), d.chargesPayees(),</span>
+<span class="fc" id="L40">                d.totalPaye(), d.devise(), d.creeLe(), d.emisLe(), d.documentPrecedentId());</span>
+    }
+    public static String ligne(Object... valeurs) {
+<span class="fc" id="L43">        return Arrays.stream(valeurs).map(ExportCsvService::cellule).collect(Collectors.joining(&quot;;&quot;)) + &quot;\r\n&quot;;</span>
+    }
+    public static String cellule(Object valeur) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        String texte = valeur == null ? &quot;&quot; : valeur.toString();</span>
+<span class="fc" id="L47">        String debut = texte.stripLeading();</span>
+        // Neutralisation des formules dans les champs provenant des sources externes.
+<span class="fc bfc" id="L49" title="All 4 branches covered.">        if ((!debut.isEmpty() &amp;&amp; &quot;=+-@&quot;.indexOf(debut.charAt(0)) &gt;= 0)</span>
+<span class="pc bpc" id="L50" title="3 of 6 branches missed.">                || texte.startsWith(&quot;\t&quot;) || texte.startsWith(&quot;\r&quot;) || texte.startsWith(&quot;\n&quot;)) texte = &quot;'&quot; + texte;</span>
+<span class="fc" id="L51">        return &quot;\&quot;&quot; + texte.replace(&quot;\&quot;&quot;, &quot;\&quot;\&quot;&quot;) + &quot;\&quot;&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
