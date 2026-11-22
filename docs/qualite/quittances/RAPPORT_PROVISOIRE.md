@@ -187,3 +187,68 @@ La procédure complète et ses prérequis sont décrits dans
 `qualite-logicielle/quittances/README.md`. Elle ne démarre pas Docker, n’utilise
 pas de base existante et remplace uniquement le sous-dossier généré
 `docs/qualite/quittances/jacoco/`.
+
+## Phase 3 — Postman / Newman
+
+### Collection et périmètre
+
+La collection dédiée est
+`qualite-logicielle/quittances/postman/Quittances-api.postman_collection.json`.
+Elle reprend les routes utiles de la collection existante du backend et
+contient neuf requêtes `GET` : état du service, identité, liste, document du
+bailleur, accès sans JWT, JWT mal formé, rôle GESTIONNAIRE et document d’un
+autre bailleur. Aucune écriture ni émission n’est effectuée.
+
+L’environnement associé est
+`qualite-logicielle/quittances/postman/Quittances-test.postman_environment.json`.
+Il pointe vers `http://127.0.0.1:18084`; les JWT et UUID y sont vides. Le
+runner `qualite-logicielle/quittances/postman/run-postman.ps1` crée un
+environnement temporaire privé, qui n’est pas conservé.
+
+### Exécution et résultats
+
+| Mesure | Résultat |
+| --- | --- |
+| Outil | Newman 6.2.3 local; Node.js 24.21.0; npm 11.19.0 |
+| Environnement Java/Maven/PostgreSQL | Java 21.0.12.1; Maven 3.9.16; PostgreSQL 18.6 |
+| Base | Cluster temporaire local, base suffixée `_test` |
+| Requêtes | 9 exécutées; 0 en échec |
+| Assertions configurées | 19 |
+| Assertions exécutées | 19 |
+| Réussies / échouées / ignorées | 19 / 0 / 0 |
+| Statuts HTTP observés | 3 x 401, 4 x 200, 1 x 403, 1 x 404 |
+| Résultat package backend | `BUILD SUCCESS` avec `-DskipTests` |
+
+Les requêtes ont vérifié l’état public, l’identité sans et avec JWT BAILLEUR,
+les refus sans JWT et avec JWT mal formé, le refus du rôle GESTIONNAIRE, la
+consultation du document du bailleur, le 404 d’un document appartenant à un
+autre bailleur et l’isolation de la liste. Le test de liste a confirmé
+l’inclusion du document propre et l’exclusion du document tiers.
+
+Le runner a généré en mémoire une clé HS256 aléatoire et les JWT synthétiques.
+Il a inséré deux quittances fictives aux identifiants aléatoires dans la base
+temporaire. Les valeurs d’authentification ont été retirées des rapports avant
+leur conservation. Aucun secret, JWT, nom réel ou donnée personnelle n’est
+conservé. Les adaptateurs externes étaient configurés en mode
+`SIMULATION`; aucun service réel du groupe n’a été contacté.
+
+Les rapports authentiques sont
+`docs/qualite/quittances/postman/newman-report.json` et
+`docs/qualite/quittances/postman/newman-report.html`. Le second est une
+synthèse tabulaire générée à partir du résultat Newman assaini; il n’inclut
+pas de corps HTTP. Les commandes et le runner reproductible sont décrits dans
+`qualite-logicielle/quittances/postman/README.md`.
+
+Après l’exécution, l’application Java a été arrêtée, PostgreSQL arrêté et le
+répertoire temporaire supprimé. Le port 18084 est libre. Les conteneurs et
+bases permanentes n’ont pas été utilisés ni modifiés.
+
+Un premier essai de provisionnement s’est arrêté avant Newman parce que les
+fixtures étaient insérées avant l’exécution de Flyway. Le runner a été corrigé
+pour attendre le démarrage de Spring Boot et ses migrations avant l’insertion;
+le cluster de cet essai a été arrêté et supprimé. L’exécution finale ci-dessus
+est celle enregistrée dans les rapports.
+
+Newman a émis l’avertissement Node non bloquant `DEP0176`; l’installation npm
+a également signalé des dépendances transitives dépréciées. Aucun de ces
+avertissements n’a fait échouer les assertions.
