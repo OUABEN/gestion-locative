@@ -11,7 +11,7 @@ Toutes ces routes utilisent GET et JSON, sans corps de requête et sans accès S
 |---|---|---|
 | Ayoub / Paiements | /api/v1/paiements/affectations | bailId, debut, fin |
 | Ahmed / Locataires | /api/v1/locataires/{id} | id |
-| Mohamed / Biens | /api/v1/biens/{id} | id |
+| Mohamed / Biens | /api/biens/{id} | id |
 | Responsable à confirmer / Baux | /api/v1/baux/{id}/situation | id, debut, fin |
 
 Ces chemins doivent être confirmés par les collègues ; les URLs et chemins sont configurables. Le responsable des baux reste à décider. Aucun cinquième microservice obligatoire n'est ajouté.
@@ -51,6 +51,7 @@ Les montants externes des exemples sont des chaînes décimales acceptées par l
 Envoi du JWT dans `Authorization: Bearer <jeton>`. En modes LOCAL et INTEGRATION, Quittances conserve la validation RS256, issuer, audience, dates, `roles` et identifiants métier existants.
 En mode COMMUN, Quittances vérifie le JWT HS256 avant d'utiliser ses claims. Pour BAILLEUR, l'identifiant métier est dérivé du `sub` vérifié (`users.id`) ; le jeton commun n'a pas besoin du claim `bailleur_id`. LOCATAIRE n'est pas dérivé du `sub` tant que son rattachement n'est pas confirmé. GESTIONNAIRE ne reçoit pas d'accès documentaire global.
 La consultation et la création utilisent le même lecteur d'identité authentifiée. La création vérifie toujours que le bail, le bien et leurs identifiants bailleur concordent.
+Pour les traces documentaires, `acteur` conserve le `sub` vérifié. LOCAL et INTEGRATION conservent l'`iss` validé dans `emetteur_identite`; COMMUN enregistre la provenance `JWT_COMMUN` dans ce champ. Cette valeur est un marqueur de mode d'authentification interne, pas un claim `iss` ni un issuer attribué au serveur Biens. Elle s'applique à la validation, l'annulation, le remplacement et l'archivage des brouillons.
 Aucun endpoint d'authentification supplémentaire n'est créé dans ce module. Ne pas transmettre les clés privées ou des jetons réels avec la documentation.
 
 ## Points encore ouverts

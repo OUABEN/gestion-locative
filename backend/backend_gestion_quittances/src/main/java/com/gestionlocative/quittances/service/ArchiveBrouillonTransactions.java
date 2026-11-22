@@ -5,12 +5,12 @@ import com.gestionlocative.quittances.dto.ArchiveBrouillonResponse;
 import com.gestionlocative.quittances.dto.DonneesApercu;
 import com.gestionlocative.quittances.entity.Quittance;
 import com.gestionlocative.quittances.repository.QuittanceRepository;
+import com.gestionlocative.quittances.security.IdentiteAudit;
 import com.gestionlocative.quittances.security.LecteurQuittances;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +27,18 @@ public class ArchiveBrouillonTransactions {
     private final PreparationApercuService preparationService;
     private final QuittanceRepository repository;
     private final JdbcTemplate jdbcTemplate;
+    private final IdentiteAudit identiteAudit;
 
     public ArchiveBrouillonTransactions(
             PreparationApercuService preparationService,
             QuittanceRepository repository,
-            JdbcTemplate jdbcTemplate
+            JdbcTemplate jdbcTemplate,
+            IdentiteAudit identiteAudit
     ) {
         this.preparationService = preparationService;
         this.repository = repository;
         this.jdbcTemplate = jdbcTemplate;
+        this.identiteAudit = identiteAudit;
     }
 
     @Transactional(
@@ -231,27 +234,13 @@ public class ArchiveBrouillonTransactions {
             );
         }
 
-        JwtAuthenticationToken jwt =
-                (JwtAuthenticationToken) authentication;
-
-        String sujet = jwt.getToken().getSubject();
-        String emetteur = jwt.getToken().getClaimAsString("iss");
-
-        if (sujet == null
-                || sujet.isBlank()
-                || sujet.length() > 200
-                || emetteur == null
-                || emetteur.isBlank()
-                || emetteur.length() > 500) {
-            throw new AccessDeniedException(
-                    "L'identité ne permet pas une traçabilité suffisante."
-            );
-        }
+        IdentiteAudit.Acteur contexteAudit =
+                identiteAudit.depuis(authentication);
 
         return new Acteur(
                 lecteur.identifiant(),
-                sujet,
-                emetteur
+                contexteAudit.sujet(),
+                contexteAudit.emetteurIdentite()
         );
     }
 

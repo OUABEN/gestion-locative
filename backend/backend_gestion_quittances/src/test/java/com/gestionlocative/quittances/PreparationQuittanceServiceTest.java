@@ -205,6 +205,24 @@ class PreparationQuittanceServiceTest {
     }
 
     @Test
+    void doitRefuserUnBienSansPreuveDePropriete() {
+        when(biensBaux.consulterBien("BIEN-TEST")).thenReturn(
+                new Bien("1", "BIEN-TEST", "Adresse fictive à Agadir", null)
+        );
+
+        RegleMetierException erreur = assertThrows(
+                RegleMetierException.class,
+                () -> preparation.preparer(
+                        "BAILLEUR-TEST", bailId, DEBUT, FIN
+                )
+        );
+
+        assertEquals("BIEN_BAIL_INCOHERENT", erreur.getCode());
+        verifyNoInteractions(locataires, paiements);
+        assertEquals(0, compterDocuments());
+    }
+
+    @Test
     void neDoitRienEnregistrerSiPaiementsEstIndisponible() {
         when(paiements.consulterAffectations(bailId, DEBUT, FIN))
                 .thenThrow(new ServiceExterneException(

@@ -69,7 +69,7 @@ quittances:
     biens:
       mode: ${BIENS_MODE:SIMULATION}
       base-url: ${BIENS_BASE_URL:http://127.0.0.1:8093}
-      chemin: "${BIENS_CHEMIN:/api/v1/biens/{id}}"
+      chemin: "${BIENS_CHEMIN:/api/biens/{id}}"
       token: ${BIENS_TOKEN:}
 
     baux:

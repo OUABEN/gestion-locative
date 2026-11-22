@@ -6,11 +6,11 @@ import com.gestionlocative.quittances.entity.StatutQuittance;
 import com.gestionlocative.quittances.entity.StatutSignature;
 import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.repository.ValidationTraceRepository;
+import com.gestionlocative.quittances.security.IdentiteAudit;
 import com.gestionlocative.quittances.security.LecteurQuittances;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,13 +23,16 @@ public class ValidationQuittanceService {
 
     private final QuittanceRepository repository;
     private final ValidationTraceRepository traceRepository;
+    private final IdentiteAudit identiteAudit;
 
     public ValidationQuittanceService(
             QuittanceRepository repository,
-            ValidationTraceRepository traceRepository
+            ValidationTraceRepository traceRepository,
+            IdentiteAudit identiteAudit
     ) {
         this.repository = repository;
         this.traceRepository = traceRepository;
+        this.identiteAudit = identiteAudit;
     }
 
     @Transactional(timeout = 10)
@@ -54,13 +57,10 @@ public class ValidationQuittanceService {
             );
         }
 
-        JwtAuthenticationToken jwt =
-                (JwtAuthenticationToken) authentication;
-
-        String acteur = jwt.getToken().getSubject();
-        String emetteur = jwt.getToken().getClaimAsString("iss");
-
-        verifierIdentiteAudit(acteur, emetteur);
+        IdentiteAudit.Acteur contexteAudit =
+                identiteAudit.depuis(authentication);
+        String acteur = contexteAudit.sujet();
+        String emetteur = contexteAudit.emetteurIdentite();
 
         Quittance document = repository.trouverPourModification(
                 id,
@@ -112,19 +112,4 @@ public class ValidationQuittanceService {
         );
     }
 
-    private void verifierIdentiteAudit(
-            String acteur,
-            String emetteur
-    ) {
-        if (acteur == null
-                || acteur.isBlank()
-                || acteur.length() > 200
-                || emetteur == null
-                || emetteur.isBlank()
-                || emetteur.length() > 500) {
-            throw new AccessDeniedException(
-                    "L'identité ne permet pas une traçabilité suffisante."
-            );
-        }
-    }
 }

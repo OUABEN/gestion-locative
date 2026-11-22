@@ -93,7 +93,7 @@ class ReferentielsClientsTest {
                 "/api/v1/locataires/{id}/quittance-summary", true);
         biensBaux = new HttpBienBailClient(
                 client,
-                "/api/v1/biens/{id}",
+                "/api/biens/{id}",
                 client,
                 "/api/v1/baux/{id}/situation?debut={debut}&fin={fin}"
         );
@@ -171,7 +171,7 @@ class ReferentielsClientsTest {
         assertEquals("Adresse fictive à Agadir, Agadir", resultat.adresse());
         assertNull(resultat.bailleurId());
         assertNull(resultat.versionContrat());
-        assertEquals("/api/v1/biens/BIEN-1", chemin.get());
+        assertEquals("/api/biens/BIEN-1", chemin.get());
     }
 
     @Test
