@@ -1,0 +1,6 @@
+# Eviter les gros rapports HTML et les journaux locaux ; conserver uniquement
+# le JTL et l'archive HTML de l'execution validee.
+execution-*/
+!execution-20261122-162107/
+execution-20261122-162107/rapport-html/
+execution-20261122-162107/jmeter.log

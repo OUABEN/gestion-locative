@@ -252,3 +252,28 @@ est celle enregistrée dans les rapports.
 Newman a émis l’avertissement Node non bloquant `DEP0176`; l’installation npm
 a également signalé des dépendances transitives dépréciées. Aucun de ces
 avertissements n’a fait échouer les assertions.
+
+## Phase 4 - JMeter (22 novembre 2026)
+
+Analyse de performance sur une instance Spring Boot isolee (`127.0.0.1:18084`) et une base PostgreSQL temporaire `_test`, avec Apache JMeter 5.6.3 et Java 21. Le processus et la base ont ete arretes apres la mesure. Les requetes sont uniquement en lecture : `GET /api/v1/systeme/etat` (200) et `GET /api/v1/quittances` sans JWT (401).
+
+| Mesure | Valeur |
+|---|---:|
+| Requetes totales | 330 |
+| Requetes reussies | 330 |
+| Echecs / taux d'erreur | 0 / 0 % |
+| Duree des deux paliers | Environ 50 s |
+| Charge | 5 utilisateurs (25 s), puis 10 utilisateurs (25 s) |
+| Debit moyen | Environ 6,6 req/s |
+| Temps moyen | 5,6 ms |
+| Temps minimum / maximum | 2 / 114 ms |
+| Percentiles P90 / P95 / P99 | 8 / 10 / 17 ms |
+
+| Palier et endpoint | Requetes | Moyenne | P95 | Echecs |
+|---|---:|---:|---:|---:|
+| 5 utilisateurs - Etat du service 200 | 56 | 8,64 ms | 11 ms | 0 |
+| 5 utilisateurs - Liste sans JWT 401 | 54 | 5,83 ms | 15 ms | 0 |
+| 10 utilisateurs - Etat du service 200 | 112 | 5,62 ms | 12 ms | 0 |
+| 10 utilisateurs - Liste sans JWT 401 | 108 | 3,89 ms | 6 ms | 0 |
+
+Sources : `docs/qualite/quittances/jmeter/execution-20261122-162107/resultats.jtl` et `rapport-html.zip` (tableau de bord HTML JMeter). La tentative `execution-20261122-161741` a echoue avant une campagne valide et n'est pas utilisee comme preuve. Le test n'etablit pas les performances des PDF, paiements, signatures ou autres integrations.

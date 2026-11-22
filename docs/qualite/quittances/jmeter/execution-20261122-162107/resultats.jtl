@@ -1,0 +1,331 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1795364477043,114,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,2,2,http://127.0.0.1:18084/api/v1/systeme/etat,100,0,71
+1795364477622,10,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,3,3,http://127.0.0.1:18084/api/v1/systeme/etat,10,0,3
+1795364478171,7,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,3,3,http://127.0.0.1:18084/api/v1/quittances,7,0,0
+1795364478622,11,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,4,4,http://127.0.0.1:18084/api/v1/systeme/etat,11,0,3
+1795364478635,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,4,4,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364479184,9,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,4,4,http://127.0.0.1:18084/api/v1/systeme/etat,9,0,0
+1795364479622,10,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,10,0,3
+1795364479634,9,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,9,0,0
+1795364479643,8,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364480196,17,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,17,0,0
+1795364480621,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,1
+1795364480635,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364480652,9,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,9,0,0
+1795364480668,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364481228,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364481629,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364481641,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364481670,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364481675,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364482238,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364482641,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364482655,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364482683,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364482689,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364483255,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364483660,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364483676,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364483692,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364483708,8,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364484264,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364484682,4,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364484696,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364484702,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364484720,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364485275,8,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364485690,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364485706,8,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364485721,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364485737,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364486296,12,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,12,0,0
+1795364486699,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364486730,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364486731,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364486746,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364487314,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364487709,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364487743,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364487743,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364487752,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364488327,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364488715,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364488758,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364488757,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364488772,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364489342,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364489730,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364489771,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364489771,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364489782,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364490360,7,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,7,0,0
+1795364490736,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364490779,27,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,27,0,0
+1795364490792,15,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,15,0,0
+1795364490783,24,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,24,0,0
+1795364491383,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364491753,3,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364491818,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364491818,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364491817,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364492405,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364492759,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364492836,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364492836,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364492837,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364493419,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364493769,3,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364493847,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364493847,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364493847,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364494425,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364494780,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364494854,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364494854,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364494854,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364495446,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364495795,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364495873,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364495874,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364495874,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364496467,6,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364496810,10,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,10,0,0
+1795364496887,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364496887,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364496888,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364497488,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364497820,3,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364497903,3,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364497903,4,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364497903,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364498503,4,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364498835,4,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-5,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364498911,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-4,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364498911,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-2,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364498911,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364499510,5,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-1,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364499857,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-5,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364499919,5,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-3,,true,,397,163,4,4,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364499919,6,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-2,text,true,,380,165,3,3,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364499919,7,5VU - Etat service 200,200,,Palier 5 utilisateurs virtuels 1-4,text,true,,380,165,3,3,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364500519,3,5VU - Liste sans JWT 401,401,,Palier 5 utilisateurs virtuels 1-1,,true,,397,163,1,1,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364501539,15,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,3,3,http://127.0.0.1:18084/api/v1/systeme/etat,15,0,4
+1795364502058,9,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,4,4,http://127.0.0.1:18084/api/v1/systeme/etat,9,0,3
+1795364502544,15,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,15,0,5
+1795364502557,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364503058,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,6,6,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,1
+1795364503073,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,6,6,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364503549,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,7,7,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,1
+1795364503564,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,7,7,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364503564,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,7,7,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364504045,13,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,8,8,http://127.0.0.1:18084/api/v1/systeme/etat,13,0,4
+1795364504076,8,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,8,8,http://127.0.0.1:18084/api/v1/quittances,8,0,0
+1795364504092,7,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,8,8,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364504546,12,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,9,9,http://127.0.0.1:18084/api/v1/systeme/etat,12,0,2
+1795364504560,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,9,9,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364504573,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,9,9,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364504573,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,9,9,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364505043,7,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,3
+1795364505060,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364505101,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364505114,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364505549,12,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,12,0,7
+1795364505560,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364505574,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364505588,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364505589,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364506039,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,2
+1795364506053,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364506067,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364506114,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364506129,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364506564,6,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364506564,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364506579,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364506596,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364506596,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364507059,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364507059,7,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364507075,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364507122,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364507137,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364507573,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364507574,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364507588,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364507604,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364507604,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364508068,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364508068,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364508083,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364508130,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364508146,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364508580,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364508587,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364508594,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364508609,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364508609,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364509077,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364509077,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364509093,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364509142,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364509157,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364509601,6,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364509602,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364509601,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364509628,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364509628,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364510088,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364510088,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364510103,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364510149,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364510165,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364510623,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364510623,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364510623,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364510639,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364510639,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364511107,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364511107,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364511122,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364511165,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364511181,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364511629,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364511629,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364511642,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364511657,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364511657,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364512116,7,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,7,0,0
+1795364512116,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364512132,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364512179,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364512195,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364512636,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364512635,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364512651,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364512667,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364512667,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364513135,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364513135,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364513151,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364513184,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364513215,7,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,7,0,0
+1795364513646,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364513646,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364513662,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364513678,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364513677,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364514141,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364514141,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364514157,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364514205,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364514236,9,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,9,0,0
+1795364514657,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364514657,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364514673,2,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,2,0,0
+1795364514689,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364514689,2,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,2,0,0
+1795364515150,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364515150,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364515164,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364515214,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364515248,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364515673,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364515673,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364515688,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364515703,6,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364515703,7,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364516165,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364516165,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364516180,11,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,11,0,0
+1795364516227,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364516254,10,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,10,0,0
+1795364516691,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364516691,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364516694,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364516720,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364516720,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364517181,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364517181,15,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,14,0,0
+1795364517197,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364517243,8,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,8,0,0
+1795364517274,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364517701,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364517701,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364517701,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364517735,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364517735,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364518193,9,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,9,0,0
+1795364518205,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364518205,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364518257,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364518289,7,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,7,0,0
+1795364518711,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364518712,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364518712,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364518754,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364518754,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364519212,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364519212,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364519212,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364519263,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364519302,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364519732,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364519731,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364519732,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364519763,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364519764,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364520218,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364520218,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364520218,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364520276,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364520322,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364520745,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364520745,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364520745,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364520776,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364520776,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364521233,6,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364521233,6,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,6,0,0
+1795364521233,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364521281,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364521329,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364521754,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364521754,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364521754,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364521783,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364521783,6,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,6,0,0
+1795364522247,5,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,5,0,0
+1795364522247,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364522247,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364522288,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364522344,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364522769,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364522768,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364522768,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364522788,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364522795,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364523252,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364523253,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364523253,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364523295,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364523350,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364523776,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-7,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364523776,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-5,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364523776,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-9,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364523794,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-3,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364523808,3,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-1,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364524257,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-6,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364524260,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-8,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364524257,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-10,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364524303,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-4,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364524357,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-2,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364524781,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-5,,true,,397,163,10,10,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364524781,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-7,text,true,,380,165,10,10,http://127.0.0.1:18084/api/v1/systeme/etat,4,0,0
+1795364524788,2,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-9,,true,,397,163,8,8,http://127.0.0.1:18084/api/v1/quittances,2,0,0
+1795364524814,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-1,,true,,397,163,7,7,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364524814,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-3,text,true,,380,165,6,6,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364525267,3,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-6,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,3,0,0
+1795364525267,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-10,,true,,397,163,5,5,http://127.0.0.1:18084/api/v1/quittances,4,0,0
+1795364525267,5,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-8,text,true,,380,165,5,5,http://127.0.0.1:18084/api/v1/systeme/etat,5,0,0
+1795364525316,4,10VU - Etat service 200,200,,Palier 10 utilisateurs virtuels 2-4,text,true,,380,165,2,2,http://127.0.0.1:18084/api/v1/systeme/etat,3,0,0
+1795364525364,4,10VU - Liste sans JWT 401,401,,Palier 10 utilisateurs virtuels 2-2,,true,,397,163,1,1,http://127.0.0.1:18084/api/v1/quittances,4,0,0
