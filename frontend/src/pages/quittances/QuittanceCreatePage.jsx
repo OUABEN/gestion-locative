@@ -96,7 +96,7 @@ export const QuittanceCreatePage = () => {
             La préparation d’une quittance est réservée au rôle BAILLEUR.
           </p>
         )}
-        {documentaryAccessForbidden && error && (
+        {error && (
           <p className={styles.inlineError} role="alert">{error}</p>
         )}
         {identity?.role === 'BAILLEUR' && !documentaryAccessForbidden && <form className={styles.createForm} onSubmit={submit}>
