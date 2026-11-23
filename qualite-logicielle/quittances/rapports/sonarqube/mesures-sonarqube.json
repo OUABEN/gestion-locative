@@ -1,0 +1,28 @@
+﻿{
+    "component":  {
+                      "key":  "gestion-locative-quittances",
+                      "name":  "Gestion locative - Quittances",
+                      "description":  "Module Quittances du projet Gestion locative",
+                      "qualifier":  "TRK",
+                      "measures":  [
+                                       {
+                                           "metric":  "coverage",
+                                           "value":  "66.3",
+                                           "bestValue":  false
+                                       },
+                                       {
+                                           "metric":  "alert_status",
+                                           "value":  "OK"
+                                       },
+                                       {
+                                           "metric":  "duplicated_lines_density",
+                                           "value":  "9.6",
+                                           "bestValue":  false
+                                       },
+                                       {
+                                           "metric":  "ncloc",
+                                           "value":  "6734"
+                                       }
+                                   ]
+                  }
+}
