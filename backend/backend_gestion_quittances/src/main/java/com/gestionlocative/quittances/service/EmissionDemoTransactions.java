@@ -33,7 +33,34 @@ public class EmissionDemoTransactions {
     public record Source(DonneesApercu donnees, long version, String numero, Instant date) {}
     public record Resultat(UUID id, String numero, String statut, String statutSignature,
             String modeSignature, String sha256, Instant emisLe) {}
-    public record Fichier(byte[] pdf, SignatureLocale.Preuve preuve, Instant date, String numero) {}
+    public record Fichier(byte[] pdf, SignatureLocale.Preuve preuve, Instant date, String numero) {
+        @Override
+        public boolean equals(Object autre) {
+            if (this == autre) return true;
+            if (!(autre instanceof Fichier fichier)) return false;
+            return java.util.Arrays.equals(pdf, fichier.pdf)
+                    && Objects.equals(preuve, fichier.preuve)
+                    && Objects.equals(date, fichier.date)
+                    && Objects.equals(numero, fichier.numero);
+        }
+
+        @Override
+        public int hashCode() {
+            int resultat = java.util.Arrays.hashCode(pdf);
+            resultat = 31 * resultat + Objects.hashCode(preuve);
+            resultat = 31 * resultat + Objects.hashCode(date);
+            resultat = 31 * resultat + Objects.hashCode(numero);
+            return resultat;
+        }
+
+        @Override
+        public String toString() {
+            // N'affiche pas le PDF brut (données documentaires potentiellement privées).
+            return "Fichier[taillePdf=" + (pdf == null ? 0 : pdf.length)
+                    + ", hashPdfJava=" + java.util.Arrays.hashCode(pdf)
+                    + ", preuve=" + preuve + ", date=" + date + ", numero=" + numero + "]";
+        }
+    }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ, timeout = 10)
     public Source charger(Authentication auth, UUID id) {
