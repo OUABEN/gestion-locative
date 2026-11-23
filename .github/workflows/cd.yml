@@ -1,6 +1,6 @@
 # =====================================================================
-# CD â€” Gestion Locative
-# AprÃ¨s une CI rÃ©ussie sur la branche main : construction des images
+# CD — Gestion Locative
+# Après une CI réussie sur la branche main : construction des images
 # Docker et publication sur GitHub Container Registry (ghcr.io).
 # Un service n'est construit que si son Dockerfile ET son manifeste
 # (package.json ou pom.xml) existent.
@@ -9,7 +9,7 @@ name: CD
 
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [CI, "Node.js CI (Module Locataires)"]
     types: [completed]
     branches: [main]
 
@@ -24,7 +24,7 @@ concurrency:
 jobs:
   build-and-push:
     name: Image ${{ matrix.service }}
-    # CI rÃ©ussie + branche main + push (exclut les pull requests)
+    # CI réussie + branche main + push (exclut les pull requests)
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main' &&
@@ -45,14 +45,14 @@ jobs:
           - service: frontend
             context: frontend
     steps:
-      - name: Checkout du commit validÃ© par la CI
+      - name: Checkout du commit validé par la CI
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       # hashFiles() n'est pas utilisable dans le "if" d'un job (pas de
-      # checkout Ã  ce stade) : la condition est Ã©valuÃ©e ici, aprÃ¨s checkout.
-      - name: Le service est-il prÃªt Ã  Ãªtre construit ?
+      # checkout à ce stade) : la condition est évaluée ici, après checkout.
+      - name: Le service est-il prêt à être construit ?
         id: detect
         if: >-
           hashFiles(format('{0}/Dockerfile', matrix.context)) != '' &&
@@ -60,7 +60,7 @@ jobs:
            hashFiles(format('{0}/pom.xml', matrix.context)) != '')
         run: echo "ready=true" >> "$GITHUB_OUTPUT"
 
-      - name: Service ignorÃ©
+      - name: Service ignoré
         if: steps.detect.outputs.ready != 'true'
         run: |
           echo "::notice::${{ matrix.service }} - Dockerfile ou package.json/pom.xml absent, image non construite."
@@ -74,7 +74,7 @@ jobs:
         if: steps.detect.outputs.ready == 'true'
         uses: docker/setup-buildx-action@v3
 
-      - name: Connexion Ã  ghcr.io
+      - name: Connexion à ghcr.io
         if: steps.detect.outputs.ready == 'true'
         uses: docker/login-action@v3
         with:

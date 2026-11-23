@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Rapport d'Exécution E2E — Module Gestion des Biens</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0B0B0C; color: #FFFFFF; margin: 0; padding: 30px; }
+    .container { max-width: 1050px; margin: 0 auto; }
+    .header { border-bottom: 2px solid #C6F432; padding-bottom: 20px; margin-bottom: 30px; }
+    h1 { color: #C6F432; margin: 0 0 10px 0; font-size: 28px; }
+    .subtitle { color: #888; font-size: 14px; }
+    .stats { display: flex; gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: #161618; border: 1px solid #28282C; border-radius: 8px; padding: 20px; flex: 1; text-align: center; }
+    .stat-val { font-size: 32px; font-weight: bold; margin-bottom: 5px; }
+    .stat-val.passed { color: #C6F432; }
+    .stat-val.failed { color: #FF4444; }
+    .stat-val.time { color: #64B5F6; }
+    .stat-lbl { color: #AAA; font-size: 13px; text-transform: uppercase; }
+    table { width: 100%; border-collapse: collapse; background: #161618; border-radius: 8px; overflow: hidden; }
+    th { background: #1F1F23; color: #C6F432; text-align: left; padding: 12px 16px; font-size: 13px; }
+    td { padding: 12px 16px; border-bottom: 1px solid #28282C; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+    .badge.passed { background: rgba(198, 244, 50, 0.15); color: #C6F432; border: 1px solid #C6F432; }
+    .badge.failed { background: rgba(255, 68, 68, 0.15); color: #FF4444; border: 1px solid #FF4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Rapport de Validation E2E — Module Gestion des Biens</h1>
+      <div class="subtitle">Auteur : Mohamed OUABEN — Groupe 16 | Environnement : Docker / Chrome Headless | Date : 2026-11-21T21:12:04.039Z</div>
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-val passed">14</div><div class="stat-lbl">Succès</div></div>
+      <div class="stat-card"><div class="stat-val failed">0</div><div class="stat-lbl">Échecs</div></div>
+      <div class="stat-card"><div class="stat-val time">24.12s</div><div class="stat-lbl">Durée totale</div></div>
+      <div class="stat-card"><div class="stat-val passed">100%</div><div class="stat-lbl">Taux de réussite</div></div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Scénario / Exigence Métier</th><th>Statut</th><th>Durée</th><th>Constat d'Exécution</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>01</b></td>
+          <td>Connexion échouée (mot de passe erroné)</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>3253ms</td>
+          <td>Alerte HTTP 401 interceptée et affichée</td>
+        </tr><tr>
+          <td><b>02</b></td>
+          <td>Connexion réussie BAILLEUR</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>1798ms</td>
+          <td>Authentification JWT et redirection vers le Dashboard</td>
+        </tr><tr>
+          <td><b>03</b></td>
+          <td>Vérification indicateurs KPI Dashboard</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>2977ms</td>
+          <td>Total des biens, loyers mensuels et statuts affichés</td>
+        </tr><tr>
+          <td><b>04</b></td>
+          <td>Navigation vers "Ajouter un bien"</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>1729ms</td>
+          <td>Affichage conforme du formulaire de saisie</td>
+        </tr><tr>
+          <td><b>05</b></td>
+          <td>Validation champs obligatoires et surface</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>1071ms</td>
+          <td>Règle métier surface > 0 et champs requis validés</td>
+        </tr><tr>
+          <td><b>06</b></td>
+          <td>Création réussie du bien immobilier</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>3933ms</td>
+          <td>Bien enregistré avec succès : 142 Boulevard Zerktouni Résidence QL-0296</td>
+        </tr><tr>
+          <td><b>07</b></td>
+          <td>Recherche et filtrage dans la liste</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>1022ms</td>
+          <td>Filtrage dynamique et debounce fonctionnels</td>
+        </tr><tr>
+          <td><b>08</b></td>
+          <td>Consultation de la fiche détail du bien</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>1458ms</td>
+          <td>Affichage complet des données techniques et financières</td>
+        </tr><tr>
+          <td><b>09</b></td>
+          <td>Modification du bien immobilier</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>145ms</td>
+          <td>Loyer ajusté et persisté en base de données</td>
+        </tr><tr>
+          <td><b>10</b></td>
+          <td>Bascule de statut vers OCCUPÉ</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>181ms</td>
+          <td>Statut mis à jour dynamiquement via PATCH /api/biens/:id/statut</td>
+        </tr><tr>
+          <td><b>11</b></td>
+          <td>Protection suppression bien OCCUPÉ (HTTP 409)</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>261ms</td>
+          <td>Intégrité garantie : Impossible de supprimer un bien occupé</td>
+        </tr><tr>
+          <td><b>12</b></td>
+          <td>Suppression autorisée sur bien LIBRE</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>132ms</td>
+          <td>Bien retiré du parc locatif après vérification</td>
+        </tr><tr>
+          <td><b>13</b></td>
+          <td>Déconnexion et invalidation session</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>2434ms</td>
+          <td>Jeton JWT invalidé et redirection vers la mire d’authentification</td>
+        </tr><tr>
+          <td><b>14</b></td>
+          <td>Rôle LOCATAIRE en lecture seule</td>
+          <td><span class="badge passed">PASSED</span></td>
+          <td>3728ms</td>
+          <td>Accès sécurisé : aucun bouton d’ajout ni de modification</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

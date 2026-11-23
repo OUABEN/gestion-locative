@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="14" failures="0" errors="0" time="3.6865549">
-    <testsuite name="src/tests/biens.frontend.test.jsx" timestamp="2026-11-19T00:19:34.253Z" hostname="OUABEN" tests="14" failures="0" errors="0" skipped="0" time="3.6865549">
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; formatCurrency formate correctement les montants en Dirham (DH) et gère les valeurs nulles/NaN" time="0.0846525">
+<testsuites name="vitest tests" tests="14" failures="0" errors="0" time="4.3018241">
+    <testsuite name="src/tests/biens.frontend.test.jsx" timestamp="2026-11-21T23:17:24.329Z" hostname="OUABEN" tests="14" failures="0" errors="0" skipped="0" time="4.3018241">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; formatCurrency formate correctement les montants en Dirham (DH) et gère les valeurs nulles/NaN" time="0.1565551">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; formatSurface et formatDate gèrent les cas normaux et limites" time="0.0149084">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; formatSurface et formatDate gèrent les cas normaux et limites" time="0.039572">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; bienSchema (Zod) applique strictement les règles métier (surface &gt; 0, prixMensuel &gt;= 0, charges &gt;= 0)" time="0.0054331">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; bienSchema (Zod) applique strictement les règles métier (surface &gt; 0, prixMensuel &gt;= 0, charges &gt;= 0)" time="0.0107042">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; decodeToken décode un JWT valide, détecte un token expiré et retourne null sur un token invalide" time="0.013385">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 1. Utilitaires (format.js, validators.js, jwt.js) &gt; decodeToken décode un JWT valide, détecte un token expiré et retourne null sur un token invalide" time="0.0271811">
             <system-err>
 Erreur lors du décodage du token JWT : InvalidTokenError: Invalid token specified: missing part #2
-    at jwtDecode (file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/jwt-decode/build/esm/index.js:42:15)
-    at Module.decodeToken (C:/Users/OUALI/Downloads/gestion-locative/frontend/src/utils/jwt.js:6:30)
-    at C:/Users/OUALI/Downloads/gestion-locative/frontend/src/tests/biens.frontend.test.jsx:150:14
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:1695:35
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:2864:26
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3402:20
+    at jwtDecode (file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/jwt-decode/build/esm/index.js:42:15)
+    at Module.decodeToken (C:/Users/Ahmed/GestionLocative-Locataires/frontend/src/utils/jwt.js:6:30)
+    at C:/Users/Ahmed/GestionLocative-Locataires/frontend/src/tests/biens.frontend.test.jsx:150:14
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:1695:35
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:2864:26
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3402:20
     at new Promise (&lt;anonymous&gt;)
-    at runWithCancel (file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3397:10)
-    at file:///C:/Users/OUALI/Downloads/gestion-locative/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3381:20
+    at runWithCancel (file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3397:10)
+    at file:///C:/Users/Ahmed/GestionLocative-Locataires/frontend/node_modules/vitest/dist/chunks/run.zBhXlcZQ.js:3381:20
     at new Promise (&lt;anonymous&gt;)
 
             </system-err>
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 2. ProtectedRoute et RoleGuard (Contrôle des accès) &gt; redirige un utilisateur non authentifié vers /login" time="0.0947573">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 2. ProtectedRoute et RoleGuard (Contrôle des accès) &gt; redirige un utilisateur non authentifié vers /login" time="0.1951998">
             <system-err>
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
 
             </system-err>
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 2. ProtectedRoute et RoleGuard (Contrôle des accès) &gt; bloque le rôle LOCATAIRE sur les routes protégées par RoleGuard et autorise BAILLEUR" time="0.0499977">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 2. ProtectedRoute et RoleGuard (Contrôle des accès) &gt; bloque le rôle LOCATAIRE sur les routes protégées par RoleGuard et autorise BAILLEUR" time="0.1073461">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 3. LoginPage (Connexion &amp; Inscription) &gt; affiche un message d’erreur lorsque la connexion échoue (401)" time="0.3597021">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 3. LoginPage (Connexion &amp; Inscription) &gt; affiche un message d’erreur lorsque la connexion échoue (401)" time="0.5515552">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 3. LoginPage (Connexion &amp; Inscription) &gt; redirige immédiatement vers le tableau de bord en 1 clic sur succès de connexion" time="0.1221262">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 3. LoginPage (Connexion &amp; Inscription) &gt; redirige immédiatement vers le tableau de bord en 1 clic sur succès de connexion" time="0.1855966">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 4. BienFormPage (Validation métier, Barre Image &amp; Erreurs 400) &gt; valide surface &gt; 0 côté client et empêche l’envoi d’une surface négative ou nulle" time="0.747437">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 4. BienFormPage (Validation métier, Barre Image &amp; Erreurs 400) &gt; valide surface &gt; 0 côté client et empêche l’envoi d’une surface négative ou nulle" time="0.8138474">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 4. BienFormPage (Validation métier, Barre Image &amp; Erreurs 400) &gt; permet de renseigner la barre image (imageUrl) et affiche les erreurs 400 renvoyées par le serveur" time="1.3467279">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 4. BienFormPage (Validation métier, Barre Image &amp; Erreurs 400) &gt; permet de renseigner la barre image (imageUrl) et affiche les erreurs 400 renvoyées par le serveur" time="1.3571585">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche la liste des biens et filtre par recherche texte" time="0.4784774">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche la liste des biens et filtre par recherche texte" time="0.5089277">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche l’état vide lorsqu’aucun bien n’est retourné" time="0.0408508">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche l’état vide lorsqu’aucun bien n’est retourné" time="0.0369158">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche l’état d’erreur et permet de réessayer le chargement" time="0.1142457">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 5. BiensListPage (Rendu liste, Filtres, État vide, Erreur avec réessai) &gt; affiche l’état d’erreur et permet de réessayer le chargement" time="0.1184366">
         </testcase>
-        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 6. DashboardPage (Calcul et affichage des KPI avec données mockées) &gt; calcule et affiche exactement le total (3), les disponibles (1), les loués (2) et le taux d’occupation arrondi (67%)" time="0.2057152">
+        <testcase classname="src/tests/biens.frontend.test.jsx" name="Frontend Gestion des Biens — Tests Unitaires &amp; Composants (Vitest + RTL) &gt; 6. DashboardPage (Calcul et affichage des KPI avec données mockées) &gt; calcule et affiche exactement le total (3), les disponibles (1), les loués (2) et le taux d’occupation arrondi (67%)" time="0.1799141">
         </testcase>
     </testsuite>
 </testsuites>
