@@ -1,7 +1,7 @@
 const { defineConfig } = require('cypress');
 const path = require('node:path');
 
-const reports = path.resolve(__dirname, '../../../docs/qualite/quittances/cypress');
+const reports = path.resolve(__dirname, '../../../qualite-logicielle/quittances/rapports/cypress');
 
 module.exports = defineConfig({
   video: false,

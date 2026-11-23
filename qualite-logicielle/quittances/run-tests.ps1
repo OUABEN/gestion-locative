@@ -15,7 +15,7 @@ $pom = Join-Path $racineDepot "backend\backend_gestion_quittances\pom.xml"
 $dossierSurefire = Join-Path $racineDepot `
     "backend\backend_gestion_quittances\target\surefire-reports"
 $dossierJacoco = Join-Path $racineDepot `
-    "docs\qualite\quittances\jacoco"
+    "qualite-logicielle\quittances\rapports\jacoco"
 
 $executables = @{
     java = Join-Path $JavaHome "bin\java.exe"

@@ -37,7 +37,7 @@ try {
     $env:JAVA_HOME = $JavaHome
     $env:Path = "$JavaHome\bin;$oldPath"
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-    $reportParent = Join-Path $repo 'docs\qualite\quittances\jmeter'
+    $reportParent = Join-Path $repo 'qualite-logicielle\quittances\rapports\jmeter'
     $runDir = Join-Path $reportParent "execution-$stamp"
     if (Test-Path -LiteralPath $runDir) { throw 'Dossier de sortie deja present; ne pas ecraser.' }
     New-Item -ItemType Directory -Path $runDir -Force | Out-Null

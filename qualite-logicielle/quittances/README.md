@@ -38,8 +38,8 @@ espacement, lignes vides, déclarations multiples, ordre des modificateurs et
 retours à la ligne des opérateurs. Il n’y a pas de règle de documentation
 Javadoc ni de suppression de violation.
 
-Les sorties sont `docs/qualite/quittances/checkstyle/checkstyle-result.xml` et
-`docs/qualite/quittances/checkstyle/checkstyle.html`. Le runner remplace les
+Les sorties sont `qualite-logicielle/quittances/rapports/checkstyle/checkstyle-result.xml` et
+`qualite-logicielle/quittances/rapports/checkstyle/checkstyle.html`. Le runner remplace les
 chemins absolus de l’ordinateur par des chemins relatifs au dépôt dans le XML;
 les violations et leur position ne sont pas modifiées.
 
@@ -94,7 +94,7 @@ supprimer le dossier d’un serveur encore actif.
 
 Les rapports Surefire/JUnit restent dans
 `backend/backend_gestion_quittances/target/surefire-reports/`. JaCoCo écrit les
-rapports HTML et XML dans `docs/qualite/quittances/jacoco/`; une nouvelle
+rapports HTML et XML dans `qualite-logicielle/quittances/rapports/jacoco/`; une nouvelle
 exécution remplace uniquement ce dossier généré.
 
 ## Périmètre des tests

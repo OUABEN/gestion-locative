@@ -53,7 +53,7 @@ Le runner exige que le port 18084 soit libre et refuse de s'y connecter s'il
 est deja occupe. Il ne lance pas Docker et ne contacte pas les services
 externes; les modes de leurs adaptateurs sont forces a `SIMULATION`.
 
-Le rapport JSON est `docs/qualite/quittances/postman/newman-report.json`.
+Le rapport JSON est `qualite-logicielle/quittances/rapports/postman/newman-report.json`.
 `newman-report.html` est une synthese tabulaire generee a partir des memes
 resultats, sans corps HTTP ni jeton. Les rapports ne doivent contenir ni JWT,
 ni secret, ni donnee personnelle. Ne jamais utiliser l'environnement Postman

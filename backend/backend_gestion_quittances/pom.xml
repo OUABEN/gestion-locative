@@ -109,7 +109,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>
-                                ${project.basedir}/../../docs/qualite/quittances/jacoco
+                                ${project.basedir}/../../qualite-logicielle/quittances/rapports/jacoco
                             </outputDirectory>
                         </configuration>
                     </execution>
@@ -139,11 +139,11 @@
                     <failsOnError>false</failsOnError>
                     <outputFileFormat>xml</outputFileFormat>
                     <outputFile>
-                        ${project.basedir}/../../docs/qualite/quittances/checkstyle/checkstyle-result.xml
+                        ${project.basedir}/../../qualite-logicielle/quittances/rapports/checkstyle/checkstyle-result.xml
                     </outputFile>
                     <linkXRef>false</linkXRef>
                     <outputDirectory>
-                        ${project.basedir}/../../docs/qualite/quittances/checkstyle
+                        ${project.basedir}/../../qualite-logicielle/quittances/rapports/checkstyle
                     </outputDirectory>
                 </configuration>
             </plugin>

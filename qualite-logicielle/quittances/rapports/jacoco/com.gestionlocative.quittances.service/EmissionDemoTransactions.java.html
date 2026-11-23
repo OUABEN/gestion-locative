@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmissionDemoTransactions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">EmissionDemoTransactions.java</span></div><h1>EmissionDemoTransactions.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
+
+import com.gestionlocative.quittances.document.SignatureLocale;
+import com.gestionlocative.quittances.dto.DonneesApercu;
+import com.gestionlocative.quittances.entity.Quittance;
+import com.gestionlocative.quittances.repository.QuittanceRepository;
+import com.gestionlocative.quittances.security.LecteurQuittances;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Service
+public class EmissionDemoTransactions {
+    private final PreparationApercuService preparation;
+    private final ConsultationQuittanceService consultation;
+    private final QuittanceRepository documents;
+    private final JdbcTemplate jdbc;
+    public EmissionDemoTransactions(PreparationApercuService preparation,
+<span class="fc" id="L29">            ConsultationQuittanceService consultation, QuittanceRepository documents, JdbcTemplate jdbc) {</span>
+<span class="fc" id="L30">        this.preparation = preparation; this.consultation = consultation;</span>
+<span class="fc" id="L31">        this.documents = documents; this.jdbc = jdbc;</span>
+<span class="fc" id="L32">    }</span>
+<span class="fc" id="L33">    public record Source(DonneesApercu donnees, long version, String numero, Instant date) {}</span>
+<span class="fc" id="L34">    public record Resultat(UUID id, String numero, String statut, String statutSignature,</span>
+            String modeSignature, String sha256, Instant emisLe) {}
+<span class="fc" id="L36">    public record Fichier(byte[] pdf, SignatureLocale.Preuve preuve, Instant date, String numero) {</span>
+        @Override
+        public boolean equals(Object autre) {
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">            if (this == autre) return true;</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            if (!(autre instanceof Fichier fichier)) return false;</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            return java.util.Arrays.equals(pdf, fichier.pdf)</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                    &amp;&amp; Objects.equals(preuve, fichier.preuve)</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                    &amp;&amp; Objects.equals(date, fichier.date)</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">                    &amp;&amp; Objects.equals(numero, fichier.numero);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="fc" id="L49">            int resultat = java.util.Arrays.hashCode(pdf);</span>
+<span class="fc" id="L50">            resultat = 31 * resultat + Objects.hashCode(preuve);</span>
+<span class="fc" id="L51">            resultat = 31 * resultat + Objects.hashCode(date);</span>
+<span class="fc" id="L52">            resultat = 31 * resultat + Objects.hashCode(numero);</span>
+<span class="fc" id="L53">            return resultat;</span>
+        }
+
+        @Override
+        public String toString() {
+            // N'affiche pas le PDF brut (données documentaires potentiellement privées).
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">            return &quot;Fichier[taillePdf=&quot; + (pdf == null ? 0 : pdf.length)</span>
+<span class="fc" id="L60">                    + &quot;, hashPdfJava=&quot; + java.util.Arrays.hashCode(pdf)</span>
+                    + &quot;, preuve=&quot; + preuve + &quot;, date=&quot; + date + &quot;, numero=&quot; + numero + &quot;]&quot;;
+        }
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ, timeout = 10)
+    public Source charger(Authentication auth, UUID id) {
+<span class="nc" id="L67">        String bailleur = bailleur(auth);</span>
+<span class="nc" id="L68">        var donnees = preparation.charger(auth, id);</span>
+<span class="nc" id="L69">        var q = documents.findByIdAndBailleurId(id, bailleur).orElseThrow(EmissionDemoTransactions::absent);</span>
+<span class="nc" id="L70">        verifierEtat(q);</span>
+<span class="nc" id="L71">        Instant date = Instant.now();</span>
+<span class="nc" id="L72">        Long compteur = jdbc.queryForObject(&quot;SELECT nextval('numero_document_seq')&quot;, Long.class);</span>
+<span class="nc" id="L73">        String numero = &quot;DEMO-QT-&quot; + date.atZone(java.time.ZoneId.of(&quot;Africa/Casablanca&quot;)).getYear()</span>
+<span class="nc" id="L74">                + &quot;-&quot; + String.format(java.util.Locale.ROOT, &quot;%06d&quot;, compteur);</span>
+<span class="nc" id="L75">        return new Source(donnees, q.getVersion(), numero, date);</span>
+    }
+    @Transactional(timeout = 10, rollbackFor = Exception.class)
+    public Resultat enregistrer(Authentication auth, UUID id, Source source, byte[] pdf,
+            SignatureLocale.Preuve preuve) throws java.security.GeneralSecurityException {
+<span class="fc" id="L80">        String bailleur = bailleur(auth);</span>
+<span class="fc" id="L81">        var q = documents.trouverPourModification(id, bailleur).orElseThrow(EmissionDemoTransactions::absent);</span>
+<span class="fc" id="L82">        verifierEtat(q);</span>
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (!id.equals(source.donnees().document().id()) || !Objects.equals(q.getVersion(), source.version()))</span>
+<span class="nc" id="L84">            throw conflit(&quot;Le document a changé. Rechargez ses détails.&quot;);</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">        if (pdf.length &gt; 10485760 || !SignatureLocale.verifier(pdf, preuve, source.date()))</span>
+<span class="nc" id="L86">            throw new java.security.GeneralSecurityException(&quot;Preuve invalide.&quot;);</span>
+<span class="fc" id="L87">        jdbc.update(&quot;&quot;&quot;</span>
+            INSERT INTO emission_demo(quittance_id,pdf,signature,certificat,sha256,cree_le)
+            VALUES (?,?,?,?,?,?)
+<span class="fc" id="L90">            &quot;&quot;&quot;, id, pdf, preuve.signature(), preuve.certificat(), preuve.sha256(), Timestamp.from(source.date()));</span>
+<span class="fc" id="L91">        q.emettreDemonstration(source.numero(), source.date(), preuve.sha256());</span>
+<span class="fc" id="L92">        documents.saveAndFlush(q);</span>
+<span class="fc" id="L93">        audit(auth, id, &quot;EMISSION_DEMO&quot;, &quot;EN_ATTENTE_SIGNATURE&quot;, &quot;EMIS&quot;);</span>
+<span class="fc" id="L94">        return new Resultat(id, q.getNumero(), &quot;EMIS&quot;, &quot;SIGNE_VERIFIE&quot;, &quot;DEMONSTRATION&quot;, preuve.sha256(), source.date());</span>
+    }
+    @Transactional(readOnly = true)
+    public Fichier consulter(Authentication auth, UUID id) {
+<span class="nc" id="L98">        var q = consultation.consulter(auth, id); // périmètre bailleur/locataire contrôlé</span>
+<span class="nc" id="L99">        var lignes = jdbc.query(&quot;SELECT pdf, signature, certificat, sha256, cree_le FROM emission_demo WHERE quittance_id=?&quot;,</span>
+<span class="nc" id="L100">            (rs, n) -&gt; new Fichier(rs.getBytes(&quot;pdf&quot;), new SignatureLocale.Preuve(rs.getBytes(&quot;signature&quot;),</span>
+<span class="nc" id="L101">                rs.getBytes(&quot;certificat&quot;), rs.getString(&quot;sha256&quot;)), rs.getTimestamp(&quot;cree_le&quot;).toInstant(), q.numero()), id);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (lignes.isEmpty()) throw absent();</span>
+<span class="nc" id="L103">        return lignes.getFirst();</span>
+    }
+    @Transactional(timeout = 10)
+    public void tracerLecture(Authentication auth, UUID id, String operation) {
+<span class="nc" id="L107">        var q = consultation.consulter(auth, id);</span>
+<span class="nc" id="L108">        audit(auth, id, operation, q.statut(), q.statut());</span>
+<span class="nc" id="L109">    }</span>
+    private void audit(Authentication auth, UUID id, String operation, String avant, String apres) {
+<span class="fc" id="L111">        var jwt = (JwtAuthenticationToken) auth;</span>
+<span class="fc" id="L112">        String sujet = jwt.getToken().getSubject(), issuer = jwt.getToken().getClaimAsString(&quot;iss&quot;);</span>
+<span class="pc bpc" id="L113" title="5 of 12 branches missed.">        if (sujet == null || sujet.isBlank() || sujet.length() &gt; 200 || issuer == null || issuer.isBlank() || issuer.length() &gt; 500)</span>
+<span class="fc" id="L114">            throw new AccessDeniedException(&quot;Identité insuffisante pour l'audit.&quot;);</span>
+<span class="fc" id="L115">        jdbc.update(&quot;&quot;&quot;</span>
+            INSERT INTO quittance_audit(id,quittance_id,acteur,emetteur_identite,operation,resultat,horodatage,statut_avant,statut_apres)
+            VALUES (?,?,?,?,?,'SUCCES',?,?,?)
+<span class="fc" id="L118">            &quot;&quot;&quot;, UUID.randomUUID(), id, sujet, issuer, operation, Timestamp.from(Instant.now()), avant, apres);</span>
+<span class="fc" id="L119">    }</span>
+    private static String bailleur(Authentication auth) {
+<span class="fc" id="L121">        var lecteur = LecteurQuittances.depuis(auth);</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (!lecteur.bailleur()) throw new AccessDeniedException(&quot;Émission réservée au bailleur.&quot;);</span>
+<span class="fc" id="L123">        return lecteur.identifiant();</span>
+    }
+    private static void verifierEtat(Quittance q) {
+<span class="pc bpc" id="L126" title="2 of 6 branches missed.">        if (!&quot;EN_ATTENTE_SIGNATURE&quot;.equals(q.getStatut().name()) || !&quot;EN_ATTENTE&quot;.equals(q.getStatutSignature().name()) || q.getEmisLe() != null)</span>
+<span class="fc" id="L127">            throw conflit(&quot;Le document doit être validé et en attente de signature.&quot;);</span>
+<span class="fc" id="L128">    }</span>
+<span class="nc" id="L129">    private static ResponseStatusException absent() { return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Document émis introuvable.&quot;); }</span>
+<span class="fc" id="L130">    private static ResponseStatusException conflit(String message) { return new ResponseStatusException(HttpStatus.CONFLICT, message); }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

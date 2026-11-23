@@ -34,6 +34,6 @@ Le JWT est synthetique et n'est pas signe. L'execution ne prouve pas une
 integration complete avec le backend ; l'integration HTTP et la charge sont
 evaluees separement avec Newman et JMeter dans l'environnement isole de QA.
 
-Les rapports se trouvent dans `docs/qualite/quittances/cypress/`.
+Les rapports se trouvent dans `qualite-logicielle/quittances/rapports/cypress/`.
 Ne conserver dans Git que le rapport JUnit final et les captures synthetiques
 utiles, pas les diagnostics ou executions echouees.

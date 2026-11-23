@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 $racineDepot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $pom = Join-Path $racineDepot "backend\backend_gestion_quittances\pom.xml"
-$dossierRapport = Join-Path $racineDepot "docs\qualite\quittances\checkstyle"
+$dossierRapport = Join-Path $racineDepot "qualite-logicielle\quittances\rapports\checkstyle"
 
 if (-not (Test-Path -LiteralPath (Join-Path $JavaHome "bin\java.exe"))) {
     throw "JDK executable not found under JavaHome."

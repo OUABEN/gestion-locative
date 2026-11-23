@@ -12,7 +12,7 @@ JMeter 5.6.3, Java 21, backend Quittances sur `127.0.0.1:18084` avec une base Po
 
 ## Resultats verifies
 
-Rapport de reference : `docs/qualite/quittances/jmeter/execution-20261122-162107/`.
+Rapport de reference : `qualite-logicielle/quittances/rapports/jmeter/execution-20261122-162107/`.
 
 - 330 requetes, 330 reussies, 0 echec (0 %).
 - Moyenne 5,6 ms ; minimum 2 ms ; maximum 114 ms.
