@@ -1,0 +1,342 @@
+{
+  "dependencyCount": 94,
+  "displayTargetFile": "package.json",
+  "filesystemPolicy": false,
+  "filtered": {
+    "ignore": [],
+    "patch": []
+  },
+  "hasUnknownVersions": false,
+  "ignoreSettings": {
+    "adminOnly": false,
+    "autoApproveIgnores": false,
+    "disregardFilesystemIgnores": false,
+    "reasonRequired": false
+  },
+  "isPrivate": true,
+  "licensesPolicy": {
+    "orgLicenseRules": null,
+    "severities": null
+  },
+  "ok": false,
+  "org": "akraaaaaaaaam",
+  "packageManager": "npm",
+  "path": "C:\\Users\\akram\\AppData\\Local\\Temp\\quittances-snyk-frontend-v3-0aaa09be1e",
+  "policy": "",
+  "projectName": "frontend",
+  "remediation": {
+    "ignore": null,
+    "pin": {},
+    "unresolved": [],
+    "upgrade": {
+      "react-router-dom@6.30.6": {
+        "upgradeTo": "react-router-dom@7.18.0",
+        "upgrades": [
+          "react-router@6.30.6",
+          "react-router@6.30.6"
+        ],
+        "vulns": [
+          "SNYK-JS-REACTROUTER-18313130",
+          "SNYK-JS-REACTROUTER-18313144"
+        ]
+      }
+    }
+  },
+  "summary": "2 vulnerable dependency paths",
+  "targetFile": "",
+  "uniqueCount": 2,
+  "vulnerabilities": [
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:H/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-07-26T11:19:45.656906Z",
+      "credit": [
+        "yoyomiski"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 6.1,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "modificationTime": "2026-07-28T13:31:47.468217Z",
+          "severity": "medium"
+        }
+      ],
+      "cvssScore": 6,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-09-24T14:23:51.860329Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:H/VA:N/SC:L/SI:L/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-09-24T14:23:51.860329Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:L/I:H/A:N"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 6.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-07-28T13:31:47.468217Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Use of Externally-Controlled Input to Select Classes or Code ('Unsafe Reflection') in the `deserializeErrors` function during SSR hydration. An attacker can cause unexpected constructor execution on the client, potentially resulting in outbound network traffic, by supplying crafted input that overwrites certain aspects of errors caught by the SSR process. \r\n\r\n**Note:** This is only exploitable if the application is running in Framework Mode or Data Mode and performs manual SSR/hydration with code that allows attacker-controlled input to influence error deserialization.\n## Remediation\nUpgrade `react-router` to version 7.18.0 or higher.\n## References\n- [GitHub Advisory](https://github.com/remix-run/react-router/security/advisories/GHSA-337j-9hxr-rhxg)\n- [GitHub Commit](https://github.com/remix-run/react-router/commit/9d22943fd46c8ae4b08236425fa3549e10e9ad1a)\n- [GitHub PR](https://github.com/remix-run/react-router/pull/15175)\n",
+      "disclosureTime": "2026-07-23T19:34:14.000000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.33631",
+        "probability": "0.00420"
+      },
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.18.0"
+      ],
+      "from": [
+        "frontend@1.0.0",
+        "react-router-dom@6.30.6",
+        "react-router@6.30.6"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JS-REACTROUTER-18313130",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-53666"
+        ],
+        "CWE": [
+          "CWE-470"
+        ],
+        "GHSA": [
+          "GHSA-337j-9hxr-rhxg"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "js",
+      "malicious": false,
+      "modificationTime": "2026-09-24T14:23:51.860329Z",
+      "moduleName": "react-router",
+      "name": "react-router",
+      "packageManager": "npm",
+      "packageName": "react-router",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-07-26T11:19:45.828301Z",
+      "references": [
+        {
+          "title": "GitHub Advisory",
+          "url": "https://github.com/remix-run/react-router/security/advisories/GHSA-337j-9hxr-rhxg"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/remix-run/react-router/commit/9d22943fd46c8ae4b08236425fa3549e10e9ad1a"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/remix-run/react-router/pull/15175"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          ">=6.4.0 <7.18.0"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Use of Externally-Controlled Input to Select Classes or Code ('Unsafe Reflection')",
+      "upgradePath": [
+        false,
+        "react-router-dom@7.18.0",
+        "react-router@7.18.0"
+      ],
+      "version": "6.30.6"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:H/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-07-26T11:22:38.851372Z",
+      "credit": [
+        "Vasya Aksyonov"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 5.4,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
+          "modificationTime": "2026-07-28T13:31:47.496190Z",
+          "severity": "medium"
+        },
+        {
+          "assigner": "NVD",
+          "cvssV3BaseScore": 6.1,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "modificationTime": "2026-08-04T01:30:10.151594Z",
+          "severity": "medium"
+        }
+      ],
+      "cvssScore": 7.1,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 7.1,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-10-25T02:01:11.297909Z",
+          "severity": "high",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:N/SC:L/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 8.2,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-10-25T02:01:11.297909Z",
+          "severity": "high",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:H/A:N"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 5.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-07-28T13:31:47.496190Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+        },
+        {
+          "assigner": "NVD",
+          "baseScore": 6.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-08-04T01:30:10.151594Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Open Redirect via the navigation mechanisms when attacker-supplied paths containing a backslash are processed. An attacker can redirect users to unintended external sites by crafting malicious links or inputs.\n## Remediation\nUpgrade `react-router` to version 7.18.0 or higher.\n## References\n- [GitHub Advisory](https://github.com/remix-run/react-router/security/advisories/GHSA-wrjc-x8rr-h8h6)\n- [GitHub Commit](https://github.com/remix-run/react-router/commit/bf63729561365b50705a24fd576e293424df23ef)\n- [GitHub PR](https://github.com/remix-run/react-router/pull/15176)\n",
+      "disclosureTime": "2026-07-23T19:38:28.000000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.22118",
+        "probability": "0.00319"
+      },
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.18.0"
+      ],
+      "from": [
+        "frontend@1.0.0",
+        "react-router-dom@6.30.6",
+        "react-router@6.30.6"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JS-REACTROUTER-18313144",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-53669"
+        ],
+        "CWE": [
+          "CWE-601"
+        ],
+        "GHSA": [
+          "GHSA-wrjc-x8rr-h8h6"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "js",
+      "malicious": false,
+      "modificationTime": "2026-10-25T02:01:11.297909Z",
+      "moduleName": "react-router",
+      "name": "react-router",
+      "packageManager": "npm",
+      "packageName": "react-router",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-07-26T11:22:39.023735Z",
+      "references": [
+        {
+          "title": "GitHub Advisory",
+          "url": "https://github.com/remix-run/react-router/security/advisories/GHSA-wrjc-x8rr-h8h6"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/remix-run/react-router/commit/bf63729561365b50705a24fd576e293424df23ef"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/remix-run/react-router/pull/15176"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          ">=6.0.0 <7.18.0"
+        ]
+      },
+      "severity": "high",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "high",
+      "socialTrendAlert": false,
+      "title": "Open Redirect",
+      "upgradePath": [
+        false,
+        "react-router-dom@7.18.0",
+        "react-router@7.18.0"
+      ],
+      "version": "6.30.6"
+    }
+  ]
+}
