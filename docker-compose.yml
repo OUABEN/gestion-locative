@@ -148,9 +148,27 @@ services:
       <<: *spring-env
       PORT: "8084"
       SERVER_PORT: "8084"
-      # Envoi des e-mails via Mailpit (à ajuster si Akram utilise d'autres noms de propriétés)
+      # Base de données (noms lus par Quittances)
+      QUITTANCES_DB_HOST: db
+      QUITTANCES_DB_PORT: "5432"
+      QUITTANCES_DB_NAME: ${POSTGRES_DB:-db_gestion_locative}
+      QUITTANCES_DB_USER: ${POSTGRES_USER}
+      QUITTANCES_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # JWT commun (HS256, même JWT_SECRET que les autres services)
+      JWT_MODE: COMMUN
+      # Services appelés : Loyers possède les baux et les paiements
+      BIENS_BASE_URL: ${BIENS_SERVICE_URL:-http://biens:8081}
+      LOCATAIRES_BASE_URL: ${LOCATAIRES_SERVICE_URL:-http://locataires:8082}
+      BAUX_BASE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+      PAIEMENTS_BASE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+      # E-mail (Mailpit)
+      DARLOC_MAILPIT_ACTIF: "true"
+      DARLOC_MAILPIT_PORT: "1025"
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"
+      # TODO (Akram) : variables *_MODE, *_CHEMIN, *_TOKEN du mode HTTP réel
+      # TODO (Akram) : décommenter quand le schéma de database/init/06_quittances.sql est validé
+      # SPRING_FLYWAY_ENABLED: "false"
     ports:
       - "8084:8084"
     depends_on:
@@ -158,7 +176,7 @@ services:
         condition: service_healthy
       mailpit:
         condition: service_started
-    # TODO (Akram) : ajouter le healthcheck (/health ou /actuator/health)
+    # TODO : healthcheck sur /api/v1/systeme/etat (après réponse d'Akram sur son image)
     networks:
       - gl_network
 
