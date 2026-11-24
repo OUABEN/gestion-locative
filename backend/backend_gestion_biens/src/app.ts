@@ -2,7 +2,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import { openapiSpec } from "./docs/openapi";
-import { authRouter } from "./routes/auth.routes";
+import { authRouter, userRouter } from "./routes/auth.routes";
 import { bienRouter } from "./routes/bien.routes";
 import { errorHandler } from "./middlewares/error-handler";
 import { AppError } from "./utils/app-error";
@@ -24,6 +24,7 @@ export const createApp = (): Express => {
 
   // Routes d'authentification (Login / Register / Profil sur table PostgreSQL users)
   app.use("/api/auth", authRouter);
+  app.use("/api/users", userRouter);
 
   // Routes métier Biens
   app.use("/api/biens", bienRouter);
