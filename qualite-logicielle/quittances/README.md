@@ -1,3 +1,57 @@
+# Qualite logicielle - Quittances
+
+## Dernier bilan du 24 novembre 2026
+
+| Outil | Resultat |
+|---|---|
+| JUnit | 317/317 tests reussis |
+| Vitest | 16/16 tests reussis |
+| Total Java et frontend | 333/333 tests reussis |
+| JaCoCo - Instructions | 82,28 % |
+| JaCoCo - Lignes | 83,45 % |
+| JaCoCo - Branches | 63,28 % |
+| Istanbul - Instructions | 62,21 % |
+| Istanbul - Lignes | 65,97 % |
+| Istanbul - Branches | 54,10 % |
+| Istanbul - Fonctions | 39,72 % |
+| Checkstyle | 0 erreur, 1641 avertissements |
+| SonarQube Quality Gate | Passed |
+| SonarQube - Couverture du nouveau code | 81,1 % |
+| SonarQube - Duplication du nouveau code | 0,94 % |
+| SonarQube - Nouveaux problemes | 0 |
+| SonarQube - Couverture globale | 74,1 % |
+| SonarQube - Duplication globale | 1,7 % |
+| SonarQube - Vulnerabilites globales | 1 |
+
+## Rapports disponibles
+
+- [JUnit](rapports/junit/RESULTATS.md)
+- [JaCoCo](rapports/jacoco/index.html)
+- [Checkstyle](rapports/checkstyle/checkstyle.html)
+- [Vitest et Istanbul](rapports/istanbul/RESULTATS.md)
+- [Couverture frontend HTML](rapports/istanbul/index.html)
+- [SonarQube](rapports/sonarqube/RESULTATS.md)
+- [Mesures SonarQube](rapports/sonarqube/mesures-sonarqube-finalisation.json)
+
+## Etat de l'integration
+
+Le nouveau contrat de recuperation de l'identite du bailleur
+est implemente et valide par les tests automatises.
+
+La validation reelle du gestionnaire reste bloquee par
+la validation des UUID de demonstration dans le service Biens.
+
+La validation positive du locataire rattache reste a effectuer.
+
+Les anciennes campagnes Postman, JMeter, Cypress, Snyk et ZAP
+sont conservees comme preuves historiques.
+
+La CI de cette nouvelle version reste a verifier apres publication.
+
+---
+
+## Documentation et campagnes precedentes
+
 # Qualité logicielle — Quittances
 
 <!-- BILAN-20261124 -->
