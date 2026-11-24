@@ -45,14 +45,14 @@ import com.gestionlocative.quittances.controller.QuittanceHistoriqueController;
     public ResponseEntity&lt;ProblemDetail&gt; accesInterdit(
             AccessDeniedException exception
     ) {
-<span class="fc" id="L48">        ProblemDetail probleme = ProblemDetail.forStatusAndDetail(</span>
+<span class="nc" id="L48">        ProblemDetail probleme = ProblemDetail.forStatusAndDetail(</span>
                 HttpStatus.FORBIDDEN,
                 &quot;Votre identité ne permet pas cette consultation.&quot;
         );
 
-<span class="fc" id="L53">        probleme.setProperty(&quot;code&quot;, &quot;ACCES_INTERDIT&quot;);</span>
+<span class="nc" id="L53">        probleme.setProperty(&quot;code&quot;, &quot;ACCES_INTERDIT&quot;);</span>
 
-<span class="fc" id="L55">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(probleme);</span>
+<span class="nc" id="L55">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(probleme);</span>
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

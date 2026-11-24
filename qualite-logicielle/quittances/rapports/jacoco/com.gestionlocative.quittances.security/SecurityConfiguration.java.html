@@ -137,34 +137,36 @@ import org.springframework.security.web.SecurityFilterChain;
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            @Value(&quot;${quittances.securite.mode}&quot;) String mode)
+            @Value(&quot;${quittances.securite.mode}&quot;) String mode,
+            com.gestionlocative.quittances.client.LocataireClient locataires)
             throws Exception {
 
-<span class="fc" id="L143">        JwtAuthenticationConverter authentication =</span>
+<span class="fc" id="L144">        JwtAuthenticationConverter authentication =</span>
                 new JwtAuthenticationConverter();
 
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (&quot;COMMUN&quot;.equals(mode)) {</span>
-<span class="fc" id="L147">            authentication.setJwtGrantedAuthoritiesConverter(jwt -&gt;</span>
-<span class="fc" id="L148">                    autoritesRoleCommun(jwt)</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (&quot;COMMUN&quot;.equals(mode)) {</span>
+<span class="fc" id="L148">            authentication.setJwtGrantedAuthoritiesConverter(jwt -&gt;</span>
+<span class="fc" id="L149">                    autoritesRoleCommun(jwt)</span>
             );
         } else {
-<span class="nc" id="L151">            JwtGrantedAuthoritiesConverter roles =</span>
+<span class="nc" id="L152">            JwtGrantedAuthoritiesConverter roles =</span>
                     new JwtGrantedAuthoritiesConverter();
 
-<span class="nc" id="L154">            roles.setAuthoritiesClaimName(&quot;roles&quot;);</span>
-<span class="nc" id="L155">            roles.setAuthorityPrefix(&quot;ROLE_&quot;);</span>
-<span class="nc" id="L156">            authentication.setJwtGrantedAuthoritiesConverter(roles);</span>
+<span class="nc" id="L155">            roles.setAuthoritiesClaimName(&quot;roles&quot;);</span>
+<span class="nc" id="L156">            roles.setAuthorityPrefix(&quot;ROLE_&quot;);</span>
+<span class="nc" id="L157">            authentication.setJwtGrantedAuthoritiesConverter(roles);</span>
         }
 
-<span class="fc" id="L159">        http</span>
-<span class="fc" id="L160">                .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L161">                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
+<span class="fc" id="L160">        http</span>
+<span class="fc" id="L161">                .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L162">                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)</span>
                 )
-<span class="fc" id="L163">                .csrf(csrf -&gt; csrf</span>
-<span class="fc" id="L164">                        .ignoringRequestMatchers(&quot;/api/**&quot;)</span>
+<span class="fc" id="L164">                .csrf(csrf -&gt; csrf</span>
+<span class="fc" id="L165">                        .ignoringRequestMatchers(&quot;/api/**&quot;)</span>
                 )
-<span class="fc" id="L166">                .authorizeHttpRequests(authorisations -&gt; authorisations</span>
-<span class="fc" id="L167">                        .requestMatchers(</span>
+<span class="fc" id="L167">                .authorizeHttpRequests(authorisations -&gt; authorisations</span>
+<span class="fc" id="L168">                    .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()</span>
+<span class="fc" id="L169">                        .requestMatchers(</span>
                                 HttpMethod.GET,
                                 &quot;/&quot;,
                                 &quot;/quittances&quot;,
@@ -172,28 +174,38 @@ import org.springframework.security.web.SecurityFilterChain;
                                 &quot;/js/quittances.js&quot;,
                                 &quot;/js/panneau-document.js&quot;,
                                 &quot;/vendor/bootstrap/bootstrap.min.css&quot;
-<span class="fc" id="L175">                        ).permitAll()</span>
-<span class="fc" id="L176">                        .requestMatchers(</span>
+<span class="fc" id="L177">                        ).permitAll()</span>
+<span class="fc" id="L178">                        .requestMatchers(</span>
                                 HttpMethod.GET,
-                                &quot;/api/v1/systeme/etat&quot;
-<span class="fc" id="L179">                        ).permitAll()</span>
-<span class="fc" id="L180">                        .requestMatchers(</span>
+                                &quot;/api/v1/systeme/etat&quot;,
+                                &quot;/health&quot;
+<span class="fc" id="L182">                        ).permitAll()</span>
+<span class="fc" id="L183">                        .requestMatchers(</span>
                                 HttpMethod.GET,
                                 &quot;/api/v1/identite&quot;
-<span class="fc" id="L183">                        ).authenticated()</span>
-<span class="fc" id="L184">                        .requestMatchers(</span>
+<span class="fc" id="L186">                        ).authenticated()</span>
+<span class="fc" id="L187">                        .requestMatchers(</span>
                                 &quot;/api/v1/quittances&quot;,
                                 &quot;/api/v1/quittances/**&quot;
-<span class="fc" id="L187">                        ).hasAnyRole(&quot;BAILLEUR&quot;, &quot;LOCATAIRE&quot;)</span>
-<span class="fc" id="L188">                        .anyRequest().denyAll()</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">                        ).hasAnyRole(&quot;COMMUN&quot;.equals(mode)</span>
+<span class="fc" id="L191">                                ? new String[]{&quot;BAILLEUR&quot;, &quot;GESTIONNAIRE&quot;, &quot;LOCATAIRE&quot;}</span>
+<span class="nc" id="L192">                                : new String[]{&quot;BAILLEUR&quot;, &quot;LOCATAIRE&quot;})</span>
+<span class="fc" id="L193">                        .anyRequest().denyAll()</span>
                 )
-<span class="fc" id="L190">                .oauth2ResourceServer(oauth -&gt; oauth</span>
-<span class="fc" id="L191">                        .jwt(jwt -&gt; jwt</span>
-<span class="fc" id="L192">                                .jwtAuthenticationConverter(authentication)</span>
+<span class="fc" id="L195">                .oauth2ResourceServer(oauth -&gt; oauth</span>
+<span class="fc" id="L196">                        .jwt(jwt -&gt; jwt</span>
+<span class="fc" id="L197">                                .jwtAuthenticationConverter(authentication)</span>
                         )
                 );
 
-<span class="fc" id="L196">        return http.build();</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (&quot;COMMUN&quot;.equals(mode)) {</span>
+<span class="fc" id="L202">            http.addFilterAfter(</span>
+                    new ResolutionLocataireFiltre(locataires),
+                    org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class
+            );
+        }
+
+<span class="fc" id="L208">        return http.build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

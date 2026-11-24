@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BienBailCollectifClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.client</a> &gt; <span class="el_source">BienBailCollectifClient.java</span></div><h1>BienBailCollectifClient.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.client;
+
+import com.gestionlocative.quittances.dto.ReferentielsExternes.BailPeriode;
+import com.gestionlocative.quittances.dto.ReferentielsExternes.Bien;
+import com.gestionlocative.quittances.exception.RegleMetierException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.Map;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.client.RestClient;
+
+/**
+ * Adaptateur en lecture seule vers les API collectives actuelles.
+ * Aucun propriétaire n'est déduit d'une simple permission de lecture.
+ */
+public final class BienBailCollectifClient implements BienBailClient {
+    private final RestClient biens;
+    private final RestClient baux;
+    private final String cheminBien;
+    private final String cheminBail;
+
+    public BienBailCollectifClient(RestClient biens, String cheminBien,
+<span class="fc" id="L27">            RestClient baux, String cheminBail) {</span>
+<span class="fc" id="L28">        this.biens = biens;</span>
+<span class="fc" id="L29">        this.cheminBien = cheminBien;</span>
+<span class="fc" id="L30">        this.baux = baux;</span>
+<span class="fc" id="L31">        this.cheminBail = cheminBail;</span>
+<span class="fc" id="L32">    }</span>
+
+<span class="fc" id="L34">    public record FicheBien(String id, String adresse, String ville,</span>
+            String bailleurId, BigDecimal charges) { }
+
+<span class="fc" id="L37">    public record FicheBail(String id, String bienId, String locataireId,</span>
+            LocalDate dateDebut, LocalDate dateFin, BigDecimal montantLoyer,
+            String statut) { }
+
+    private FicheBien lireBien(String id) {
+<span class="fc" id="L42">        FicheBien bien = LectureApiExterne.lire(biens, &quot;BIENS&quot;, cheminBien,</span>
+<span class="fc" id="L43">                Map.of(&quot;id&quot;, id), FicheBien.class);</span>
+<span class="fc bfc" id="L44" title="All 4 branches covered.">        if (!id.equals(bien.id()) || !LectureApiExterne.textePresent(bien.adresse())</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                || !LectureApiExterne.identifiantValide(bien.bailleurId())) {</span>
+<span class="fc" id="L46">            throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
+        }
+<span class="fc" id="L48">        return bien;</span>
+    }
+
+    @Override
+    public Bien consulterBien(String id) {
+<span class="fc" id="L53">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc" id="L54">        FicheBien source = lireBien(id);</span>
+<span class="fc" id="L55">        String adresse = source.adresse().trim();</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (LectureApiExterne.textePresent(source.ville())) {</span>
+<span class="fc" id="L57">            adresse += &quot;, &quot; + source.ville().trim();</span>
+        }
+<span class="fc" id="L59">        return new Bien(&quot;1&quot;, id, adresse, source.bailleurId());</span>
+    }
+
+    @Override
+    public BailPeriode consulterBail(String id, LocalDate debut, LocalDate fin) {
+<span class="fc" id="L64">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc bfc" id="L65" title="All 6 branches covered.">        if (debut == null || fin == null || fin.isBefore(debut)) {</span>
+<span class="fc" id="L66">            throw new RegleMetierException(&quot;PERIODE_INVALIDE&quot;, &quot;Période invalide.&quot;);</span>
+        }
+        // Les API collectives décrivent des mensualités, sans règle de prorata.
+<span class="fc" id="L69">        YearMonth mois = YearMonth.from(debut);</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        if (!debut.equals(mois.atDay(1)) || !fin.equals(mois.atEndOfMonth())) {</span>
+<span class="fc" id="L71">            throw new RegleMetierException(&quot;PERIODE_NON_MENSUELLE&quot;,</span>
+                    &quot;Le contrat collectif ne prend pas en charge les périodes partielles.&quot;);
+        }
+<span class="fc" id="L74">        FicheBail bail = LectureApiExterne.lire(baux, &quot;BAUX&quot;, cheminBail,</span>
+<span class="fc" id="L75">                Map.of(&quot;id&quot;, id), FicheBail.class);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (!id.equals(bail.id())</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(bail.bienId())</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(bail.locataireId())</span>
+<span class="pc bpc" id="L79" title="2 of 4 branches missed.">                || bail.dateDebut() == null || bail.montantLoyer() == null</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                || bail.montantLoyer().signum() &lt; 0</span>
+<span class="fc bfc" id="L81" title="All 4 branches covered.">                || !(&quot;ACTIF&quot;.equals(bail.statut()) || &quot;TERMINE&quot;.equals(bail.statut()))</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                || debut.isBefore(bail.dateDebut())</span>
+<span class="pc bpc" id="L83" title="1 of 4 branches missed.">                || (bail.dateFin() != null &amp;&amp; fin.isAfter(bail.dateFin()))) {</span>
+<span class="fc" id="L84">            throw LectureApiExterne.incoherence(&quot;BAUX&quot;);</span>
+        }
+<span class="fc" id="L86">        FicheBien bien = lireBien(bail.bienId());</span>
+<span class="fc bfc" id="L87" title="All 4 branches covered.">        if (bien.charges() == null || bien.charges().signum() &lt; 0) {</span>
+<span class="fc" id="L88">            throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
+        }
+        // L'identité provient du JWT vérifié; la propriété provient de Biens.
+<span class="fc" id="L91">        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="fc" id="L92">        var lecteur = com.gestionlocative.quittances.security</span>
+<span class="fc" id="L93">                .LecteurQuittances.depuis(auth);</span>
+
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (!lecteur.peutEcrire()) {</span>
+<span class="nc" id="L96">            throw new AccessDeniedException(</span>
+                    &quot;Operation reservee au bailleur et au gestionnaire.&quot;);
+        }
+
+<span class="fc" id="L100">        JwtAuthenticationToken jwt = (JwtAuthenticationToken) auth;</span>
+<span class="fc" id="L101">        String sujet = jwt.getToken().getSubject();</span>
+
+<span class="pc bpc" id="L103" title="1 of 4 branches missed.">        if (lecteur.bailleur() &amp;&amp; !bien.bailleurId().equals(sujet)) {</span>
+<span class="fc" id="L104">            throw new AccessDeniedException(</span>
+                    &quot;Le bien n'appartient pas au bailleur authentifie.&quot;);
+        }
+
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (lecteur.gestionnaire()) {</span>
+<span class="nc" id="L109">            throw new com.gestionlocative.quittances.exception.ServiceExterneException(</span>
+                    &quot;BIENS&quot;,
+                    &quot;IDENTITE_BAILLEUR_INDISPONIBLE&quot;,
+                    &quot;Le referentiel doit fournir l'identite du proprietaire.&quot;,
+                    null);
+        }
+
+<span class="fc" id="L116">String nom = jwt.getToken().getClaimAsString(&quot;nom&quot;);</span>
+<span class="fc" id="L117">        String prenom = jwt.getToken().getClaimAsString(&quot;prenom&quot;);</span>
+<span class="pc bpc" id="L118" title="1 of 4 branches missed.">        if (!LectureApiExterne.textePresent(nom) || !LectureApiExterne.textePresent(prenom)) {</span>
+<span class="fc" id="L119">            throw new AccessDeniedException(&quot;Nom du bailleur absent du JWT vérifié.&quot;);</span>
+        }
+<span class="fc" id="L121">        return new BailPeriode(&quot;1&quot;, id, bail.locataireId(), bail.bienId(),</span>
+<span class="fc" id="L122">                bien.bailleurId(), prenom.trim() + &quot; &quot; + nom.trim(), bail.dateDebut(),</span>
+<span class="fc" id="L123">                bail.dateFin(), debut, fin, bail.montantLoyer(), bien.charges(), &quot;MAD&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

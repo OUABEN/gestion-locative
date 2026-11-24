@@ -42,102 +42,136 @@ public class ConstructionBrouillonService {
             LocalDate debut,
             LocalDate fin
     ) {
-<span class="pc bpc" id="L45" title="2 of 4 branches missed.">        if (bailleurId == null || bailleurId.isBlank()) {</span>
-<span class="nc" id="L46">            throw new RegleMetierException(</span>
+<span class="fc" id="L45">        return construireInterne(bailleurId, bailId, debut, fin, false);</span>
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public Resultat construirePourGestionnaire(
+            org.springframework.security.core.Authentication authentication,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin
+    ) {
+<span class="fc" id="L55">        var lecteur = com.gestionlocative.quittances.security</span>
+<span class="fc" id="L56">                .LecteurQuittances.depuis(authentication);</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (!lecteur.gestionnaire()) {</span>
+<span class="fc" id="L59">            throw new org.springframework.security.access.AccessDeniedException(</span>
+                    &quot;Cette operation est reservee au gestionnaire.&quot;);
+        }
+
+<span class="fc" id="L63">        return construireInterne(null, bailId, debut, fin, true);</span>
+    }
+
+    private Resultat construireInterne(
+            String bailleurId,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin,
+            boolean gestionnaire
+    ) {
+<span class="fc bfc" id="L73" title="All 6 branches covered.">        if (!gestionnaire &amp;&amp; (bailleurId == null || bailleurId.isBlank())) {</span>
+<span class="fc" id="L74">            throw new RegleMetierException(</span>
                     &quot;ACTEUR_ABSENT&quot;,
                     &quot;Le bailleur authentifié est obligatoire.&quot;
             );
         }
 
-<span class="fc" id="L52">        var bail = bienBailClient.consulterBail(bailId, debut, fin);</span>
+<span class="fc" id="L80">        var bail = bienBailClient.consulterBail(bailId, debut, fin);</span>
 
-<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!bailleurId.equals(bail.bailleurId())) {</span>
-<span class="fc" id="L55">            throw new RegleMetierException(</span>
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">        if (bail.bailleurId() == null || bail.bailleurId().isBlank()) {</span>
+<span class="nc" id="L83">            throw new RegleMetierException(</span>
+                    &quot;PROPRIETAIRE_ABSENT&quot;,
+                    &quot;Le proprietaire du bail doit etre identifie.&quot;);
+        }
+
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        if (!gestionnaire &amp;&amp; !bailleurId.equals(bail.bailleurId())) {</span>
+<span class="fc" id="L89">            throw new RegleMetierException(</span>
                     &quot;ACCES_INTERDIT&quot;,
                     &quot;Ce bail ne relève pas de cet utilisateur.&quot;
             );
         }
 
-<span class="fc" id="L61">        var bien = bienBailClient.consulterBien(bail.bienId());</span>
+<span class="fc" id="L95">        var bien = bienBailClient.consulterBien(bail.bienId());</span>
 
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (!bail.bienId().equals(bien.id())</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">                || !bail.bailleurId().equals(bien.bailleurId())) {</span>
-<span class="fc" id="L65">            throw new RegleMetierException(</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (!bail.bienId().equals(bien.id())</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">                || !bail.bailleurId().equals(bien.bailleurId())) {</span>
+<span class="fc" id="L99">            throw new RegleMetierException(</span>
                     &quot;BIEN_BAIL_INCOHERENT&quot;,
                     &quot;Le bien ne correspond pas aux données du bail.&quot;
             );
         }
 
-<span class="fc" id="L71">        var locataire = locataireClient.consulter(bail.locataireId());</span>
+<span class="fc" id="L105">        var locataire = locataireClient.consulter(bail.locataireId());</span>
 
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (!bail.locataireId().equals(locataire.id())) {</span>
-<span class="nc" id="L74">            throw new RegleMetierException(</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (!bail.locataireId().equals(locataire.id())) {</span>
+<span class="nc" id="L108">            throw new RegleMetierException(</span>
                     &quot;LOCATAIRE_BAIL_INCOHERENT&quot;,
                     &quot;Le locataire ne correspond pas au bail.&quot;
             );
         }
 
-<span class="fc" id="L80">        var affectations = paiementClient.consulterAffectations(</span>
+<span class="fc" id="L114">        var affectations = paiementClient.consulterAffectations(</span>
                 bailId,
                 debut,
                 fin
         );
 
-<span class="fc" id="L86">        var calcul = calculService.calculer(</span>
+<span class="fc" id="L120">        var calcul = calculService.calculer(</span>
                 new SituationPeriode(
-<span class="fc" id="L88">                        bail.bailId(),</span>
-<span class="fc" id="L89">                        bail.debutBail(),</span>
-<span class="fc" id="L90">                        bail.finBail(),</span>
+<span class="fc" id="L122">                        bail.bailId(),</span>
+<span class="fc" id="L123">                        bail.debutBail(),</span>
+<span class="fc" id="L124">                        bail.finBail(),</span>
                         debut,
                         fin,
-<span class="fc" id="L93">                        bail.loyerDu(),</span>
-<span class="fc" id="L94">                        bail.chargesDues(),</span>
-<span class="fc" id="L95">                        bail.devise(),</span>
+<span class="fc" id="L127">                        bail.loyerDu(),</span>
+<span class="fc" id="L128">                        bail.chargesDues(),</span>
+<span class="fc" id="L129">                        bail.devise(),</span>
                         affectations
                 )
         );
 
-<span class="fc" id="L100">        Map&lt;String, String&gt; donnees = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L101">        donnees.put(&quot;versionSnapshot&quot;, &quot;1&quot;);</span>
-<span class="fc" id="L102">        donnees.put(&quot;referenceBail&quot;, bail.bailId());</span>
-<span class="fc" id="L103">        donnees.put(&quot;bailleurNom&quot;, bail.nomBailleur());</span>
-<span class="fc" id="L104">        donnees.put(&quot;locataireNom&quot;, locataire.nom());</span>
-<span class="fc" id="L105">        donnees.put(</span>
+<span class="fc" id="L134">        Map&lt;String, String&gt; donnees = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L135">        donnees.put(&quot;versionSnapshot&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L136">        donnees.put(&quot;referenceBail&quot;, bail.bailId());</span>
+<span class="fc" id="L137">        donnees.put(&quot;bailleurNom&quot;, bail.nomBailleur());</span>
+<span class="fc" id="L138">        donnees.put(&quot;locataireNom&quot;, locataire.nom());</span>
+<span class="fc" id="L139">        donnees.put(</span>
                 &quot;locatairePrenom&quot;,
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">                locataire.prenom() == null ? &quot;&quot; : locataire.prenom()</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">                locataire.prenom() == null ? &quot;&quot; : locataire.prenom()</span>
         );
-<span class="fc" id="L109">        donnees.put(&quot;bienAdresse&quot;, bien.adresse());</span>
-<span class="fc" id="L110">        donnees.put(&quot;debutBail&quot;, bail.debutBail().toString());</span>
+<span class="fc" id="L143">        donnees.put(&quot;bienAdresse&quot;, bien.adresse());</span>
+<span class="fc" id="L144">        donnees.put(&quot;debutBail&quot;, bail.debutBail().toString());</span>
 
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (bail.finBail() != null) {</span>
-<span class="nc" id="L113">            donnees.put(&quot;finBail&quot;, bail.finBail().toString());</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (bail.finBail() != null) {</span>
+<span class="nc" id="L147">            donnees.put(&quot;finBail&quot;, bail.finBail().toString());</span>
         }
 
-<span class="fc" id="L116">        Quittance document = Quittance.creerBrouillon(</span>
-<span class="fc" id="L117">                bail.bailId(),</span>
-<span class="fc" id="L118">                locataire.id(),</span>
-<span class="fc" id="L119">                bien.id(),</span>
-<span class="fc" id="L120">                bail.bailleurId(),</span>
+<span class="fc" id="L150">        Quittance document = Quittance.creerBrouillon(</span>
+<span class="fc" id="L151">                bail.bailId(),</span>
+<span class="fc" id="L152">                locataire.id(),</span>
+<span class="fc" id="L153">                bien.id(),</span>
+<span class="fc" id="L154">                bail.bailleurId(),</span>
                 debut,
                 fin,
-<span class="fc" id="L123">                calcul.loyerDu(),</span>
-<span class="fc" id="L124">                calcul.chargesDues(),</span>
-<span class="fc" id="L125">                calcul.loyerPaye(),</span>
-<span class="fc" id="L126">                calcul.chargesPayees(),</span>
-<span class="fc" id="L127">                calcul.typeDocument(),</span>
+<span class="fc" id="L157">                calcul.loyerDu(),</span>
+<span class="fc" id="L158">                calcul.chargesDues(),</span>
+<span class="fc" id="L159">                calcul.loyerPaye(),</span>
+<span class="fc" id="L160">                calcul.chargesPayees(),</span>
+<span class="fc" id="L161">                calcul.typeDocument(),</span>
                 donnees
         );
 
-<span class="fc" id="L131">        return new Resultat(document, calcul.affectationsRetenues());</span>
+<span class="fc" id="L165">        return new Resultat(document, calcul.affectationsRetenues());</span>
     }
 
     public record Resultat(
             Quittance document,
             List&lt;SituationPeriode.Affectation&gt; affectations
     ) {
-<span class="fc" id="L138">        public Resultat {</span>
-<span class="fc" id="L139">            affectations = List.copyOf(affectations);</span>
-<span class="fc" id="L140">        }</span>
+<span class="fc" id="L172">        public Resultat {</span>
+<span class="fc" id="L173">            affectations = List.copyOf(affectations);</span>
+<span class="fc" id="L174">        }</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

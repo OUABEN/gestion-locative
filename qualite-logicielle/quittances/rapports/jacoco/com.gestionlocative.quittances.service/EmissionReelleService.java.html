@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmissionReelleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">EmissionReelleService.java</span></div><h1>EmissionReelleService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
+
+import com.gestionlocative.quittances.config.ReferentielsProperties;
+import com.gestionlocative.quittances.document.SignataireReel;
+import com.gestionlocative.quittances.document.SignatureLocale;
+import com.gestionlocative.quittances.pdf.EmissionReellePdfService;
+import com.gestionlocative.quittances.repository.QuittanceRepository;
+import com.gestionlocative.quittances.security.LecteurQuittances;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+@Service
+public class EmissionReelleService {
+    private final ControlePrealableEmissionService controle;
+    private final PreparationApercuService preparation;
+    private final QuittanceRepository documents;
+    private final JdbcTemplate jdbc;
+    private final EmissionReellePdfService pdf;
+    private final SignataireReel signataire;
+    private final EmissionReelleTransactions transactions;
+    private final ConsultationQuittanceService consultation;
+    private final ReferentielsProperties sources;
+
+    @Value(&quot;${quittances.emission-reelle.active:false}&quot;) private boolean actif;
+    @Value(&quot;${quittances.securite.mode:LOCAL}&quot;) private String modeJwt;
+    @Value(&quot;${quittances.integration.paiements.mode:SIMULATION}&quot;) private String modePaiements;
+
+    public EmissionReelleService(ControlePrealableEmissionService controle,
+            PreparationApercuService preparation, QuittanceRepository documents,
+            JdbcTemplate jdbc, EmissionReellePdfService pdf, SignataireReel signataire,
+            EmissionReelleTransactions transactions, ConsultationQuittanceService consultation,
+<span class="fc" id="L48">            ReferentielsProperties sources) {</span>
+<span class="fc" id="L49">        this.controle = controle; this.preparation = preparation; this.documents = documents;</span>
+<span class="fc" id="L50">        this.jdbc = jdbc; this.pdf = pdf; this.signataire = signataire;</span>
+<span class="fc" id="L51">        this.transactions = transactions; this.consultation = consultation; this.sources = sources;</span>
+<span class="fc" id="L52">    }</span>
+
+    @Transactional(propagation = Propagation.NEVER)
+    public EmissionReelleTransactions.Resultat emettre(Authentication auth, UUID id,
+            Boolean confirmation) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (!Boolean.TRUE.equals(confirmation)) {</span>
+<span class="fc" id="L58">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Confirmation obligatoire.&quot;);</span>
+        }
+<span class="fc bfc" id="L60" title="All 4 branches covered.">        if (!actif || !&quot;COMMUN&quot;.equals(modeJwt)</span>
+<span class="pc bpc" id="L61" title="2 of 4 branches missed.">                || !&quot;UTILISATEUR&quot;.equals(modePaiements)</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">                || sources == null || !modeUtilisateur(sources.locataires())</span>
+<span class="pc bpc" id="L63" title="2 of 4 branches missed.">                || !modeUtilisateur(sources.biens()) || !modeUtilisateur(sources.baux())</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                || !signataire.estConfigure()) {</span>
+<span class="fc" id="L65">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,</span>
+                    &quot;Émission réelle indisponible : JWT commun, sources réelles et certificat requis.&quot;);
+        }
+        // Contrôle externe préalable : preuves réelles, bailleur, paiements et instantané.
+<span class="nc" id="L69">        controle.verifier(auth, id);</span>
+<span class="nc" id="L70">        LecteurQuittances lecteur = LecteurQuittances.depuis(auth);</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (!lecteur.peutEcrire()) {</span>
+<span class="nc" id="L73">            throw new org.springframework.security.access.AccessDeniedException(</span>
+                    &quot;Emission reservee au bailleur ou au gestionnaire.&quot;);
+        }
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        var document = (lecteur.gestionnaire()</span>
+<span class="nc" id="L78">                ? documents.findById(id)</span>
+<span class="nc" id="L79">                : documents.findByIdAndBailleurId(id, lecteur.identifiant()))</span>
+<span class="nc" id="L80">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND));</span>
+<span class="nc" id="L81">        var donnees = preparation.charger(auth, id);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (!id.equals(donnees.document().id())) {</span>
+<span class="nc" id="L83">            throw new ResponseStatusException(HttpStatus.CONFLICT, &quot;Identifiant incohérent.&quot;);</span>
+        }
+<span class="nc" id="L85">        Instant date = Instant.now();</span>
+<span class="nc" id="L86">        Long sequence = jdbc.queryForObject(&quot;SELECT nextval('numero_document_seq')&quot;, Long.class);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (sequence == null) throw new IllegalStateException(&quot;Séquence de numérotation absente.&quot;);</span>
+<span class="nc" id="L88">        String numero = &quot;QT-&quot; + date.atZone(ZoneOffset.UTC).getYear()</span>
+<span class="nc" id="L89">                + &quot;-&quot; + String.format(java.util.Locale.ROOT, &quot;%06d&quot;, sequence);</span>
+        try {
+<span class="nc" id="L91">            byte[] contenu = pdf.generer(donnees, numero, date);</span>
+<span class="nc" id="L92">            SignatureLocale.Preuve preuve = signataire.signer(contenu, date);</span>
+<span class="nc" id="L93">            return transactions.enregistrer(auth, id, document.getVersion(), numero,</span>
+                    date, contenu, preuve);
+<span class="nc" id="L95">        } catch (IOException | GeneralSecurityException e) {</span>
+<span class="nc" id="L96">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,</span>
+                    &quot;Émission indisponible : vérifiez le PDF et la configuration du certificat.&quot;);
+        }
+    }
+
+    private static boolean modeUtilisateur(ReferentielsProperties.Endpoint endpoint) {
+<span class="pc bpc" id="L102" title="1 of 4 branches missed.">        return endpoint != null &amp;&amp; &quot;UTILISATEUR&quot;.equals(endpoint.mode());</span>
+    }
+
+    public EmissionReelleTransactions.Verification verifier(Authentication auth, UUID id) {
+<span class="fc" id="L106">        var fichier = charger(auth, id);</span>
+<span class="fc" id="L107">        return new EmissionReelleTransactions.Verification(</span>
+<span class="fc" id="L108">                fichier.numero(), fichier.preuve().sha256(), true, false);</span>
+    }
+
+    public byte[] telechargerPdf(Authentication auth, UUID id) {
+<span class="fc" id="L112">        return charger(auth, id).pdf();</span>
+    }
+
+    public byte[] telechargerPreuve(Authentication auth, UUID id) {
+<span class="fc" id="L116">        var fichier = charger(auth, id);</span>
+<span class="fc" id="L117">        try (ByteArrayOutputStream sortie = new ByteArrayOutputStream();</span>
+<span class="fc" id="L118">                ZipOutputStream zip = new ZipOutputStream(sortie)) {</span>
+<span class="fc" id="L119">            ajouter(zip, &quot;document.pdf&quot;, fichier.pdf());</span>
+<span class="fc" id="L120">            ajouter(zip, &quot;document.sig&quot;, fichier.preuve().signature());</span>
+<span class="fc" id="L121">            ajouter(zip, &quot;certificat.cer&quot;, fichier.preuve().certificat());</span>
+<span class="fc" id="L122">            ajouter(zip, &quot;LIRE-MOI.txt&quot;, (&quot;Signature détachée RSA-SHA256.\n&quot;</span>
+<span class="fc" id="L123">                    + &quot;Empreinte SHA-256 : &quot; + fichier.preuve().sha256() + &quot;\n&quot;</span>
+                    + &quot;Validité cryptographique vérifiée.\n&quot;
+                    + &quot;La chaîne de certification et la valeur juridique doivent être vérifiées séparément.\n&quot;)
+<span class="fc" id="L126">                    .getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L127">            zip.finish();</span>
+<span class="fc" id="L128">            return sortie.toByteArray();</span>
+<span class="nc" id="L129">        } catch (IOException exception) {</span>
+<span class="nc" id="L130">            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,</span>
+                    &quot;Preuve d'émission indisponible.&quot;);
+        }
+    }
+
+    private EmissionReelleTransactions.Fichier charger(Authentication auth, UUID id) {
+        try {
+<span class="fc" id="L137">            return transactions.consulter(auth, id, consultation);</span>
+<span class="fc" id="L138">        } catch (GeneralSecurityException e) {</span>
+<span class="fc" id="L139">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+                    &quot;Preuve d'émission invalide.&quot;);
+        }
+    }
+    private static void ajouter(ZipOutputStream zip, String nom, byte[] contenu)
+            throws IOException {
+<span class="fc" id="L145">        zip.putNextEntry(new ZipEntry(nom));</span>
+<span class="fc" id="L146">        zip.write(contenu);</span>
+<span class="fc" id="L147">        zip.closeEntry();</span>
+<span class="fc" id="L148">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -53,18 +53,17 @@ public class ArchiveBrouillonTransactions {
                 id
         );
 
-<span class="fc" id="L56">        Quittance document = repository.findByIdAndBailleurId(</span>
-                id,
-<span class="fc" id="L58">                acteur.bailleurId()</span>
-<span class="fc" id="L59">        ).orElseThrow(this::introuvable);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        Quittance document = (acteur.gestionnaire()</span>
+<span class="nc" id="L57">                ? repository.findById(id)</span>
+<span class="fc" id="L58">                : repository.findByIdAndBailleurId(id, acteur.bailleurId())).orElseThrow(this::introuvable);</span>
 
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (archiveExiste(id, document.getVersion())) {</span>
-<span class="nc" id="L62">            throw conflit(</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (archiveExiste(id, document.getVersion())) {</span>
+<span class="nc" id="L61">            throw conflit(</span>
                     &quot;Un brouillon est déjà archivé pour cette version.&quot;
             );
         }
 
-<span class="fc" id="L67">        return new Source(donnees, document.getVersion());</span>
+<span class="fc" id="L66">        return new Source(donnees, document.getVersion());</span>
     }
 
     @Transactional(timeout = 10)
@@ -74,45 +73,44 @@ public class ArchiveBrouillonTransactions {
             long versionAttendue,
             PdfStocke fichier
     ) {
-<span class="fc" id="L77">        Acteur acteur = identifier(authentication);</span>
+<span class="fc" id="L76">        Acteur acteur = identifier(authentication);</span>
 
-<span class="fc" id="L79">        Quittance document = repository.trouverPourModification(</span>
-                quittanceId,
-<span class="fc" id="L81">                acteur.bailleurId()</span>
-<span class="fc" id="L82">        ).orElseThrow(this::introuvable);</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        Quittance document = (acteur.gestionnaire()</span>
+<span class="nc" id="L79">                ? repository.trouverPourModificationGestionnaire(quittanceId)</span>
+<span class="fc" id="L80">                : repository.trouverPourModification(quittanceId, acteur.bailleurId())).orElseThrow(this::introuvable);</span>
 
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (!Objects.equals(</span>
-<span class="fc" id="L85">                document.getVersion(),</span>
-<span class="fc" id="L86">                Long.valueOf(versionAttendue)</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if (!Objects.equals(</span>
+<span class="fc" id="L83">                document.getVersion(),</span>
+<span class="fc" id="L84">                Long.valueOf(versionAttendue)</span>
         )) {
-<span class="nc" id="L88">            throw conflit(</span>
+<span class="nc" id="L86">            throw conflit(</span>
                     &quot;Le document a changé pendant la génération du PDF.&quot;
             );
         }
 
-<span class="fc" id="L93">        String statut = document.getStatut().name();</span>
+<span class="fc" id="L91">        String statut = document.getStatut().name();</span>
 
-<span class="fc" id="L95">        boolean autorise =</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                &quot;BROUILLON&quot;.equals(statut)</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                        || &quot;EN_ATTENTE_VALIDATION&quot;.equals(statut)</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                        || &quot;EN_ATTENTE_SIGNATURE&quot;.equals(statut);</span>
+<span class="fc" id="L93">        boolean autorise =</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                &quot;BROUILLON&quot;.equals(statut)</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                        || &quot;EN_ATTENTE_VALIDATION&quot;.equals(statut)</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                        || &quot;EN_ATTENTE_SIGNATURE&quot;.equals(statut);</span>
 
-<span class="pc bpc" id="L100" title="2 of 4 branches missed.">        if (!autorise || document.getEmisLe() != null) {</span>
-<span class="nc" id="L101">            throw conflit(</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        if (!autorise || document.getEmisLe() != null) {</span>
+<span class="nc" id="L99">            throw conflit(</span>
                     &quot;Ce document ne peut plus être archivé comme brouillon.&quot;
             );
         }
 
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (archiveExiste(quittanceId, versionAttendue)) {</span>
-<span class="nc" id="L107">            throw conflit(</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (archiveExiste(quittanceId, versionAttendue)) {</span>
+<span class="nc" id="L105">            throw conflit(</span>
                     &quot;Un brouillon est déjà archivé pour cette version.&quot;
             );
         }
 
-<span class="fc" id="L112">        UUID archiveId = UUID.randomUUID();</span>
-<span class="fc" id="L113">        Instant date = Instant.now();</span>
+<span class="fc" id="L110">        UUID archiveId = UUID.randomUUID();</span>
+<span class="fc" id="L111">        Instant date = Instant.now();</span>
 
-<span class="fc" id="L115">        jdbcTemplate.update(&quot;&quot;&quot;</span>
+<span class="fc" id="L113">        jdbcTemplate.update(&quot;&quot;&quot;</span>
                 INSERT INTO document_fichier (
                     id,
                     quittance_id,
@@ -127,15 +125,15 @@ public class ArchiveBrouillonTransactions {
                 &quot;&quot;&quot;,
                 archiveId,
                 quittanceId,
-<span class="fc" id="L130">                versionAttendue,</span>
+<span class="fc" id="L128">                versionAttendue,</span>
                 &quot;BROUILLON&quot;,
-<span class="fc" id="L132">                fichier.reference(),</span>
-<span class="fc" id="L133">                fichier.sha256(),</span>
-<span class="fc" id="L134">                fichier.tailleOctets(),</span>
-<span class="fc" id="L135">                Timestamp.from(date)</span>
+<span class="fc" id="L130">                fichier.reference(),</span>
+<span class="fc" id="L131">                fichier.sha256(),</span>
+<span class="fc" id="L132">                fichier.tailleOctets(),</span>
+<span class="fc" id="L133">                Timestamp.from(date)</span>
         );
 
-<span class="fc" id="L138">        jdbcTemplate.update(&quot;&quot;&quot;</span>
+<span class="fc" id="L136">        jdbcTemplate.update(&quot;&quot;&quot;</span>
                 INSERT INTO quittance_audit (
                     id,
                     quittance_id,
@@ -149,24 +147,24 @@ public class ArchiveBrouillonTransactions {
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 &quot;&quot;&quot;,
-<span class="fc" id="L152">                UUID.randomUUID(),</span>
+<span class="fc" id="L150">                UUID.randomUUID(),</span>
                 quittanceId,
-<span class="fc" id="L154">                acteur.sujet(),</span>
-<span class="fc" id="L155">                acteur.emetteur(),</span>
+<span class="fc" id="L152">                acteur.sujet(),</span>
+<span class="fc" id="L153">                acteur.emetteur(),</span>
                 &quot;ARCHIVAGE_BROUILLON&quot;,
                 &quot;SUCCES&quot;,
-<span class="fc" id="L158">                Timestamp.from(date),</span>
+<span class="fc" id="L156">                Timestamp.from(date),</span>
                 statut,
                 statut
         );
 
-<span class="fc" id="L163">        return new ArchiveBrouillonResponse(</span>
+<span class="fc" id="L161">        return new ArchiveBrouillonResponse(</span>
                 archiveId,
                 quittanceId,
                 versionAttendue,
                 &quot;BROUILLON&quot;,
-<span class="fc" id="L168">                fichier.sha256(),</span>
-<span class="fc" id="L169">                fichier.tailleOctets(),</span>
+<span class="fc" id="L166">                fichier.sha256(),</span>
+<span class="fc" id="L167">                fichier.tailleOctets(),</span>
                 date
         );
     }
@@ -177,14 +175,13 @@ public class ArchiveBrouillonTransactions {
             UUID quittanceId,
             UUID archiveId
     ) {
-<span class="fc" id="L180">        Acteur acteur = identifier(authentication);</span>
+<span class="fc" id="L178">        Acteur acteur = identifier(authentication);</span>
 
-<span class="fc" id="L182">        repository.findByIdAndBailleurId(</span>
-                quittanceId,
-<span class="fc" id="L184">                acteur.bailleurId()</span>
-<span class="fc" id="L185">        ).orElseThrow(this::introuvable);</span>
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        (acteur.gestionnaire()</span>
+<span class="nc" id="L181">                ? repository.findById(quittanceId)</span>
+<span class="fc" id="L182">                : repository.findByIdAndBailleurId(quittanceId, acteur.bailleurId())).orElseThrow(this::introuvable);</span>
 
-<span class="fc" id="L187">        var fichiers = jdbcTemplate.query(</span>
+<span class="fc" id="L184">        var fichiers = jdbcTemplate.query(</span>
                 &quot;&quot;&quot;
                 SELECT reference_stockage, sha256
                 FROM document_fichier
@@ -192,23 +189,23 @@ public class ArchiveBrouillonTransactions {
                   AND quittance_id = ?
                   AND nature = 'BROUILLON'
                 &quot;&quot;&quot;,
-<span class="fc" id="L195">                (resultat, numeroLigne) -&gt; new Fichier(</span>
-<span class="fc" id="L196">                        resultat.getString(&quot;reference_stockage&quot;),</span>
-<span class="fc" id="L197">                        resultat.getString(&quot;sha256&quot;)</span>
+<span class="fc" id="L192">                (resultat, numeroLigne) -&gt; new Fichier(</span>
+<span class="fc" id="L193">                        resultat.getString(&quot;reference_stockage&quot;),</span>
+<span class="fc" id="L194">                        resultat.getString(&quot;sha256&quot;)</span>
                 ),
                 archiveId,
                 quittanceId
         );
 
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        if (fichiers.isEmpty()) {</span>
-<span class="nc" id="L204">            throw introuvable();</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if (fichiers.isEmpty()) {</span>
+<span class="nc" id="L201">            throw introuvable();</span>
         }
 
-<span class="fc" id="L207">        return fichiers.getFirst();</span>
+<span class="fc" id="L204">        return fichiers.getFirst();</span>
     }
 
     private boolean archiveExiste(UUID quittanceId, long version) {
-<span class="fc" id="L211">        Long nombre = jdbcTemplate.queryForObject(</span>
+<span class="fc" id="L208">        Long nombre = jdbcTemplate.queryForObject(</span>
                 &quot;&quot;&quot;
                 SELECT COUNT(*)
                 FROM document_fichier
@@ -218,62 +215,64 @@ public class ArchiveBrouillonTransactions {
                 &quot;&quot;&quot;,
                 Long.class,
                 quittanceId,
-<span class="fc" id="L221">                version</span>
+<span class="fc" id="L218">                version</span>
         );
 
-<span class="pc bpc" id="L224" title="1 of 2 branches missed.">        return nombre.longValue() &gt; 0;</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        return nombre.longValue() &gt; 0;</span>
     }
 
     private Acteur identifier(Authentication authentication) {
-<span class="fc" id="L228">        LecteurQuittances lecteur =</span>
-<span class="fc" id="L229">                LecteurQuittances.depuis(authentication);</span>
+<span class="fc" id="L225">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L226">                LecteurQuittances.depuis(authentication);</span>
 
-<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (!lecteur.bailleur()) {</span>
-<span class="nc" id="L232">            throw new AccessDeniedException(</span>
-                    &quot;Les archives de brouillons sont réservées au bailleur.&quot;
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if (!lecteur.peutEcrire()) {</span>
+<span class="nc" id="L229">            throw new AccessDeniedException(</span>
+                    &quot;Les archives de brouillons sont réservées au bailleur ou au gestionnaire.&quot;
             );
         }
 
-<span class="fc" id="L237">        IdentiteAudit.Acteur contexteAudit =</span>
-<span class="fc" id="L238">                identiteAudit.depuis(authentication);</span>
+<span class="fc" id="L234">        IdentiteAudit.Acteur contexteAudit =</span>
+<span class="fc" id="L235">                identiteAudit.depuis(authentication);</span>
 
-<span class="fc" id="L240">        return new Acteur(</span>
-<span class="fc" id="L241">                lecteur.identifiant(),</span>
-<span class="fc" id="L242">                contexteAudit.sujet(),</span>
-<span class="fc" id="L243">                contexteAudit.emetteurIdentite()</span>
+<span class="fc" id="L237">        return new Acteur(</span>
+<span class="fc" id="L238">                lecteur.identifiant(),</span>
+<span class="fc" id="L239">                contexteAudit.sujet(),</span>
+<span class="fc" id="L240">                contexteAudit.emetteurIdentite(),</span>
+<span class="fc" id="L241">                lecteur.gestionnaire()</span>
         );
     }
 
     private ResponseStatusException introuvable() {
-<span class="fc" id="L248">        return new ResponseStatusException(</span>
+<span class="fc" id="L246">        return new ResponseStatusException(</span>
                 HttpStatus.NOT_FOUND,
                 &quot;Document ou archive introuvable.&quot;
         );
     }
 
     private ResponseStatusException conflit(String message) {
-<span class="nc" id="L255">        return new ResponseStatusException(</span>
+<span class="nc" id="L253">        return new ResponseStatusException(</span>
                 HttpStatus.CONFLICT,
                 message
         );
     }
 
-<span class="fc" id="L261">    public record Source(</span>
+<span class="fc" id="L259">    public record Source(</span>
             DonneesApercu donnees,
             long version
     ) {
     }
 
-<span class="fc" id="L267">    public record Fichier(</span>
+<span class="fc" id="L265">    public record Fichier(</span>
             String reference,
             String sha256
     ) {
     }
 
-<span class="fc" id="L273">    private record Acteur(</span>
+<span class="fc" id="L271">    private record Acteur(</span>
             String bailleurId,
             String sujet,
-            String emetteur
+            String emetteur,
+            boolean gestionnaire
     ) {
     }
 }

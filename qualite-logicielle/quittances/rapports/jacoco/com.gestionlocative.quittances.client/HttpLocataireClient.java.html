@@ -11,55 +11,111 @@ public class HttpLocataireClient implements LocataireClient {
     private final RestClient client;
     private final String chemin;
     private final boolean formatAhmed;
+    private final boolean resolutionUtilisateurAutorisee;
 
     public HttpLocataireClient(RestClient client, String chemin) {
-<span class="fc" id="L16">        this(client, chemin, false);</span>
-<span class="fc" id="L17">    }</span>
+<span class="fc" id="L17">        this(client, chemin, false);</span>
+<span class="fc" id="L18">    }</span>
 
-<span class="fc" id="L19">    public HttpLocataireClient(RestClient client, String chemin, boolean formatAhmed) {</span>
-<span class="fc" id="L20">        this.formatAhmed = formatAhmed;</span>
-<span class="fc" id="L21">        this.client = client;</span>
-<span class="fc" id="L22">        this.chemin = chemin;</span>
-<span class="fc" id="L23">    }</span>
+    public HttpLocataireClient(RestClient client, String chemin, boolean formatAhmed) {
+<span class="fc" id="L21">        this(client, chemin, formatAhmed, false);</span>
+<span class="fc" id="L22">    }</span>
 
-<span class="fc" id="L25">    public record SyntheseAhmed(String id, String nom, String prenom, String email,</span>
+    public HttpLocataireClient(
+            RestClient client,
+            String chemin,
+            boolean formatAhmed,
+<span class="fc" id="L28">            boolean resolutionUtilisateurAutorisee) {</span>
+<span class="fc" id="L29">        this.resolutionUtilisateurAutorisee = resolutionUtilisateurAutorisee;</span>
+<span class="fc" id="L30">        this.formatAhmed = formatAhmed;</span>
+<span class="fc" id="L31">        this.client = client;</span>
+<span class="fc" id="L32">        this.chemin = chemin;</span>
+<span class="fc" id="L33">    }</span>
+
+<span class="fc" id="L35">    public record SyntheseAhmed(String id, String nom, String prenom, String email,</span>
             String nomComplet, String cin, String telephone) { }
 
     @Override
     public Locataire consulter(String id) {
-<span class="fc" id="L30">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc" id="L40">        LectureApiExterne.verifierIdentifiant(id);</span>
 
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        if (formatAhmed) {</span>
-<span class="fc" id="L33">            SyntheseAhmed reponse = LectureApiExterne.lire(client, &quot;LOCATAIRES&quot;, chemin,</span>
-<span class="fc" id="L34">                    Map.of(&quot;id&quot;, id), SyntheseAhmed.class);</span>
-<span class="fc bfc" id="L35" title="All 4 branches covered.">            if (!id.equals(reponse.id()) || !LectureApiExterne.textePresent(reponse.nom())</span>
-<span class="fc bfc" id="L36" title="All 2 branches covered.">                    || !LectureApiExterne.textePresent(reponse.prenom())) {</span>
-<span class="fc" id="L37">                throw LectureApiExterne.incoherence(&quot;LOCATAIRES&quot;);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (formatAhmed) {</span>
+<span class="fc" id="L43">            SyntheseAhmed reponse = LectureApiExterne.lire(client, &quot;LOCATAIRES&quot;, chemin,</span>
+<span class="fc" id="L44">                    Map.of(&quot;id&quot;, id), SyntheseAhmed.class);</span>
+<span class="fc bfc" id="L45" title="All 4 branches covered.">            if (!id.equals(reponse.id()) || !LectureApiExterne.textePresent(reponse.nom())</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                    || !LectureApiExterne.textePresent(reponse.prenom())) {</span>
+<span class="fc" id="L47">                throw LectureApiExterne.incoherence(&quot;LOCATAIRES&quot;);</span>
             }
             // Version du contrat INTERNE après adaptation, pas une version déclarée par Ahmed.
             // L'API ne prouve pas la vérification de l'adresse : jamais true par défaut.
-<span class="fc" id="L41">            return new Locataire(&quot;1&quot;, reponse.id(), reponse.nom(), reponse.prenom(),</span>
-<span class="fc" id="L42">                    reponse.email(), false);</span>
+<span class="fc" id="L51">            return new Locataire(&quot;1&quot;, reponse.id(), reponse.nom(), reponse.prenom(),</span>
+<span class="fc" id="L52">                    reponse.email(), false);</span>
         }
 
-<span class="fc" id="L45">        Locataire resultat = LectureApiExterne.lire(</span>
+<span class="fc" id="L55">        Locataire resultat = LectureApiExterne.lire(</span>
                 client,
                 &quot;LOCATAIRES&quot;,
                 chemin,
-<span class="fc" id="L49">                Map.of(&quot;id&quot;, id),</span>
+<span class="fc" id="L59">                Map.of(&quot;id&quot;, id),</span>
                 Locataire.class
         );
 
-<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (!&quot;1&quot;.equals(resultat.versionContrat())</span>
-<span class="fc bfc" id="L54" title="All 2 branches covered.">                || !id.equals(resultat.id())</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                || !LectureApiExterne.textePresent(resultat.nom())</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                || resultat.emailVerifie() == null</span>
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">                || (Boolean.TRUE.equals(resultat.emailVerifie())</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">                &amp;&amp; !LectureApiExterne.textePresent(resultat.email()))) {</span>
-<span class="fc" id="L59">            throw LectureApiExterne.incoherence(&quot;LOCATAIRES&quot;);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (!&quot;1&quot;.equals(resultat.versionContrat())</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                || !id.equals(resultat.id())</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">                || !LectureApiExterne.textePresent(resultat.nom())</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                || resultat.emailVerifie() == null</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">                || (Boolean.TRUE.equals(resultat.emailVerifie())</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                &amp;&amp; !LectureApiExterne.textePresent(resultat.email()))) {</span>
+<span class="fc" id="L69">            throw LectureApiExterne.incoherence(&quot;LOCATAIRES&quot;);</span>
         }
 
-<span class="fc" id="L62">        return resultat;</span>
+<span class="fc" id="L72">        return resultat;</span>
+    }
+
+<span class="fc" id="L75">    public record FicheConnectee(String id) {}</span>
+
+    @Override
+    public String identifierConnecte() {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (!resolutionUtilisateurAutorisee) {</span>
+<span class="fc" id="L80">            throw new org.springframework.security.access.AccessDeniedException(</span>
+                    &quot;La resolution du locataire exige le JWT utilisateur.&quot;);
+        }
+
+        try {
+<span class="fc" id="L85">            FicheConnectee fiche = client.get()</span>
+<span class="fc" id="L86">                    .uri(&quot;/api/locataires/me&quot;)</span>
+<span class="fc" id="L87">                    .retrieve()</span>
+<span class="fc" id="L88">                    .body(FicheConnectee.class);</span>
+
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">            if (fiche == null</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                    || !LectureApiExterne.identifiantValide(fiche.id())</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                    || !fiche.id().equals(fiche.id().trim())) {</span>
+<span class="fc" id="L93">                throw LectureApiExterne.incoherence(&quot;LOCATAIRES&quot;);</span>
+            }
+
+<span class="fc" id="L96">            return fiche.id();</span>
+
+<span class="fc" id="L98">        } catch (org.springframework.web.client.RestClientResponseException e) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (e.getStatusCode().value() == 404</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">                    || e.getStatusCode().value() == 403</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">                    || e.getStatusCode().value() == 401) {</span>
+<span class="fc" id="L102">                throw new org.springframework.security.access.AccessDeniedException(</span>
+                        &quot;Aucune fiche locataire accessible pour ce compte.&quot;);
+            }
+
+<span class="fc" id="L106">            throw new com.gestionlocative.quittances.exception.ServiceExterneException(</span>
+                    &quot;LOCATAIRES&quot;,
+                    &quot;ERREUR_HTTP_EXTERNE&quot;,
+                    &quot;Impossible de resoudre le locataire connecte.&quot;,
+<span class="fc" id="L110">                    e.getStatusCode().value());</span>
+
+<span class="fc" id="L112">        } catch (org.springframework.web.client.RestClientException e) {</span>
+<span class="fc" id="L113">            throw new com.gestionlocative.quittances.exception.ServiceExterneException(</span>
+                    &quot;LOCATAIRES&quot;,
+                    &quot;RESOLUTION_INDISPONIBLE&quot;,
+                    &quot;Le service Locataires est indisponible.&quot;,
+                    null);
+        }
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

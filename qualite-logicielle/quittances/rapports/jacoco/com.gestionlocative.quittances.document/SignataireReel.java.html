@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SignataireReel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.document</a> &gt; <span class="el_source">SignataireReel.java</span></div><h1>SignataireReel.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.document;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HexFormat;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+/** Signature détachée avec certificat explicitement épinglé : ne prouve pas à elle seule la qualification juridique. */
+@Component
+<span class="fc" id="L22">public class SignataireReel {</span>
+    @Value(&quot;${quittances.emission-reelle.pkcs12-path:}&quot;) private String chemin;
+    @Value(&quot;${quittances.emission-reelle.pkcs12-alias:}&quot;) private String alias;
+    @Value(&quot;${quittances.emission-reelle.pkcs12-password:}&quot;) private String motDePasse;
+    @Value(&quot;${quittances.emission-reelle.certificat-sha256:}&quot;) private String empreinteCertificat;
+
+    public boolean estConfigure() {
+<span class="pc bpc" id="L29" title="3 of 8 branches missed.">        return present(chemin) &amp;&amp; present(alias) &amp;&amp; present(motDePasse)</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">                &amp;&amp; empreinteCertificat != null &amp;&amp; empreinteCertificat.matches(&quot;[0-9a-f]{64}&quot;);</span>
+    }
+
+    public SignatureLocale.Preuve signer(byte[] pdf, Instant date)
+            throws IOException, GeneralSecurityException {
+<span class="fc bfc" id="L35" title="All 8 branches covered.">        if (!estConfigure() || pdf == null || pdf.length == 0 || date == null) {</span>
+<span class="fc" id="L36">            throw new GeneralSecurityException(&quot;Configuration de signature incomplète.&quot;);</span>
+        }
+<span class="fc" id="L38">        char[] secret = motDePasse.toCharArray();</span>
+        try {
+<span class="fc" id="L40">            KeyStore magasin = KeyStore.getInstance(&quot;PKCS12&quot;);</span>
+<span class="fc" id="L41">            try (var entree = Files.newInputStream(Path.of(chemin))) {</span>
+<span class="fc" id="L42">                magasin.load(entree, secret);</span>
+            }
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (!(magasin.getCertificate(alias) instanceof X509Certificate certificat)</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                    || !(magasin.getKey(alias, secret) instanceof PrivateKey privee)) {</span>
+<span class="fc" id="L46">                throw new GeneralSecurityException(&quot;Certificat ou clé privée absent.&quot;);</span>
+            }
+<span class="fc" id="L48">            verifierCertificat(certificat, date);</span>
+<span class="fc" id="L49">            Signature signature = Signature.getInstance(&quot;SHA256withRSA&quot;);</span>
+<span class="fc" id="L50">            signature.initSign(privee);</span>
+<span class="fc" id="L51">            signature.update(pdf);</span>
+<span class="fc" id="L52">            SignatureLocale.Preuve preuve = new SignatureLocale.Preuve(</span>
+<span class="fc" id="L53">                    signature.sign(), certificat.getEncoded(), SignatureLocale.empreinte(pdf));</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">            if (!verifier(pdf, preuve, date)) {</span>
+<span class="nc" id="L55">                throw new GeneralSecurityException(&quot;Signature non vérifiable.&quot;);</span>
+            }
+<span class="fc" id="L57">            return preuve;</span>
+        } finally {
+<span class="fc" id="L59">            Arrays.fill(secret, '\0');</span>
+        }
+    }
+
+    public boolean verifier(byte[] pdf, SignatureLocale.Preuve preuve, Instant date)
+            throws GeneralSecurityException {
+<span class="pc bpc" id="L65" title="1 of 8 branches missed.">        if (!estConfigure() || pdf == null || preuve == null || date == null) return false;</span>
+<span class="fc" id="L66">        X509Certificate certificat = (X509Certificate) java.security.cert.CertificateFactory</span>
+<span class="fc" id="L67">                .getInstance(&quot;X.509&quot;).generateCertificate(</span>
+<span class="fc" id="L68">                        new java.io.ByteArrayInputStream(preuve.certificat()));</span>
+<span class="fc" id="L69">        verifierCertificat(certificat, date);</span>
+<span class="fc" id="L70">        return SignatureLocale.verifier(pdf, preuve, date);</span>
+    }
+
+    private void verifierCertificat(X509Certificate certificat, Instant date)
+            throws GeneralSecurityException {
+<span class="fc" id="L75">        certificat.checkValidity(Date.from(date));</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (!(certificat.getPublicKey() instanceof RSAPublicKey rsa)</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                || rsa.getModulus().bitLength() &lt; 2048) {</span>
+<span class="nc" id="L78">            throw new GeneralSecurityException(&quot;Clé publique insuffisante.&quot;);</span>
+        }
+<span class="fc" id="L80">        boolean[] usages = certificat.getKeyUsage();</span>
+<span class="pc bpc" id="L81" title="3 of 6 branches missed.">        if (usages != null &amp;&amp; (usages.length == 0 || !usages[0])) {</span>
+<span class="nc" id="L82">            throw new GeneralSecurityException(&quot;Certificat non autorisé à la signature numérique.&quot;);</span>
+        }
+<span class="fc" id="L84">        String empreinte = HexFormat.of().formatHex(</span>
+<span class="fc" id="L85">                MessageDigest.getInstance(&quot;SHA-256&quot;).digest(certificat.getEncoded()));</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (!MessageDigest.isEqual(</span>
+<span class="fc" id="L87">                empreinte.getBytes(java.nio.charset.StandardCharsets.US_ASCII),</span>
+<span class="fc" id="L88">                empreinteCertificat.getBytes(java.nio.charset.StandardCharsets.US_ASCII))) {</span>
+<span class="fc" id="L89">            throw new GeneralSecurityException(&quot;Empreinte du certificat non autorisée.&quot;);</span>
+        }
+<span class="fc" id="L91">    }</span>
+
+    private static boolean present(String valeur) {
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">        return valeur != null &amp;&amp; !valeur.isBlank();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

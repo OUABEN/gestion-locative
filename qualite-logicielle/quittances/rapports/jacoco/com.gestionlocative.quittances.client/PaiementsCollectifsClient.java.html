@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaiementsCollectifsClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.client</a> &gt; <span class="el_source">PaiementsCollectifsClient.java</span></div><h1>PaiementsCollectifsClient.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.client;
+
+import com.gestionlocative.quittances.dto.SituationPeriode.Affectation;
+import com.gestionlocative.quittances.dto.SituationPeriode.Nature;
+import com.gestionlocative.quittances.dto.SituationPeriode.StatutPaiement;
+import com.gestionlocative.quittances.exception.RegleMetierException;
+import com.gestionlocative.quittances.exception.ServiceExterneException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
+
+/**
+ * Adaptateur vers /api/echeances et /api/paiements du module Loyers.
+ * L'enregistrement d'un paiement dans cette API représente un paiement confirmé.
+ * Aucun règlement de charges ne peut être inventé à partir d'un paiement de loyer.
+ */
+public final class PaiementsCollectifsClient implements PaiementClient {
+    private final RestClient client;
+
+<span class="fc" id="L32">    public PaiementsCollectifsClient(RestClient client) {</span>
+<span class="fc" id="L33">        this.client = client;</span>
+<span class="fc" id="L34">    }</span>
+
+<span class="fc" id="L36">    public record Echeance(UUID id, UUID bailId, Integer mois, Integer annee,</span>
+            BigDecimal montant, String statut, BigDecimal totalPaye, BigDecimal resteAPayer) { }
+<span class="fc" id="L38">    public record Paiement(UUID id, UUID echeanceId, BigDecimal montant,</span>
+            LocalDate datePaiement) { }
+
+    @Override
+    public List&lt;Affectation&gt; consulterAffectations(String bailId, LocalDate debut, LocalDate fin) {
+<span class="fc" id="L43">        LectureApiExterne.verifierIdentifiant(bailId);</span>
+<span class="pc bpc" id="L44" title="3 of 6 branches missed.">        if (debut == null || fin == null || fin.isBefore(debut)) {</span>
+<span class="nc" id="L45">            throw new RegleMetierException(&quot;PERIODE_INVALIDE&quot;, &quot;Période invalide.&quot;);</span>
+        }
+<span class="fc" id="L47">        YearMonth mois = YearMonth.from(debut);</span>
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">        if (!debut.equals(mois.atDay(1)) || !fin.equals(mois.atEndOfMonth())) {</span>
+<span class="nc" id="L49">            throw new RegleMetierException(&quot;PERIODE_NON_MENSUELLE&quot;,</span>
+                    &quot;Le service Loyers ne sait affecter que des mensualités entières.&quot;);
+        }
+        UUID reference;
+        try {
+<span class="fc" id="L54">            reference = UUID.fromString(bailId);</span>
+<span class="nc" id="L55">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L56">            throw new RegleMetierException(&quot;BAIL_NON_UUID&quot;, &quot;Un identifiant de bail UUID est nécessaire.&quot;);</span>
+<span class="fc" id="L57">        }</span>
+
+        List&lt;Echeance&gt; echeances;
+        List&lt;Paiement&gt; paiements;
+        try {
+<span class="fc" id="L62">            echeances = client.get().uri(&quot;/api/echeances?bailId={id}&quot;, Map.of(&quot;id&quot;, bailId))</span>
+<span class="fc" id="L63">                    .retrieve().body(new ParameterizedTypeReference&lt;List&lt;Echeance&gt;&gt;() { });</span>
+<span class="fc" id="L64">            paiements = client.get().uri(&quot;/api/paiements?bailId={id}&quot;, Map.of(&quot;id&quot;, bailId))</span>
+<span class="fc" id="L65">                    .retrieve().body(new ParameterizedTypeReference&lt;List&lt;Paiement&gt;&gt;() { });</span>
+<span class="nc" id="L66">        } catch (RestClientResponseException e) {</span>
+<span class="nc" id="L67">            throw new ServiceExterneException(&quot;PAIEMENTS&quot;, &quot;ERREUR_HTTP_EXTERNE&quot;,</span>
+<span class="nc" id="L68">                    &quot;Loyers a refusé la consultation.&quot;, e.getStatusCode().value());</span>
+<span class="nc" id="L69">        } catch (ResourceAccessException e) {</span>
+<span class="nc" id="L70">            throw new ServiceExterneException(&quot;PAIEMENTS&quot;, &quot;SERVICE_INJOIGNABLE&quot;,</span>
+                    &quot;Loyers est inaccessible.&quot;, null);
+<span class="nc" id="L72">        } catch (RestClientException e) {</span>
+<span class="nc" id="L73">            throw new ServiceExterneException(&quot;PAIEMENTS&quot;, &quot;REPONSE_ILLISIBLE&quot;,</span>
+                    &quot;Réponse Loyers invalide.&quot;, null);
+<span class="fc" id="L75">        }</span>
+<span class="pc bpc" id="L76" title="2 of 4 branches missed.">        if (echeances == null || paiements == null) {</span>
+<span class="nc" id="L77">            throw LectureApiExterne.incoherence(&quot;PAIEMENTS&quot;);</span>
+        }
+<span class="fc" id="L79">        Map&lt;UUID, Echeance&gt; parId = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L80">        Set&lt;YearMonth&gt; periodes = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        for (Echeance e : echeances) {</span>
+<span class="pc bpc" id="L82" title="3 of 6 branches missed.">            if (e == null || e.id() == null || !reference.equals(e.bailId())</span>
+<span class="pc bpc" id="L83" title="4 of 8 branches missed.">                    || e.mois() == null || e.annee() == null || e.mois() &lt; 1 || e.mois() &gt; 12</span>
+<span class="pc bpc" id="L84" title="3 of 6 branches missed.">                    || e.montant() == null || e.totalPaye() == null || e.resteAPayer() == null</span>
+<span class="pc bpc" id="L85" title="2 of 4 branches missed.">                    || e.montant().signum() &lt; 0 || e.totalPaye().signum() &lt; 0</span>
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">                    || e.resteAPayer().signum() &lt; 0 || e.totalPaye().compareTo(e.montant()) &gt; 0</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">                    || e.montant().subtract(e.totalPaye()).compareTo(e.resteAPayer()) != 0</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">                    || parId.putIfAbsent(e.id(), e) != null</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                    || !periodes.add(YearMonth.of(e.annee(), e.mois()))) {</span>
+<span class="nc" id="L90">                throw LectureApiExterne.incoherence(&quot;PAIEMENTS&quot;);</span>
+            }
+<span class="fc" id="L92">        }</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (!periodes.contains(mois)) {</span>
+<span class="nc" id="L94">            throw LectureApiExterne.incoherence(&quot;PAIEMENTS&quot;);</span>
+        }
+<span class="fc" id="L96">        Map&lt;UUID, BigDecimal&gt; sommes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L97">        Set&lt;UUID&gt; ids = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L98">        List&lt;Affectation&gt; resultat = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        for (Paiement paiement : paiements) {</span>
+<span class="pc bpc" id="L100" title="3 of 6 branches missed.">            if (paiement == null || paiement.id() == null || paiement.echeanceId() == null</span>
+<span class="pc bpc" id="L101" title="2 of 4 branches missed.">                    || paiement.montant() == null || paiement.montant().signum() &lt;= 0</span>
+<span class="pc bpc" id="L102" title="2 of 4 branches missed.">                    || paiement.datePaiement() == null || paiement.datePaiement().isAfter(LocalDate.now())</span>
+<span class="pc bpc" id="L103" title="2 of 4 branches missed.">                    || !ids.add(paiement.id()) || !parId.containsKey(paiement.echeanceId())) {</span>
+<span class="nc" id="L104">                throw LectureApiExterne.incoherence(&quot;PAIEMENTS&quot;);</span>
+            }
+<span class="fc" id="L106">            Echeance e = parId.get(paiement.echeanceId());</span>
+<span class="fc" id="L107">            sommes.merge(e.id(), paiement.montant(), BigDecimal::add);</span>
+<span class="pc bpc" id="L108" title="2 of 4 branches missed.">            if (e.mois() == mois.getMonthValue() &amp;&amp; e.annee() == mois.getYear()) {</span>
+<span class="fc" id="L109">                resultat.add(new Affectation(&quot;LOYERS-&quot; + paiement.id(), paiement.id().toString(),</span>
+<span class="fc" id="L110">                        bailId, debut, fin, Nature.LOYER, paiement.montant(), &quot;MAD&quot;,</span>
+                        StatutPaiement.CONFIRME));
+            }
+<span class="fc" id="L113">        }</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        for (Echeance e : echeances) {</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            if (sommes.getOrDefault(e.id(), BigDecimal.ZERO).compareTo(e.totalPaye()) != 0) {</span>
+<span class="fc" id="L116">                throw LectureApiExterne.incoherence(&quot;PAIEMENTS&quot;);</span>
+            }
+<span class="fc" id="L118">        }</span>
+<span class="fc" id="L119">        return List.copyOf(resultat);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

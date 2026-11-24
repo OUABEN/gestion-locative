@@ -71,9 +71,9 @@ public class ControlePrealableEmissionService {
     public void verifier(Authentication authentication, UUID quittanceId) {
 <span class="fc" id="L72">        LecteurQuittances lecteur =</span>
 <span class="fc" id="L73">                LecteurQuittances.depuis(authentication);</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (!lecteur.bailleur()) {</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (!lecteur.peutEcrire()) {</span>
 <span class="nc" id="L75">            throw new AccessDeniedException(</span>
-                    &quot;Le pré-contrôle est réservé au bailleur.&quot;
+                    &quot;Le pré-contrôle est réservé au bailleur ou au gestionnaire.&quot;
             );
         }
 
@@ -89,7 +89,7 @@ public class ControlePrealableEmissionService {
 <span class="fc" id="L89">                acteur.emetteurIdentite()</span>
 <span class="pc bpc" id="L90" title="1 of 2 branches missed.">        ) || !acteur.sujet().equals(lecteur.identifiant())) {</span>
 <span class="nc" id="L91">            throw new AccessDeniedException(</span>
-                    &quot;Le bailleur doit correspondre au sujet du JWT commun vérifié.&quot;
+                    &quot;L'acteur doit correspondre au sujet du JWT commun vérifié.&quot;
             );
         }
 
@@ -100,213 +100,217 @@ public class ControlePrealableEmissionService {
             );
         }
 
-<span class="fc" id="L103">        Quittance document = quittances.findByIdAndBailleurId(</span>
-                quittanceId,
-<span class="fc" id="L105">                lecteur.identifiant()</span>
-<span class="fc" id="L106">        ).orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        Quittance document = (lecteur.gestionnaire()</span>
+<span class="fc" id="L104">                ? quittances.findById(quittanceId)</span>
+<span class="fc" id="L105">                : quittances.findByIdAndBailleurId(</span>
+<span class="fc" id="L106">                        quittanceId, lecteur.identifiant())</span>
+<span class="fc" id="L107">        ).orElseThrow(() -&gt; new ResponseStatusException(</span>
                 HttpStatus.NOT_FOUND,
                 &quot;Document introuvable.&quot;
         ));
 
-<span class="fc" id="L111">        verifierEtat(document);</span>
-<span class="fc" id="L112">        verifierInstantane(document);</span>
+<span class="fc" id="L112">        verifierEtat(document);</span>
+<span class="fc" id="L113">        verifierInstantane(document);</span>
 
         ConstructionBrouillonService.Resultat situationCourante;
         try {
-<span class="fc" id="L116">            situationCourante = construction.construire(</span>
-<span class="fc" id="L117">                    lecteur.identifiant(),</span>
-<span class="fc" id="L118">                    document.getBailId(),</span>
-<span class="fc" id="L119">                    document.getPeriodeDebut(),</span>
-<span class="fc" id="L120">                    document.getPeriodeFin()</span>
+<span class="fc" id="L117">            situationCourante = construction.construire(</span>
+<span class="fc" id="L118">                    document.getBailleurId(),</span>
+<span class="fc" id="L119">                    document.getBailId(),</span>
+<span class="fc" id="L120">                    document.getPeriodeDebut(),</span>
+<span class="fc" id="L121">                    document.getPeriodeFin()</span>
             );
-<span class="fc" id="L122">        } catch (ServiceExterneException exception) {</span>
-<span class="fc" id="L123">            throw indisponible(</span>
+<span class="fc" id="L123">        } catch (ServiceExterneException exception) {</span>
+<span class="fc" id="L124">            throw indisponible(</span>
                     &quot;Les preuves métier ne peuvent pas être vérifiées &quot;
                             + &quot;auprès des services sources.&quot;
             );
-<span class="fc" id="L127">        } catch (RegleMetierException exception) {</span>
-<span class="fc" id="L128">            throw conflit(</span>
+<span class="fc" id="L128">        } catch (RegleMetierException exception) {</span>
+<span class="fc" id="L129">            throw conflit(</span>
                     &quot;Les données actuelles ne permettent pas de confirmer &quot;
                             + &quot;l'éligibilité du document.&quot;
             );
-<span class="fc" id="L132">        }</span>
+<span class="fc" id="L133">        }</span>
 
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (situationCourante == null</span>
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">                || situationCourante.document() == null) {</span>
-<span class="nc" id="L136">            throw new IllegalStateException(</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (situationCourante == null</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">                || situationCourante.document() == null) {</span>
+<span class="nc" id="L137">            throw new IllegalStateException(</span>
                     &quot;La construction de la situation courante est absente.&quot;
             );
         }
 
-<span class="fc" id="L141">        Quittance documentCourant = situationCourante.document();</span>
-<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (documentCourant.getTypeDocument()</span>
+<span class="fc" id="L142">        Quittance documentCourant = situationCourante.document();</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (documentCourant.getTypeDocument()</span>
                 != TypeDocument.QUITTANCE_INTEGRALE) {
-<span class="fc" id="L144">            throw conflit(</span>
+<span class="fc" id="L145">            throw conflit(</span>
                     &quot;Les paiements actuels ne permettent qu'un reçu partiel, &quot;
                             + &quot;pas une quittance intégrale.&quot;
             );
         }
 
-<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (!memeInstantane(document, documentCourant)) {</span>
-<span class="fc" id="L151">            throw conflit(</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if (!memeInstantane(document, documentCourant)) {</span>
+<span class="fc" id="L152">            throw conflit(</span>
                     &quot;Le bail, la période, les montants ou l'instantané &quot;
                             + &quot;ont changé depuis la préparation.&quot;
             );
         }
 
-<span class="fc" id="L157">        List&lt;PaiementAffectation&gt; affectationsEnregistrees =</span>
-<span class="fc" id="L158">                affectations.findByQuittance_IdOrderByAffectationExterneIdAsc(</span>
+<span class="fc" id="L158">        List&lt;PaiementAffectation&gt; affectationsEnregistrees =</span>
+<span class="fc" id="L159">                affectations.findByQuittance_IdOrderByAffectationExterneIdAsc(</span>
                         quittanceId
                 );
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (!memesAffectations(</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (!memesAffectations(</span>
                 document,
                 affectationsEnregistrees,
-<span class="fc" id="L164">                situationCourante.affectations()</span>
+<span class="fc" id="L165">                situationCourante.affectations()</span>
         )) {
-<span class="fc" id="L166">            throw conflit(</span>
+<span class="fc" id="L167">            throw conflit(</span>
                     &quot;Les affectations confirmées ont changé depuis &quot;
                             + &quot;la préparation.&quot;
             );
         }
-<span class="fc" id="L171">    }</span>
+<span class="fc" id="L172">    }</span>
 
     private boolean sourcesReellesConfigurees() {
-<span class="fc bfc" id="L174" title="All 2 branches covered.">        return &quot;INTEGRATION&quot;.equals(modePaiements)</span>
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">                &amp;&amp; modeIntegration(referentiels.locataires())</span>
-<span class="pc bpc" id="L176" title="1 of 2 branches missed.">                &amp;&amp; modeIntegration(referentiels.biens())</span>
-<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                &amp;&amp; modeIntegration(referentiels.baux());</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        return modeIntegration(modePaiements)</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">                &amp;&amp; modeIntegration(referentiels.locataires())</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                &amp;&amp; modeIntegration(referentiels.biens())</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">                &amp;&amp; modeIntegration(referentiels.baux());</span>
     }
 
+    private static boolean modeIntegration(String mode) {
+<span class="fc bfc" id="L182" title="All 4 branches covered.">        return &quot;INTEGRATION&quot;.equals(mode) || &quot;UTILISATEUR&quot;.equals(mode);</span>
+    }
     private static boolean modeIntegration(
             ReferentielsProperties.Endpoint endpoint
     ) {
-<span class="pc bpc" id="L183" title="1 of 2 branches missed.">        return endpoint != null</span>
-<span class="pc bpc" id="L184" title="1 of 2 branches missed.">                &amp;&amp; &quot;INTEGRATION&quot;.equals(endpoint.mode());</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        return endpoint != null</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">                &amp;&amp; modeIntegration(endpoint.mode());</span>
     }
 
     private void verifierEtat(Quittance document) {
-<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (document.getStatut() != StatutQuittance.EN_ATTENTE_SIGNATURE</span>
-<span class="pc bpc" id="L189" title="1 of 2 branches missed.">                || document.getStatutSignature() != StatutSignature.EN_ATTENTE</span>
-<span class="pc bpc" id="L190" title="1 of 2 branches missed.">                || document.getEmisLe() != null</span>
-<span class="pc bpc" id="L191" title="1 of 2 branches missed.">                || document.getNumero() != null</span>
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">                || document.getPdfReference() != null</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">                || document.getPdfSha256() != null) {</span>
-<span class="fc" id="L194">            throw conflit(</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (document.getStatut() != StatutQuittance.EN_ATTENTE_SIGNATURE</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">                || document.getStatutSignature() != StatutSignature.EN_ATTENTE</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">                || document.getEmisLe() != null</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">                || document.getNumero() != null</span>
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">                || document.getPdfReference() != null</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">                || document.getPdfSha256() != null) {</span>
+<span class="fc" id="L198">            throw conflit(</span>
                     &quot;Le document n'est pas un brouillon validé disponible &quot;
                             + &quot;pour ce pré-contrôle.&quot;
             );
         }
 
-<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (document.getTypeDocument() != TypeDocument.QUITTANCE_INTEGRALE) {</span>
-<span class="fc" id="L201">            throw conflit(</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (document.getTypeDocument() != TypeDocument.QUITTANCE_INTEGRALE) {</span>
+<span class="fc" id="L205">            throw conflit(</span>
                     &quot;Un reçu partiel ne peut pas être pré-contrôlé comme &quot;
                             + &quot;une quittance intégrale.&quot;
             );
         }
-<span class="fc" id="L206">    }</span>
+<span class="fc" id="L210">    }</span>
 
     private void verifierInstantane(Quittance document) {
-<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if (document.getBailId() == null</span>
-<span class="pc bpc" id="L210" title="1 of 2 branches missed.">                || document.getLocataireId() == null</span>
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">                || document.getBienId() == null</span>
-<span class="pc bpc" id="L212" title="1 of 2 branches missed.">                || document.getBailleurId() == null</span>
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">                || document.getPeriodeDebut() == null</span>
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">                || document.getPeriodeFin() == null</span>
-<span class="fc" id="L215">                || document.getPeriodeFin()</span>
-<span class="pc bpc" id="L216" title="1 of 2 branches missed.">                        .isBefore(document.getPeriodeDebut())) {</span>
-<span class="nc" id="L217">            throw conflit(&quot;L'identité du bail ou la période est incohérente.&quot;);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if (document.getBailId() == null</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">                || document.getLocataireId() == null</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">                || document.getBienId() == null</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">                || document.getBailleurId() == null</span>
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">                || document.getPeriodeDebut() == null</span>
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">                || document.getPeriodeFin() == null</span>
+<span class="fc" id="L219">                || document.getPeriodeFin()</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">                        .isBefore(document.getPeriodeDebut())) {</span>
+<span class="nc" id="L221">            throw conflit(&quot;L'identité du bail ou la période est incohérente.&quot;);</span>
         }
 
-<span class="fc" id="L220">        Map&lt;String, String&gt; instantane = document.getDonneesFigees();</span>
-<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if (!&quot;1&quot;.equals(instantane.get(&quot;versionSnapshot&quot;))</span>
-<span class="pc bpc" id="L222" title="1 of 2 branches missed.">                || !document.getBailId().equals(</span>
-<span class="fc" id="L223">                        instantane.get(&quot;referenceBail&quot;)</span>
+<span class="fc" id="L224">        Map&lt;String, String&gt; instantane = document.getDonneesFigees();</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if (!&quot;1&quot;.equals(instantane.get(&quot;versionSnapshot&quot;))</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">                || !document.getBailId().equals(</span>
+<span class="fc" id="L227">                        instantane.get(&quot;referenceBail&quot;)</span>
                 )) {
-<span class="nc" id="L225">            throw conflit(</span>
+<span class="nc" id="L229">            throw conflit(</span>
                     &quot;L'instantané documentaire requis est absent ou invalide.&quot;
             );
         }
 
         try {
-<span class="fc" id="L231">            LocalDate debutBail = LocalDate.parse(</span>
-<span class="fc" id="L232">                    instantane.get(&quot;debutBail&quot;)</span>
+<span class="fc" id="L235">            LocalDate debutBail = LocalDate.parse(</span>
+<span class="fc" id="L236">                    instantane.get(&quot;debutBail&quot;)</span>
             );
-<span class="fc" id="L234">            String finBailTexte = instantane.get(&quot;finBail&quot;);</span>
-<span class="pc bpc" id="L235" title="1 of 2 branches missed.">            LocalDate finBail = finBailTexte == null</span>
-<span class="fc" id="L236">                    ? null</span>
-<span class="pc" id="L237">                    : LocalDate.parse(finBailTexte);</span>
+<span class="fc" id="L238">            String finBailTexte = instantane.get(&quot;finBail&quot;);</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">            LocalDate finBail = finBailTexte == null</span>
+<span class="fc" id="L240">                    ? null</span>
+<span class="pc" id="L241">                    : LocalDate.parse(finBailTexte);</span>
 
-<span class="pc bpc" id="L239" title="2 of 4 branches missed.">            if (document.getPeriodeDebut().isBefore(debutBail)</span>
+<span class="pc bpc" id="L243" title="2 of 4 branches missed.">            if (document.getPeriodeDebut().isBefore(debutBail)</span>
                     || (finBail != null
-<span class="nc bnc" id="L241" title="All 2 branches missed.">                    &amp;&amp; document.getPeriodeFin().isAfter(finBail))) {</span>
-<span class="nc" id="L242">                throw conflit(</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                    &amp;&amp; document.getPeriodeFin().isAfter(finBail))) {</span>
+<span class="nc" id="L246">                throw conflit(</span>
                         &quot;La période du document n'est pas couverte &quot;
                                 + &quot;par le bail figé.&quot;
                 );
             }
-<span class="nc" id="L247">        } catch (DateTimeParseException | NullPointerException exception) {</span>
-<span class="nc" id="L248">            throw conflit(</span>
+<span class="nc" id="L251">        } catch (DateTimeParseException | NullPointerException exception) {</span>
+<span class="nc" id="L252">            throw conflit(</span>
                     &quot;Les dates du bail figées dans le document sont invalides.&quot;
             );
-<span class="fc" id="L251">        }</span>
+<span class="fc" id="L255">        }</span>
 
-<span class="fc" id="L253">        BigDecimal totalCalcule = document.getLoyerPaye()</span>
-<span class="fc" id="L254">                .add(document.getChargesPayees());</span>
-<span class="pc bpc" id="L255" title="1 of 2 branches missed.">        if (document.getTotalPaye().compareTo(totalCalcule) != 0</span>
-<span class="fc" id="L256">                || document.getLoyerPaye()</span>
-<span class="pc bpc" id="L257" title="1 of 2 branches missed.">                        .compareTo(document.getLoyerDu()) != 0</span>
-<span class="fc" id="L258">                || document.getChargesPayees()</span>
-<span class="pc bpc" id="L259" title="1 of 2 branches missed.">                        .compareTo(document.getChargesDues()) != 0) {</span>
-<span class="nc" id="L260">            throw conflit(</span>
+<span class="fc" id="L257">        BigDecimal totalCalcule = document.getLoyerPaye()</span>
+<span class="fc" id="L258">                .add(document.getChargesPayees());</span>
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">        if (document.getTotalPaye().compareTo(totalCalcule) != 0</span>
+<span class="fc" id="L260">                || document.getLoyerPaye()</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">                        .compareTo(document.getLoyerDu()) != 0</span>
+<span class="fc" id="L262">                || document.getChargesPayees()</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">                        .compareTo(document.getChargesDues()) != 0) {</span>
+<span class="nc" id="L264">            throw conflit(</span>
                     &quot;Les montants du document ne constituent pas &quot;
                             + &quot;un règlement intégral cohérent.&quot;
             );
         }
-<span class="fc" id="L265">    }</span>
+<span class="fc" id="L269">    }</span>
 
     private boolean memeInstantane(
             Quittance document,
             Quittance courant
     ) {
-<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        return Objects.equals(document.getBailId(), courant.getBailId())</span>
-<span class="pc bpc" id="L272" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
-<span class="fc" id="L273">                        document.getLocataireId(),</span>
-<span class="fc" id="L274">                        courant.getLocataireId()</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        return Objects.equals(document.getBailId(), courant.getBailId())</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
+<span class="fc" id="L277">                        document.getLocataireId(),</span>
+<span class="fc" id="L278">                        courant.getLocataireId()</span>
                 )
-<span class="pc bpc" id="L276" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(document.getBienId(), courant.getBienId())</span>
-<span class="pc bpc" id="L277" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
-<span class="fc" id="L278">                        document.getBailleurId(),</span>
-<span class="fc" id="L279">                        courant.getBailleurId()</span>
-                )
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(document.getBienId(), courant.getBienId())</span>
 <span class="pc bpc" id="L281" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
-<span class="fc" id="L282">                        document.getPeriodeDebut(),</span>
-<span class="fc" id="L283">                        courant.getPeriodeDebut()</span>
+<span class="fc" id="L282">                        document.getBailleurId(),</span>
+<span class="fc" id="L283">                        courant.getBailleurId()</span>
                 )
 <span class="pc bpc" id="L285" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
-<span class="fc" id="L286">                        document.getPeriodeFin(),</span>
-<span class="fc" id="L287">                        courant.getPeriodeFin()</span>
+<span class="fc" id="L286">                        document.getPeriodeDebut(),</span>
+<span class="fc" id="L287">                        courant.getPeriodeDebut()</span>
                 )
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">                &amp;&amp; document.getTypeDocument() == courant.getTypeDocument()</span>
-<span class="fc bfc" id="L290" title="All 2 branches covered.">                &amp;&amp; memeMontant(document.getLoyerDu(), courant.getLoyerDu())</span>
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">                &amp;&amp; memeMontant(</span>
-<span class="fc" id="L292">                        document.getChargesDues(),</span>
-<span class="fc" id="L293">                        courant.getChargesDues()</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(</span>
+<span class="fc" id="L290">                        document.getPeriodeFin(),</span>
+<span class="fc" id="L291">                        courant.getPeriodeFin()</span>
                 )
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">                &amp;&amp; document.getTypeDocument() == courant.getTypeDocument()</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">                &amp;&amp; memeMontant(document.getLoyerDu(), courant.getLoyerDu())</span>
 <span class="pc bpc" id="L295" title="1 of 2 branches missed.">                &amp;&amp; memeMontant(</span>
-<span class="fc" id="L296">                        document.getLoyerPaye(),</span>
-<span class="fc" id="L297">                        courant.getLoyerPaye()</span>
+<span class="fc" id="L296">                        document.getChargesDues(),</span>
+<span class="fc" id="L297">                        courant.getChargesDues()</span>
                 )
 <span class="pc bpc" id="L299" title="1 of 2 branches missed.">                &amp;&amp; memeMontant(</span>
-<span class="fc" id="L300">                        document.getChargesPayees(),</span>
-<span class="fc" id="L301">                        courant.getChargesPayees()</span>
+<span class="fc" id="L300">                        document.getLoyerPaye(),</span>
+<span class="fc" id="L301">                        courant.getLoyerPaye()</span>
                 )
 <span class="pc bpc" id="L303" title="1 of 2 branches missed.">                &amp;&amp; memeMontant(</span>
-<span class="fc" id="L304">                        document.getTotalPaye(),</span>
-<span class="fc" id="L305">                        courant.getTotalPaye()</span>
+<span class="fc" id="L304">                        document.getChargesPayees(),</span>
+<span class="fc" id="L305">                        courant.getChargesPayees()</span>
                 )
-<span class="pc bpc" id="L307" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(document.getDevise(), courant.getDevise())</span>
-<span class="pc bpc" id="L308" title="1 of 2 branches missed.">                &amp;&amp; document.getDonneesFigees().equals(</span>
-<span class="fc" id="L309">                        courant.getDonneesFigees()</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">                &amp;&amp; memeMontant(</span>
+<span class="fc" id="L308">                        document.getTotalPaye(),</span>
+<span class="fc" id="L309">                        courant.getTotalPaye()</span>
+                )
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">                &amp;&amp; Objects.equals(document.getDevise(), courant.getDevise())</span>
+<span class="pc bpc" id="L312" title="1 of 2 branches missed.">                &amp;&amp; document.getDonneesFigees().equals(</span>
+<span class="fc" id="L313">                        courant.getDonneesFigees()</span>
                 );
     }
 
@@ -315,76 +319,76 @@ public class ControlePrealableEmissionService {
             List&lt;PaiementAffectation&gt; enregistrees,
             List&lt;Affectation&gt; actuelles
     ) {
-<span class="pc bpc" id="L318" title="2 of 4 branches missed.">        if (enregistrees == null</span>
+<span class="pc bpc" id="L322" title="2 of 4 branches missed.">        if (enregistrees == null</span>
                 || actuelles == null
-<span class="fc bfc" id="L320" title="All 2 branches covered.">                || enregistrees.size() != actuelles.size()) {</span>
-<span class="fc" id="L321">            return false;</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">                || enregistrees.size() != actuelles.size()) {</span>
+<span class="fc" id="L325">            return false;</span>
         }
 
-<span class="fc" id="L324">        Map&lt;String, Affectation&gt; parIdentifiant = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L325" title="All 2 branches covered.">        for (Affectation actuelle : actuelles) {</span>
-<span class="pc bpc" id="L326" title="1 of 2 branches missed.">            if (actuelle == null</span>
-<span class="pc bpc" id="L327" title="1 of 2 branches missed.">                    || actuelle.affectationId() == null</span>
-<span class="pc bpc" id="L328" title="1 of 2 branches missed.">                    || actuelle.statut() != StatutPaiement.CONFIRME</span>
-<span class="pc bpc" id="L329" title="1 of 2 branches missed.">                    || parIdentifiant.putIfAbsent(</span>
-<span class="fc" id="L330">                            actuelle.affectationId(),</span>
+<span class="fc" id="L328">        Map&lt;String, Affectation&gt; parIdentifiant = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        for (Affectation actuelle : actuelles) {</span>
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">            if (actuelle == null</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">                    || actuelle.affectationId() == null</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">                    || actuelle.statut() != StatutPaiement.CONFIRME</span>
+<span class="pc bpc" id="L333" title="1 of 2 branches missed.">                    || parIdentifiant.putIfAbsent(</span>
+<span class="fc" id="L334">                            actuelle.affectationId(),</span>
                             actuelle
                     ) != null) {
-<span class="nc" id="L333">                return false;</span>
+<span class="nc" id="L337">                return false;</span>
             }
-<span class="fc" id="L335">        }</span>
+<span class="fc" id="L339">        }</span>
 
-<span class="fc" id="L337">        Set&lt;String&gt; traitees = new HashSet&lt;&gt;();</span>
-<span class="fc bfc" id="L338" title="All 2 branches covered.">        for (PaiementAffectation enregistree : enregistrees) {</span>
-<span class="pc bpc" id="L339" title="1 of 2 branches missed.">            if (enregistree == null</span>
-<span class="pc bpc" id="L340" title="1 of 2 branches missed.">                    || !&quot;CONFIRME&quot;.equals(enregistree.getStatutSource())</span>
-<span class="pc bpc" id="L341" title="1 of 2 branches missed.">                    || !traitees.add(enregistree.getAffectationExterneId())) {</span>
-<span class="nc" id="L342">                return false;</span>
+<span class="fc" id="L341">        Set&lt;String&gt; traitees = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L342" title="All 2 branches covered.">        for (PaiementAffectation enregistree : enregistrees) {</span>
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">            if (enregistree == null</span>
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">                    || !&quot;CONFIRME&quot;.equals(enregistree.getStatutSource())</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">                    || !traitees.add(enregistree.getAffectationExterneId())) {</span>
+<span class="nc" id="L346">                return false;</span>
             }
 
-<span class="fc" id="L345">            Affectation actuelle = parIdentifiant.get(</span>
-<span class="fc" id="L346">                    enregistree.getAffectationExterneId()</span>
+<span class="fc" id="L349">            Affectation actuelle = parIdentifiant.get(</span>
+<span class="fc" id="L350">                    enregistree.getAffectationExterneId()</span>
             );
-<span class="pc bpc" id="L348" title="1 of 2 branches missed.">            if (actuelle == null</span>
-<span class="pc bpc" id="L349" title="1 of 2 branches missed.">                    || !document.getBailId().equals(actuelle.bailId())</span>
-<span class="pc bpc" id="L350" title="1 of 2 branches missed.">                    || !document.getPeriodeDebut().equals(</span>
-<span class="fc" id="L351">                            actuelle.periodeDebut()</span>
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">            if (actuelle == null</span>
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">                    || !document.getBailId().equals(actuelle.bailId())</span>
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">                    || !document.getPeriodeDebut().equals(</span>
+<span class="fc" id="L355">                            actuelle.periodeDebut()</span>
                     )
-<span class="pc bpc" id="L353" title="1 of 2 branches missed.">                    || !document.getPeriodeFin().equals(</span>
-<span class="fc" id="L354">                            actuelle.periodeFin()</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">                    || !document.getPeriodeFin().equals(</span>
+<span class="fc" id="L358">                            actuelle.periodeFin()</span>
                     )
-<span class="pc bpc" id="L356" title="1 of 2 branches missed.">                    || !enregistree.getPaiementExterneId().equals(</span>
-<span class="fc" id="L357">                            actuelle.paiementId()</span>
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">                    || !enregistree.getPaiementExterneId().equals(</span>
+<span class="fc" id="L361">                            actuelle.paiementId()</span>
                     )
-<span class="pc bpc" id="L359" title="1 of 2 branches missed.">                    || !enregistree.getNature().equals(</span>
-<span class="fc" id="L360">                            actuelle.nature().name()</span>
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">                    || !enregistree.getNature().equals(</span>
+<span class="fc" id="L364">                            actuelle.nature().name()</span>
                     )
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">                    || !memeMontant(</span>
-<span class="fc" id="L363">                            enregistree.getMontant(),</span>
-<span class="fc" id="L364">                            actuelle.montant()</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">                    || !memeMontant(</span>
+<span class="fc" id="L367">                            enregistree.getMontant(),</span>
+<span class="fc" id="L368">                            actuelle.montant()</span>
                     )
-<span class="pc bpc" id="L366" title="1 of 2 branches missed.">                    || !enregistree.getDevise().equals(</span>
-<span class="fc" id="L367">                            actuelle.devise()</span>
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">                    || !enregistree.getDevise().equals(</span>
+<span class="fc" id="L371">                            actuelle.devise()</span>
                     )) {
-<span class="nc" id="L369">                return false;</span>
+<span class="nc" id="L373">                return false;</span>
             }
-<span class="fc" id="L371">        }</span>
+<span class="fc" id="L375">        }</span>
 
-<span class="pc bpc" id="L373" title="1 of 2 branches missed.">        return traitees.size() == parIdentifiant.size();</span>
+<span class="pc bpc" id="L377" title="1 of 2 branches missed.">        return traitees.size() == parIdentifiant.size();</span>
     }
 
     private boolean memeMontant(BigDecimal premier, BigDecimal second) {
-<span class="pc bpc" id="L377" title="2 of 4 branches missed.">        return premier != null</span>
+<span class="pc bpc" id="L381" title="2 of 4 branches missed.">        return premier != null</span>
                 &amp;&amp; second != null
-<span class="fc bfc" id="L379" title="All 2 branches covered.">                &amp;&amp; premier.compareTo(second) == 0;</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">                &amp;&amp; premier.compareTo(second) == 0;</span>
     }
 
     private ResponseStatusException conflit(String detail) {
-<span class="fc" id="L383">        return new ResponseStatusException(HttpStatus.CONFLICT, detail);</span>
+<span class="fc" id="L387">        return new ResponseStatusException(HttpStatus.CONFLICT, detail);</span>
     }
 
     private ResponseStatusException indisponible(String detail) {
-<span class="fc" id="L387">        return new ResponseStatusException(</span>
+<span class="fc" id="L391">        return new ResponseStatusException(</span>
                 HttpStatus.SERVICE_UNAVAILABLE,
                 detail
         );

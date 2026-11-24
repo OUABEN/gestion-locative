@@ -31,64 +31,71 @@ public class QuittanceCreationController {
             @RequestBody CreationQuittanceRequest demande,
             Authentication authentication
     ) {
-<span class="fc" id="L34">        String bailleurId = identifierBailleur(authentication);</span>
-<span class="fc" id="L35">        verifierDemande(demande);</span>
+<span class="fc" id="L34">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L35">                LecteurQuittances.depuis(authentication);</span>
 
-<span class="fc" id="L37">        UUID id = preparationService.preparer(</span>
-                bailleurId,
-<span class="fc" id="L39">                demande.bailId(),</span>
-<span class="fc" id="L40">                demande.periodeDebut(),</span>
-<span class="fc" id="L41">                demande.periodeFin()</span>
-        );
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (!lecteur.peutEcrire()) {</span>
+<span class="fc" id="L38">            throw new AccessDeniedException(</span>
+                    &quot;Creation reservee au bailleur et au gestionnaire.&quot;);
+        }
 
-<span class="fc" id="L44">        CreationQuittanceResponse reponse =</span>
+<span class="fc" id="L42">        verifierDemande(demande);</span>
+
+        UUID id;
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (lecteur.gestionnaire()) {</span>
+<span class="fc" id="L47">            id = preparationService.preparerPourGestionnaire(</span>
+                    authentication,
+<span class="fc" id="L49">                    demande.bailId(),</span>
+<span class="fc" id="L50">                    demande.periodeDebut(),</span>
+<span class="fc" id="L51">                    demande.periodeFin()</span>
+            );
+        } else {
+<span class="fc" id="L54">            id = preparationService.preparer(</span>
+<span class="fc" id="L55">                    lecteur.identifiant(),</span>
+<span class="fc" id="L56">                    demande.bailId(),</span>
+<span class="fc" id="L57">                    demande.periodeDebut(),</span>
+<span class="fc" id="L58">                    demande.periodeFin()</span>
+            );
+        }
+
+<span class="fc" id="L62">        CreationQuittanceResponse reponse =</span>
                 new CreationQuittanceResponse(
                         id,
                         &quot;BROUILLON&quot;,
                         &quot;NON_SIGNE&quot;
                 );
 
-<span class="fc" id="L51">        return ResponseEntity.status(HttpStatus.CREATED).body(reponse);</span>
+<span class="fc" id="L69">        return ResponseEntity.status(HttpStatus.CREATED).body(reponse);</span>
     }
 
-    private String identifierBailleur(Authentication authentication) {
-<span class="fc" id="L55">        LecteurQuittances lecteur =</span>
-<span class="fc" id="L56">                LecteurQuittances.depuis(authentication);</span>
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (!lecteur.bailleur()) {</span>
-<span class="nc" id="L58">            throw new AccessDeniedException(</span>
-                    &quot;La création est réservée au bailleur.&quot;
-            );
-        }
-
-<span class="fc" id="L63">        return lecteur.identifiant();</span>
-    }
 
     private void verifierDemande(CreationQuittanceRequest demande) {
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if (demande == null</span>
-<span class="pc bpc" id="L68" title="1 of 2 branches missed.">                || demande.bailId() == null</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                || demande.bailId().isBlank()</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                || demande.bailId().length() &gt; 100</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                || !demande.bailId().equals(demande.bailId().trim())) {</span>
-<span class="nc" id="L72">            throw new ResponseStatusException(</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (demande == null</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">                || demande.bailId() == null</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">                || demande.bailId().isBlank()</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                || demande.bailId().length() &gt; 100</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                || !demande.bailId().equals(demande.bailId().trim())) {</span>
+<span class="nc" id="L79">            throw new ResponseStatusException(</span>
                     HttpStatus.BAD_REQUEST,
                     &quot;L'identifiant du bail est obligatoire et limité à 100 caractères.&quot;
             );
         }
 
-<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (demande.periodeDebut() == null</span>
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                || demande.periodeFin() == null) {</span>
-<span class="nc" id="L80">            throw new ResponseStatusException(</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (demande.periodeDebut() == null</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                || demande.periodeFin() == null) {</span>
+<span class="nc" id="L87">            throw new ResponseStatusException(</span>
                     HttpStatus.BAD_REQUEST,
                     &quot;Les dates de début et de fin sont obligatoires.&quot;
             );
         }
 
-<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (demande.periodeFin().isBefore(demande.periodeDebut())) {</span>
-<span class="fc" id="L87">            throw new ResponseStatusException(</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (demande.periodeFin().isBefore(demande.periodeDebut())) {</span>
+<span class="fc" id="L94">            throw new ResponseStatusException(</span>
                     HttpStatus.BAD_REQUEST,
                     &quot;La fin de période doit être postérieure ou égale au début.&quot;
             );
         }
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L99">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

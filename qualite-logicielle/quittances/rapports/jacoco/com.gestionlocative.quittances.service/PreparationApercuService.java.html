@@ -40,9 +40,9 @@ public class PreparationApercuService {
 <span class="fc" id="L40">        LecteurQuittances lecteur =</span>
 <span class="fc" id="L41">                LecteurQuittances.depuis(authentication);</span>
 
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (!lecteur.bailleur()) {</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (!lecteur.peutEcrire()) {</span>
 <span class="nc" id="L44">            throw new AccessDeniedException(</span>
-                    &quot;La prévisualisation est réservée au bailleur.&quot;
+                    &quot;La prévisualisation est réservée au bailleur ou au gestionnaire.&quot;
             );
         }
 

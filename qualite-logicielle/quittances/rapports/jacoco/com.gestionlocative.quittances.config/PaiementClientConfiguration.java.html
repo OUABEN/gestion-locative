@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Set;
 
 import com.gestionlocative.quittances.client.HttpPaiementClient;
+import com.gestionlocative.quittances.client.PaiementsCollectifsClient;
 import com.gestionlocative.quittances.client.PaiementClient;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,17 +19,17 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration(proxyBeanMethods = false)
-<span class="fc" id="L21">public class PaiementClientConfiguration {</span>
+<span class="fc" id="L22">public class PaiementClientConfiguration {</span>
     @Value(&quot;${DARLOC_DOCKER_DEMO:false}&quot;)
     private boolean dockerDemo;
 
 
     @Bean(name = &quot;paiementHttpTransport&quot;, destroyMethod = &quot;close&quot;)
     public HttpClient paiementHttpTransport() {
-<span class="fc" id="L28">        return HttpClient.newBuilder()</span>
-<span class="fc" id="L29">                .connectTimeout(Duration.ofSeconds(2))</span>
-<span class="fc" id="L30">                .followRedirects(HttpClient.Redirect.NEVER)</span>
-<span class="fc" id="L31">                .build();</span>
+<span class="fc" id="L29">        return HttpClient.newBuilder()</span>
+<span class="fc" id="L30">                .connectTimeout(Duration.ofSeconds(2))</span>
+<span class="fc" id="L31">                .followRedirects(HttpClient.Redirect.NEVER)</span>
+<span class="fc" id="L32">                .build();</span>
     }
 
     @Bean
@@ -39,72 +40,83 @@ import org.springframework.web.client.RestClient;
             @Value(&quot;${quittances.integration.paiements.mode}&quot;) String mode,
             @Value(&quot;${quittances.integration.paiements.token:}&quot;) String token) {
 
-<span class="fc" id="L42">        URI uri = URI.create(baseUrl);</span>
+<span class="fc" id="L43">        URI uri = URI.create(baseUrl);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        boolean collectif = &quot;UTILISATEUR&quot;.equals(mode)</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                &amp;&amp; &quot;/api/paiements?bailId={bailId}&quot;.equals(chemin);</span>
 
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (uri.getHost() == null</span>
-<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                || !Set.of(&quot;http&quot;, &quot;https&quot;).contains(uri.getScheme())</span>
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">                || uri.getUserInfo() != null</span>
-<span class="pc bpc" id="L47" title="1 of 2 branches missed.">                || uri.getQuery() != null</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                || uri.getFragment() != null) {</span>
-<span class="nc" id="L49">            throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (uri.getHost() == null</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                || !Set.of(&quot;http&quot;, &quot;https&quot;).contains(uri.getScheme())</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                || uri.getUserInfo() != null</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">                || uri.getQuery() != null</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                || uri.getFragment() != null) {</span>
+<span class="nc" id="L52">            throw new IllegalArgumentException(</span>
                     &quot;L'adresse du service Paiements est invalide.&quot;
             );
         }
 
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (!chemin.startsWith(&quot;/&quot;)</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                || chemin.startsWith(&quot;//&quot;)</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{bailId}&quot;)</span>
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{debut}&quot;)</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{fin}&quot;)) {</span>
-<span class="nc" id="L59">            throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (!chemin.startsWith(&quot;/&quot;)</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                || chemin.startsWith(&quot;//&quot;)</span>
+<span class="pc bpc" id="L59" title="2 of 4 branches missed.">                || !chemin.contains(&quot;{bailId}&quot;)</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                || (!collectif &amp;&amp; (!chemin.contains(&quot;{debut}&quot;)</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                || !chemin.contains(&quot;{fin}&quot;)))) {</span>
+<span class="nc" id="L62">            throw new IllegalArgumentException(</span>
                     &quot;Le chemin Paiements doit contenir les paramètres attendus.&quot;
             );
         }
 
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (&quot;SIMULATION&quot;.equals(mode)) {</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">            if (!ReseauDemo.sourceAutorisee(uri, dockerDemo)) {</span>
-<span class="nc" id="L66">                throw new IllegalArgumentException(</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (&quot;SIMULATION&quot;.equals(mode)) {</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">            if (!ReseauDemo.sourceAutorisee(uri, dockerDemo)) {</span>
+<span class="nc" id="L69">                throw new IllegalArgumentException(</span>
                         &quot;Le mode SIMULATION est limité à une adresse locale.&quot;
                 );
             }
 
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if (!token.isBlank()) {</span>
-<span class="nc" id="L72">                throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            if (!token.isBlank()) {</span>
+<span class="nc" id="L75">                throw new IllegalArgumentException(</span>
                         &quot;Ne configure pas de jeton réel en mode SIMULATION.&quot;
                 );
             }
 
-<span class="nc bnc" id="L77" title="All 2 branches missed.">        } else if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
-<span class="nc bnc" id="L78" title="All 2 branches missed.">            if (token.isBlank()) {</span>
-<span class="nc" id="L79">                throw new IllegalArgumentException(</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        } else if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (token.isBlank()) {</span>
+<span class="nc" id="L82">                throw new IllegalArgumentException(</span>
                         &quot;Un jeton de service est requis en mode INTEGRATION.&quot;
                 );
             }
 
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        } else if (&quot;UTILISATEUR&quot;.equals(mode)) {</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            if (!token.isBlank()) {</span>
+<span class="fc" id="L89">                throw new IllegalArgumentException(</span>
+                        &quot;Le mode UTILISATEUR interdit les jetons statiques.&quot;
+                );
+            }
+
         } else {
-<span class="nc" id="L85">            throw new IllegalArgumentException(</span>
-                    &quot;Le mode Paiements doit être SIMULATION ou INTEGRATION.&quot;
+<span class="nc" id="L95">            throw new IllegalArgumentException(</span>
+                    &quot;Le mode Paiements doit etre SIMULATION, INTEGRATION ou UTILISATEUR.&quot;
             );
         }
 
-<span class="fc" id="L90">        JdkClientHttpRequestFactory factory =</span>
+<span class="fc" id="L100">        JdkClientHttpRequestFactory factory =</span>
                 new JdkClientHttpRequestFactory(transport);
 
-<span class="fc" id="L93">        factory.setReadTimeout(Duration.ofSeconds(5));</span>
+<span class="fc" id="L103">        factory.setReadTimeout(Duration.ofSeconds(5));</span>
 
-<span class="fc" id="L95">        RestClient.Builder builder = RestClient.builder()</span>
-<span class="fc" id="L96">                .baseUrl(baseUrl)</span>
-<span class="fc" id="L97">                .requestFactory(factory)</span>
-<span class="fc" id="L98">                .defaultHeader(</span>
+<span class="fc" id="L105">        RestClient.Builder builder = RestClient.builder()</span>
+<span class="fc" id="L106">                .baseUrl(baseUrl)</span>
+<span class="fc" id="L107">                .requestFactory(factory)</span>
+<span class="fc" id="L108">                .defaultHeader(</span>
                         HttpHeaders.ACCEPT,
                         MediaType.APPLICATION_JSON_VALUE
                 );
 
-<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
-<span class="nc" id="L104">            builder.defaultHeaders(headers -&gt; headers.setBearerAuth(token));</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if (&quot;INTEGRATION&quot;.equals(mode)) {</span>
+<span class="nc" id="L114">            builder.defaultHeaders(headers -&gt; headers.setBearerAuth(token));</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        } else if (&quot;UTILISATEUR&quot;.equals(mode)) {</span>
+<span class="fc" id="L116">            builder.requestInterceptor(new JwtUtilisateurInterceptor());</span>
         }
 
-<span class="fc" id="L107">        return new HttpPaiementClient(builder.build(), chemin);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        return collectif ? new PaiementsCollectifsClient(builder.build()) : new HttpPaiementClient(builder.build(), chemin);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
