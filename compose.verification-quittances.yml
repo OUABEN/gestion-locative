@@ -1,0 +1,50 @@
+# Verification isolee : ne modifie aucun fichier compose collectif.
+# A placer a la racine du depot gestion-locative-groupe16.
+name: gl-verification-quittances
+
+services:
+  validation-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: gl_quittances_validation
+      POSTGRES_USER: gl_validation
+      POSTGRES_PASSWORD: gl_validation_temp_only
+    volumes:
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - validation_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: "no"
+
+  quittances:
+    build:
+      context: ./backend/backend_gestion_quittances
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "8084"
+      QUITTANCES_DB_HOST: validation-db
+      QUITTANCES_DB_PORT: "5432"
+      QUITTANCES_DB_NAME: gl_quittances_validation
+      QUITTANCES_DB_USER: gl_validation
+      QUITTANCES_DB_PASSWORD: gl_validation_temp_only
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      JWT_MODE: COMMUN
+      JWT_SECRET: ${GL_VALIDATION_JWT_SECRET:?Definir GL_VALIDATION_JWT_SECRET dans PowerShell}
+      PAIEMENTS_MODE: SIMULATION
+      LOCATAIRES_MODE: SIMULATION
+      BIENS_MODE: SIMULATION
+      BAUX_MODE: SIMULATION
+      EMISSION_REELLE_ACTIVE: "false"
+    ports:
+      - "127.0.0.1:18084:8084"
+    depends_on:
+      validation-db:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  validation_pgdata:
