@@ -1,8 +1,8 @@
-﻿import axios from 'axios';
-import { ensureValidToken, generateFreshToken } from './httpClient';
+﻿import { httpClient } from './httpClient';
 
 const API_BASE_URL = import.meta.env.VITE_API_LOCATAIRES_URL || '/api/locataires';
 const DIRECT_BACKEND_URL = 'http://localhost:8082/api/locataires';
+const BAUX_BASE_URL = import.meta.env.VITE_API_BAUX_URL || '/api/baux';
 const DIRECT_BAUX_URL = 'http://localhost:8082/api/baux';
 
 const STORAGE_KEY = 'gl_locataires_store_v2';
@@ -119,53 +119,38 @@ const writeLocalBaux = (items) => {
   }
 };
 
-const locatairesClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 6000,
-});
-
-locatairesClient.interceptors.request.use(
-  async (config) => {
-    const token = await ensureValidToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-locatairesClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalConfig = error.config;
-    if (!originalConfig) return Promise.reject(error);
-
-    if (error.response?.status === 401 && !originalConfig._retriedAuth) {
-      originalConfig._retriedAuth = true;
-      const freshToken = await generateFreshToken();
-      originalConfig.headers.Authorization = `Bearer ${freshToken}`;
-      return locatairesClient.request(originalConfig);
-    }
-
+const locatairesRequest = async (config) => {
+  const reqConfig = {
+    baseURL: API_BASE_URL,
+    ...config,
+  };
+  try {
+    return await httpClient(reqConfig);
+  } catch (error) {
     const isProxyFailure =
       !error.response ||
       error.response.status === 502 ||
       error.response.status === 504 ||
       (error.response.status === 500 && !error.response.data?.message);
 
-    if (isProxyFailure && !originalConfig._retriedDirect) {
-      originalConfig._retriedDirect = true;
-      originalConfig.baseURL = DIRECT_BACKEND_URL;
-      return locatairesClient.request(originalConfig);
+    if (isProxyFailure && !config._retriedDirect) {
+      return await httpClient({
+        ...reqConfig,
+        baseURL: DIRECT_BACKEND_URL,
+        _retriedDirect: true,
+      });
     }
-
-    return Promise.reject(error);
+    throw error;
   }
-);
+};
+
+const locatairesClient = {
+  get: (url, config = {}) => locatairesRequest({ method: 'GET', url, ...config }),
+  post: (url, data, config = {}) => locatairesRequest({ method: 'POST', url, data, ...config }),
+  put: (url, data, config = {}) => locatairesRequest({ method: 'PUT', url, data, ...config }),
+  patch: (url, data, config = {}) => locatairesRequest({ method: 'PATCH', url, data, ...config }),
+  delete: (url, config = {}) => locatairesRequest({ method: 'DELETE', url, ...config }),
+};
 
 export const locatairesApi = {
   // Profil du locataire connecté (GET /api/locataires/me)
@@ -264,7 +249,7 @@ export const locatairesApi = {
         throw err;
       }
       const created = {
-        id: crypto.randomUUID ? crypto.randomUUID() : `a${Date.now()}-locataire`,
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `a${Date.now()}-locataire`,
         nom: data.nom,
         prenom: data.prenom,
         cin: normalizedCin,
@@ -327,14 +312,21 @@ export const locatairesApi = {
   // Baux associés au locataire
   getBauxByLocataire: async (locataireId) => {
     try {
-      const response = await axios.get(`${DIRECT_BAUX_URL}?locataireId=${locataireId}`, {
-        headers: {
-          Authorization: `Bearer ${await ensureValidToken()}`,
-        },
+      const response = await httpClient.get('', {
+        baseURL: BAUX_BASE_URL,
+        params: { locataireId },
       });
       if (response.data) return response.data;
     } catch {
-      // fallback
+      try {
+        const directResp = await httpClient.get('', {
+          baseURL: DIRECT_BAUX_URL,
+          params: { locataireId },
+        });
+        if (directResp.data) return directResp.data;
+      } catch {
+        // fallback
+      }
     }
     const baux = readLocalBaux();
     return baux.filter((b) => String(b.locataireId || b.locataire_id) === String(locataireId));
@@ -343,15 +335,21 @@ export const locatairesApi = {
   // Tous les baux
   getBaux: async (params = {}) => {
     try {
-      const response = await axios.get(DIRECT_BAUX_URL, {
+      const response = await httpClient.get('', {
+        baseURL: BAUX_BASE_URL,
         params,
-        headers: {
-          Authorization: `Bearer ${await ensureValidToken()}`,
-        },
       });
       if (response.data) return response.data;
     } catch {
-      // fallback
+      try {
+        const directResp = await httpClient.get('', {
+          baseURL: DIRECT_BAUX_URL,
+          params,
+        });
+        if (directResp.data) return directResp.data;
+      } catch {
+        // fallback
+      }
     }
     const baux = readLocalBaux();
     if (params.statut) {
