@@ -126,6 +126,49 @@ Le préfixe `/api/<service>` est retiré avant transmission. L'en-tête `Authori
 
 Côté React, les URLs d'API sont exposées au build sous `VITE_API_*_URL` **et** `REACT_APP_API_*_URL` (compatible Vite et Create React App).
 
+### Configuration du service Quittances pour le scénario intégré
+
+La configuration transmise par le responsable du module Quittances utilise les services réels et relaie le JWT de l'appelant en mode `UTILISATEUR`. Ces valeurs sont intégrées à `environment` du service `quittances` dans le Compose racine :
+
+```yaml
+JWT_MODE: COMMUN
+SERVER_ADDRESS: "0.0.0.0"
+SERVER_PORT: "8084"
+DARLOC_DOCKER_DEMO: "false"
+
+BIENS_MODE: UTILISATEUR
+BIENS_SERVICE_URL: "http://biens:8081"
+BIENS_BASE_URL: "http://biens:8081"
+BIENS_CHEMIN: "/api/biens/{id}"
+BIENS_TOKEN: ""
+
+LOCATAIRES_MODE: UTILISATEUR
+LOCATAIRES_SERVICE_URL: "http://locataires:8082"
+LOCATAIRES_BASE_URL: "http://locataires:8082"
+LOCATAIRES_CHEMIN: "/api/locataires/{id}/quittance-summary"
+LOCATAIRES_TOKEN: ""
+
+BAUX_MODE: UTILISATEUR
+BAUX_BASE_URL: "http://loyers:8083"
+BAUX_CHEMIN: "/api/baux/{id}"
+BAUX_TOKEN: ""
+
+PAIEMENTS_MODE: UTILISATEUR
+LOYERS_SERVICE_URL: "http://loyers:8083"
+PAIEMENTS_BASE_URL: "http://loyers:8083"
+PAIEMENTS_CHEMIN: "/api/paiements?bailId={bailId}"
+PAIEMENTS_TOKEN: ""
+
+SPRING_FLYWAY_ENABLED: "true"
+SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+SPRING_FLYWAY_BASELINE_VERSION: "0"
+SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+```
+
+Les variables `*_TOKEN` restent vides en mode `UTILISATEUR` : le JWT courant est relayé. Le `JWT_SECRET` commun est fourni depuis l'environnement, jamais écrit dans ce fichier. Le Compose racine fournit aussi `QUITTANCES_DB_HOST/PORT/NAME/USER/PASSWORD`, dérivés de la base et des variables PostgreSQL communes, car le service Quittances les lit directement. `SERVER_ADDRESS=0.0.0.0` permet l'écoute sur le réseau Docker. La route de disponibilité indiquée par Quittances est `GET /api/v1/systeme/etat`.
+
+**À valider avant de considérer le raccordement prêt :** les valeurs ci-dessus viennent du responsable Quittances. Le `application.yml` actuellement présent dans le dépôt a des valeurs par défaut différentes, notamment `127.0.0.1` et des chemins `/api/v1/...`; la configuration effective doit donc être vérifiée dans la PR/intégration Docker. La cible `BAUX_BASE_URL=http://loyers:8083` est la valeur communiquée par Akram, tandis que les routes de bail observées dans le dépôt sont actuellement portées par Locataires. Le scénario d'émission avec signature cryptographique et l'envoi Mailpit réel nécessitent des paramètres additionnels et restent **NON TESTÉS** ici. Le responsable Quittances prévoit également de contacter Mohamed au sujet de l'endpoint d'identité du propriétaire.
+
 ---
 
 ## 6. Pipeline CI/CD

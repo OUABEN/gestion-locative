@@ -41,3 +41,9 @@ L'API REST est alors accessible sur : `http://localhost:8082/api/v1/locataires`
 - `PUT /api/v1/locataires/{id}` : Mettre à jour l'email et le téléphone
 - `DELETE /api/v1/locataires/{id}` : Supprimer une fiche locataire
 - `GET /api/v1/locataires/{id}/quittance-summary` : Synthèse locataire pour le module Quittances
+
+## Décision à prendre : responsabilité du bail
+
+Le code présent aujourd'hui place la création, la lecture, la liste et la mise à jour de statut des baux dans `backend_gestion_locataires` (modèle, service, contrôleur et routes Bail). Le contrôleur de bail interroge aussi Biens pour la disponibilité et la mise à jour du statut du logement. Le service Loyers conserve des identifiants `bailId` sur les échéances et paiements et consulte les informations du bail via son client externe. Quittances, de son côté, consomme une référence de bail pour préparer ses documents.
+
+Cette description reflète l'organisation actuelle du code. La décision de conserver la responsabilité du bail dans Locataires ou de la déplacer vers Loyers reste à prendre par Ayoub et Ahmed.
