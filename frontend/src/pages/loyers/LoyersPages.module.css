@@ -1,0 +1,26 @@
+.page { display: grid; gap: 22px; color: var(--color-midnight); }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.title { margin: 0; font-size: clamp(26px, 3vw, 34px); letter-spacing: -.04em; }
+.subtitle { margin: 8px 0 0; color: var(--color-midnight-muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { padding: 9px 14px; border-radius: var(--radius-full); color: var(--color-midnight-muted); text-decoration: none; font-weight: 600; }
+.tabActive { background: var(--color-lime); color: var(--color-midnight); }
+.filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.input, .select { min-height: 42px; padding: 9px 12px; border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); background: var(--color-white); color: var(--color-midnight); font: inherit; }
+.select { min-width: 170px; }
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; min-width: 720px; }
+.table th { padding: 12px; text-align: left; color: var(--color-midnight-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.table td { padding: 15px 12px; border-top: 1px solid var(--color-border-light); vertical-align: middle; }
+.money { font-weight: 700; font-variant-numeric: tabular-nums; }
+.status { display: inline-flex; padding: 6px 10px; border-radius: var(--radius-full); background: #f0f1f3; font-size: 12px; font-weight: 700; }
+.status[data-status="PAYEE"] { background: #eef6d5; }
+.status[data-status="EN_RETARD"], .status[data-status="IMPAYEE"] { background: #fff0ed; color: #a33224; }
+.muted { color: var(--color-midnight-muted); }
+.notice { padding: 18px; border-radius: var(--radius-md); background: var(--color-off-white); }
+.error { color: #a33224; }
+.form { display: grid; gap: 14px; }
+.form label { display: grid; gap: 6px; font-weight: 600; }
+.remainder { padding: 14px; border-radius: var(--radius-sm); background: var(--color-lime-soft); }
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+@media (max-width: 640px) { .header { display: grid; } .select, .input { width: 100%; } .filters { display: grid; } }

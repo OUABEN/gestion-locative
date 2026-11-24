@@ -1,42 +1,223 @@
-version: '3.8'
+# =====================================================================
+# Gestion Locative — orchestration complète
+#   cp .env.example .env   puis   docker compose up --build
+# Toutes les valeurs sensibles proviennent du fichier .env (jamais en dur).
+# Les services communiquent par NOM DE SERVICE sur le réseau gl_network
+# (jamais via localhost) : db, biens, locataires, loyers, quittances.
+# Pour repartir d'une base vide :  docker compose down -v
+# =====================================================================
+name: gestion-locative
+
+# ---------- Variables communes à tous les backends ----------
+x-backend-env: &backend-env
+  NODE_ENV: ${NODE_ENV:-production}
+  # Connexion PostgreSQL (format éclaté)
+  DB_HOST: db
+  DB_PORT: "5432"
+  DB_NAME: ${POSTGRES_DB:-db_gestion_locative}
+  DB_USER: ${POSTGRES_USER:?POSTGRES_USER manquant dans .env}
+  DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+  # Connexion PostgreSQL (format URL)
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-db_gestion_locative}
+  # JWT partagé entre tous les services (même secret, HS256)
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant dans .env}
+  JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+  # URLs inter-services (noms de service Docker)
+  BIENS_SERVICE_URL: ${BIENS_SERVICE_URL:-http://biens:8081}
+  LOCATAIRES_SERVICE_URL: ${LOCATAIRES_SERVICE_URL:-http://locataires:8082}
+  LOYERS_SERVICE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+  QUITTANCES_SERVICE_URL: ${QUITTANCES_SERVICE_URL:-http://quittances:8084}
+
+# ---------- Variables supplémentaires pour Spring Boot (relaxed binding) ----------
+x-spring-env: &spring-env
+  <<: *backend-env
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+  SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-db_gestion_locative}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+x-depends-db: &depends-db
+  db:
+    condition: service_healthy
 
 services:
-  locataires-db:
-    image: postgres:15-alpine
-    container_name: locataires-postgres
-    restart: always
+  # ---------------------------------------------------------------
+  # Base de données PostgreSQL partagée
+  # ---------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: gestion_locative_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secret_password
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER manquant dans .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: ${POSTGRES_DB:-db_gestion_locative}
     ports:
-      - "5432:5432"
+      # 5433 côté hôte pour éviter le conflit avec un PostgreSQL local
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
-      - locataires_pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+      # Scripts exécutés (ordre alphabétique) uniquement à la 1re création du volume
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
-      - gestion-locative-net
+      - gl_network
 
-  gestion-locataires:
+  # ---------------------------------------------------------------
+  # Service mail de développement (Mailpit) : SMTP 1025, interface web 8025
+  # ---------------------------------------------------------------
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+    networks:
+      - gl_network
+
+  # ---------------------------------------------------------------
+  # Microservices backend
+  # ---------------------------------------------------------------
+  biens:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: service-locataires
-    restart: always
-    depends_on:
-      - locataires-db
+      context: ./backend/backend_gestion_biens
+    image: gestion-locative/backend_gestion_biens:local
+    restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://locataires-db:5432/gestion_locative_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: secret_password
+      <<: *backend-env
+      PORT: "8081"
+    ports:
+      - "8081:8081"
+    depends_on: *depends-db
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - gl_network
+
+  locataires:
+    build:
+      context: ./backend/backend_gestion_locataires
+    image: gestion-locative/backend_gestion_locataires:local
+    restart: unless-stopped
+    environment:
+      <<: *spring-env
+      PORT: "8082"
+      SERVER_PORT: "8082"
     ports:
       - "8082:8082"
+    depends_on: *depends-db
+    # TODO (Ahmed) : ajouter le healthcheck (/health ou /actuator/health)
     networks:
-      - gestion-locative-net
+      - gl_network
+
+  loyers:
+    build:
+      context: ./backend/backend_gestion_loyers
+    image: gestion-locative/backend_gestion_loyers:local
+    restart: unless-stopped
+    environment:
+      <<: *spring-env
+      PORT: "8083"
+      SERVER_PORT: "8083"
+    ports:
+      - "8083:8083"
+    depends_on: *depends-db
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - gl_network
+
+  quittances:
+    build:
+      context: ./backend/backend_gestion_quittances
+    image: gestion-locative/backend_gestion_quittances:local
+    restart: unless-stopped
+    environment:
+      <<: *spring-env
+      PORT: "8084"
+      SERVER_PORT: "8084"
+      # Base de données (noms lus par Quittances)
+      QUITTANCES_DB_HOST: db
+      QUITTANCES_DB_PORT: "5432"
+      QUITTANCES_DB_NAME: ${POSTGRES_DB:-db_gestion_locative}
+      QUITTANCES_DB_USER: ${POSTGRES_USER}
+      QUITTANCES_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # JWT commun (HS256, même JWT_SECRET que les autres services)
+      JWT_MODE: COMMUN
+      # Services appelés : Loyers possède les baux et les paiements
+      BIENS_BASE_URL: ${BIENS_SERVICE_URL:-http://biens:8081}
+      LOCATAIRES_BASE_URL: ${LOCATAIRES_SERVICE_URL:-http://locataires:8082}
+      BAUX_BASE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+      PAIEMENTS_BASE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+      # E-mail (Mailpit)
+      DARLOC_MAILPIT_ACTIF: "true"
+      DARLOC_MAILPIT_PORT: "1025"
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      # TODO (Akram) : variables *_MODE, *_CHEMIN, *_TOKEN du mode HTTP réel
+      # TODO (Akram) : décommenter quand le schéma de database/init/06_quittances.sql est validé
+      # SPRING_FLYWAY_ENABLED: "false"
+    ports:
+      - "8084:8084"
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    # TODO : healthcheck sur /api/v1/systeme/etat (après réponse d'Akram sur son image)
+    networks:
+      - gl_network
+
+  # ---------------------------------------------------------------
+  # Frontend React servi par nginx (reverse proxy vers les services)
+  # ---------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # URLs utilisées par le navigateur (relayées par nginx)
+        API_BIENS_URL: ${FRONTEND_API_BIENS_URL:-/api/biens}
+        API_LOCATAIRES_URL: ${FRONTEND_API_LOCATAIRES_URL:-/api/locataires}
+        API_LOYERS_URL: ${FRONTEND_API_LOYERS_URL:-/api/loyers}
+        API_QUITTANCES_URL: ${FRONTEND_API_QUITTANCES_URL:-/api/quittances}
+    image: gestion-locative/frontend:local
+    restart: unless-stopped
+    environment:
+      # Cibles du reverse proxy nginx (réseau Docker interne)
+      BIENS_SERVICE_URL: ${BIENS_SERVICE_URL:-http://biens:8081}
+      LOCATAIRES_SERVICE_URL: ${LOCATAIRES_SERVICE_URL:-http://locataires:8082}
+      LOYERS_SERVICE_URL: ${LOYERS_SERVICE_URL:-http://loyers:8083}
+      QUITTANCES_SERVICE_URL: ${QUITTANCES_SERVICE_URL:-http://quittances:8084}
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:80"
+    depends_on:
+      biens:
+        condition: service_healthy
+      loyers:
+        condition: service_healthy
+      locataires:
+        condition: service_started
+      quittances:
+        condition: service_started
+    networks:
+      - gl_network
 
 networks:
-  gestion-locative-net:
+  gl_network:
+    name: gl_network
     driver: bridge
 
 volumes:
-  locataires_pgdata:
+  pgdata:

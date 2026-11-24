@@ -1,10 +1,4 @@
-# Exclus du contexte de build Docker
-node_modules
-dist
-build
-target
-.env
-.env.*
-coverage
-.git
-*.log
+target/
+.git/
+.idea/
+*.md

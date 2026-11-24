@@ -4,15 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Valide les JWT émis par le service d'authentification (HS256, secret partagé).
- * Contrat attendu : sub = id utilisateur (UUID), claim "role" = BAILLEUR | GESTIONNAIRE | LOCATAIRE.
+ * Valide les JWT émis par backend_gestion_biens (HS256, secret partagé JWT_SECRET).
+ * Contenu attendu : sub = id utilisateur, role = BAILLEUR | GESTIONNAIRE | LOCATAIRE, email.
  */
 @Service
 public class JwtService {
@@ -30,17 +28,5 @@ public class JwtService {
     /** Lève JwtException si le token est invalide, falsifié ou expiré. */
     public Claims parse(String token) {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
-    }
-
-    /** Token court (5 min) pour les appels de service à service, rôle GESTIONNAIRE. */
-    public String genererTokenService() {
-        Instant now = Instant.now();
-        return Jwts.builder()
-                .subject("service-loyers")
-                .claim("role", "GESTIONNAIRE")
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(300)))
-                .signWith(key)
-                .compact();
     }
 }

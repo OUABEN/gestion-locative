@@ -1,0 +1,13 @@
+{
+  "name": "gestion-locataires-postman",
+  "version": "1.0.0",
+  "description": "Suite de tests d'API Newman / Postman pour le module Gestion des Locataires & Baux",
+  "private": true,
+  "scripts": {
+    "test": "newman run locataires.postman_collection.json --reporters cli,htmlextra --reporter-htmlextra-export ../../../docs/qualite/locataires/newman-report.html"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}

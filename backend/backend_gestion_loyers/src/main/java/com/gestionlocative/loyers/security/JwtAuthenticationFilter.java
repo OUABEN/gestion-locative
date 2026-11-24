@@ -29,13 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith(PREFIX)) {
+            String token = header.substring(PREFIX.length());
             try {
-                Claims claims = jwtService.parse(header.substring(PREFIX.length()));
+                Claims claims = jwtService.parse(token);
                 String role = claims.get("role", String.class);
                 if (role != null) {
+                    String email = claims.get("email", String.class);
+                    AuthenticatedUser user = new AuthenticatedUser(claims.getSubject(), role, email, token);
                     var auth = new UsernamePasswordAuthenticationToken(
-                            claims.getSubject(), null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                            user, token, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (JwtException | IllegalArgumentException e) {

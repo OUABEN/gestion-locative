@@ -14,6 +14,7 @@ import { QuittancesListPage } from './pages/quittances/QuittancesListPage';
 import { QuittanceCreatePage } from './pages/quittances/QuittanceCreatePage';
 import { QuittanceDetailPage } from './pages/quittances/QuittanceDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { EcheancesPage, HistoriquePaiementsPage, RetardsPage } from './pages/loyers/LoyersPages';
 
 // Module 02 : Gestion des Locataires (Ahmed LAARIF)
 import { LocatairesListPage } from './pages/locataires/LocatairesListPage';
@@ -80,7 +81,9 @@ export const App = () => {
         <Route path="locataires/mon-espace" element={<MonEspaceLocatairePage />} />
 
         {/* Modules complémentaires de la plateforme Gestion Locative */}
-        <Route path="loyers" element={<ModuleHubPage moduleKey="loyers" />} />
+        <Route path="loyers" element={<EcheancesPage />} />
+        <Route path="loyers/historique" element={<HistoriquePaiementsPage />} />
+        <Route path="loyers/retards" element={<RetardsPage />} />
         <Route path="quittances" element={<QuittancesListPage />} />
         <Route path="quittances/nouveau" element={<QuittanceCreatePage />} />
         <Route path="quittances/:id" element={<QuittanceDetailPage />} />

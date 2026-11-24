@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -86,7 +87,7 @@ jobs:
           elif [ -f pom.xml ]; then
             mvn -B test
           else
-            echo "Aucun projet Node ou Maven d├®tect├® dans ce dossier"; exit 1
+            echo "Aucun projet Node ou Maven détecté dans ce dossier"; exit 1
           fi
 
   frontend:
@@ -109,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: V├®rifier la syntaxe du fichier compose
+      - name: Vérifier la syntaxe du fichier compose
         run: |
           cp .env.example .env
           docker compose config -q

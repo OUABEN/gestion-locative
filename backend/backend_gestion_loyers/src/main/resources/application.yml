@@ -13,14 +13,29 @@ spring:
       ddl-auto: validate   # le schéma est géré par database/init/*.sql
     open-in-view: false
 
-# JWT partagé : MÊME secret et MÊME algorithme (HS256) que les autres microservices
+# JWT partagé : MÊME secret et MÊME algorithme (HS256) que backend_gestion_biens
 jwt:
   secret: ${JWT_SECRET:}
+
+# Healthcheck Docker : seul /actuator/health est exposé
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+# Documentation de l'API
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 # Règles métier des échéances (à confirmer avec l'équipe)
 loyers:
   jour-echeance: 5          # le loyer du mois M est dû le 5 du mois M
   jours-avant-impaye: 30    # EN_RETARD puis IMPAYEE après 30 jours de retard
   services:
-    locataires-url: ${LOCATAIRES_URL:http://localhost:8082}
-    biens-url: ${BIENS_URL:http://localhost:8081}
+    # Mêmes noms de variables que docker-compose.yml
+    locataires-url: ${LOCATAIRES_SERVICE_URL:http://localhost:8082}
+    biens-url: ${BIENS_SERVICE_URL:http://localhost:8081}
