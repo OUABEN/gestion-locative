@@ -173,4 +173,16 @@ describe('Campagne de Tests Unitaires - Module Gestion des Locataires (Ahmed LAA
     expect(suppressionEchouee).toBe(false);
     expect(service.nombreLocataires()).toBe(2);
   });
+
+  test('UT-LOC-15 : Recherche par email existant (locataire conforme retourné)', () => {
+    const resultat = service.getByEmail('yassine@mail.ma');
+    expect(resultat).not.toBeNull();
+    expect(resultat.cin).toBe('AB123456');
+    expect(resultat.nom).toBe('El Amrani');
+  });
+
+  test('UT-LOC-16 : Recherche par email inexistant (null retourné)', () => {
+    const resultat = service.getByEmail('inconnu@mail.ma');
+    expect(resultat).toBeNull();
+  });
 });

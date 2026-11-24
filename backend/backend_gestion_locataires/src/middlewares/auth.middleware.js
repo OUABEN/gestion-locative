@@ -4,7 +4,7 @@ const env = require('../config/env');
 /**
  * Middleware d'authentification JWT
  * Valide le jeton transmis dans l'en-tête Authorization: Bearer <token>
- * avec la même clé secrète JWT_SECRET et le même format que backend_gestion_biens.
+ * avec la clé secrète JWT_SECRET (algorithme HS256) et extrait { sub, role, email }.
  */
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -27,7 +27,7 @@ function authenticate(req, res, next) {
 
   const token = parts[1];
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET);
+    const decoded = jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] });
     if (!decoded || !decoded.sub || !decoded.role) {
       return res.status(401).json({
         status: 401,
@@ -36,7 +36,14 @@ function authenticate(req, res, next) {
       });
     }
 
-    req.user = decoded;
+    const { sub, role, email } = decoded;
+    req.user = {
+      ...decoded,
+      sub,
+      role,
+      email: email || decoded.email
+    };
+    req.token = token;
     next();
   } catch (err) {
     return res.status(401).json({

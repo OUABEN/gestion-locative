@@ -36,8 +36,13 @@ export const MonEspaceLocatairePage = () => {
   const loadMyData = async () => {
     setLoading(true);
     try {
-      const locs = await locatairesApi.getAll();
-      const myProfile = Array.isArray(locs) && locs.length > 0 ? locs[0] : null;
+      let myProfile = null;
+      try {
+        myProfile = await locatairesApi.getMe();
+      } catch {
+        const locs = await locatairesApi.getAll();
+        myProfile = Array.isArray(locs) && locs.length > 0 ? locs[0] : null;
+      }
       setLocataire(myProfile);
 
       if (myProfile) {
