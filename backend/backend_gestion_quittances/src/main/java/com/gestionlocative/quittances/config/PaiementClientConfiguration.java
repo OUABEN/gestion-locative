@@ -81,9 +81,16 @@ public class PaiementClientConfiguration {
                 );
             }
 
+        } else if ("UTILISATEUR".equals(mode)) {
+            if (!token.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Le mode UTILISATEUR interdit les jetons statiques."
+                );
+            }
+
         } else {
             throw new IllegalArgumentException(
-                    "Le mode Paiements doit être SIMULATION ou INTEGRATION."
+                    "Le mode Paiements doit etre SIMULATION, INTEGRATION ou UTILISATEUR."
             );
         }
 
@@ -102,6 +109,8 @@ public class PaiementClientConfiguration {
 
         if ("INTEGRATION".equals(mode)) {
             builder.defaultHeaders(headers -> headers.setBearerAuth(token));
+        } else if ("UTILISATEUR".equals(mode)) {
+            builder.requestInterceptor(new JwtUtilisateurInterceptor());
         }
 
         return new HttpPaiementClient(builder.build(), chemin);

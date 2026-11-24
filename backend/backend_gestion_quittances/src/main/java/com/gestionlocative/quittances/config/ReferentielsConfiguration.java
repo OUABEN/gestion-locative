@@ -147,9 +147,15 @@ public class ReferentielsConfiguration {
                         "Un jeton de service est requis pour l'intégration."
                 );
             }
+        } else if ("UTILISATEUR".equals(endpoint.mode())) {
+            if (!token.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Le mode UTILISATEUR interdit les jetons statiques."
+                );
+            }
         } else {
             throw new IllegalArgumentException(
-                    "Le mode doit être SIMULATION ou INTEGRATION."
+                    "Le mode doit être SIMULATION, INTEGRATION ou UTILISATEUR."
             );
         }
 
@@ -168,6 +174,8 @@ public class ReferentielsConfiguration {
 
         if ("INTEGRATION".equals(endpoint.mode())) {
             builder.defaultHeaders(headers -> headers.setBearerAuth(token));
+        } else if ("UTILISATEUR".equals(endpoint.mode())) {
+            builder.requestInterceptor(new JwtUtilisateurInterceptor());
         }
 
         return builder.build();
