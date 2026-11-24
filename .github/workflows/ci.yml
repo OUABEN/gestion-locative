@@ -77,7 +77,30 @@ jobs:
             echo "SPRING_FLYWAY_ENABLED=true"
             echo "SPRING_JPA_HIBERNATE_DDL_AUTO=validate"
           } >> "$GITHUB_ENV"
+      - name: Generer les cles RSA de test Quittances
+        if: matrix.service == 'quittances'
+        working-directory: backend/backend_gestion_quittances
+        run: |
+          mkdir -p .local-jwt
+          chmod 700 .local-jwt
 
+          openssl genpkey -algorithm RSA \
+            -pkeyopt rsa_keygen_bits:2048 \
+            -out .local-jwt/private.pem
+
+          openssl pkcs8 -topk8 -nocrypt \
+            -in .local-jwt/private.pem \
+            -outform DER \
+            -out .local-jwt/private.der
+
+          openssl pkey \
+            -in .local-jwt/private.pem \
+            -pubout -outform DER \
+            -out .local-jwt/public.der
+
+          chmod 600 .local-jwt/private.pem .local-jwt/private.der
+
+          test -s .local-jwt/public.der
       - name: Tests du service ${{ matrix.service }}
         working-directory: backend/backend_gestion_${{ matrix.service }}
         run: |
