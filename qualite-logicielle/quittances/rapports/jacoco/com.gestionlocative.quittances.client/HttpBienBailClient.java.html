@@ -14,7 +14,8 @@ public class HttpBienBailClient implements BienBailClient {
 <span class="fc" id="L14">    public record FicheBienReelle(</span>
             String id,
             String adresse,
-            String ville
+            String ville,
+            String bailleurId
     ) {
     }
 
@@ -27,36 +28,37 @@ public class HttpBienBailClient implements BienBailClient {
             RestClient biensClient,
             String biensChemin,
             RestClient bauxClient,
-<span class="fc" id="L30">            String bauxChemin) {</span>
+<span class="fc" id="L31">            String bauxChemin) {</span>
 
-<span class="fc" id="L32">        this.biensClient = biensClient;</span>
-<span class="fc" id="L33">        this.biensChemin = biensChemin;</span>
-<span class="fc" id="L34">        this.bauxClient = bauxClient;</span>
-<span class="fc" id="L35">        this.bauxChemin = bauxChemin;</span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L33">        this.biensClient = biensClient;</span>
+<span class="fc" id="L34">        this.biensChemin = biensChemin;</span>
+<span class="fc" id="L35">        this.bauxClient = bauxClient;</span>
+<span class="fc" id="L36">        this.bauxChemin = bauxChemin;</span>
+<span class="fc" id="L37">    }</span>
 
     @Override
     public Bien consulterBien(String id) {
-<span class="fc" id="L40">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc" id="L41">        LectureApiExterne.verifierIdentifiant(id);</span>
 
-<span class="fc" id="L42">        FicheBienReelle resultat = LectureApiExterne.lire(</span>
+<span class="fc" id="L43">        FicheBienReelle resultat = LectureApiExterne.lire(</span>
                 biensClient,
                 &quot;BIENS&quot;,
                 biensChemin,
-<span class="fc" id="L46">                Map.of(&quot;id&quot;, id),</span>
+<span class="fc" id="L47">                Map.of(&quot;id&quot;, id),</span>
                 FicheBienReelle.class
         );
 
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (!id.equals(resultat.id())</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">                || !LectureApiExterne.textePresent(resultat.adresse())</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">                || !LectureApiExterne.textePresent(resultat.ville())) {</span>
-<span class="fc" id="L53">            throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (!id.equals(resultat.id())</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">                || !LectureApiExterne.textePresent(resultat.adresse())</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">                || !LectureApiExterne.identifiantValide(resultat.bailleurId())) {</span>
+<span class="fc" id="L54">            throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
         }
 
-<span class="fc" id="L56">        String adresseComplete =</span>
-<span class="fc" id="L57">                resultat.adresse().trim() + &quot;, &quot; + resultat.ville().trim();</span>
-
-<span class="fc" id="L59">        return new Bien(null, resultat.id(), adresseComplete, null);</span>
+<span class="fc" id="L57">        String adresseComplete = resultat.adresse().trim();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (LectureApiExterne.textePresent(resultat.ville())) {</span>
+<span class="fc" id="L59">            adresseComplete += &quot;, &quot; + resultat.ville().trim();</span>
+        }
+<span class="fc" id="L61">        return new Bien(&quot;1&quot;, resultat.id(), adresseComplete, resultat.bailleurId());</span>
     }
 
     @Override
@@ -65,43 +67,43 @@ public class HttpBienBailClient implements BienBailClient {
             LocalDate debut,
             LocalDate fin) {
 
-<span class="fc" id="L68">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc" id="L70">        LectureApiExterne.verifierIdentifiant(id);</span>
 
-<span class="pc bpc" id="L70" title="3 of 6 branches missed.">        if (debut == null || fin == null || fin.isBefore(debut)) {</span>
-<span class="nc" id="L71">            throw new RegleMetierException(</span>
+<span class="pc bpc" id="L72" title="3 of 6 branches missed.">        if (debut == null || fin == null || fin.isBefore(debut)) {</span>
+<span class="nc" id="L73">            throw new RegleMetierException(</span>
                     &quot;PERIODE_INVALIDE&quot;,
                     &quot;La période demandée est invalide.&quot;
             );
         }
 
-<span class="fc" id="L77">        BailPeriode resultat = LectureApiExterne.lire(</span>
+<span class="fc" id="L79">        BailPeriode resultat = LectureApiExterne.lire(</span>
                 bauxClient,
                 &quot;BAUX&quot;,
                 bauxChemin,
-<span class="fc" id="L81">                Map.of(</span>
+<span class="fc" id="L83">                Map.of(</span>
                         &quot;id&quot;, id,
-<span class="fc" id="L83">                        &quot;debut&quot;, debut.toString(),</span>
-<span class="fc" id="L84">                        &quot;fin&quot;, fin.toString()</span>
+<span class="fc" id="L85">                        &quot;debut&quot;, debut.toString(),</span>
+<span class="fc" id="L86">                        &quot;fin&quot;, fin.toString()</span>
                 ),
                 BailPeriode.class
         );
 
-<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (!&quot;1&quot;.equals(resultat.versionContrat())</span>
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">                || !id.equals(resultat.bailId())</span>
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                || !debut.equals(resultat.periodeDebut())</span>
-<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                || !fin.equals(resultat.periodeFin())</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.locataireId())</span>
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.bienId())</span>
-<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.bailleurId())</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                || !LectureApiExterne.textePresent(resultat.nomBailleur())</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                || resultat.debutBail() == null</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                || resultat.loyerDu() == null</span>
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                || resultat.chargesDues() == null</span>
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                || !&quot;MAD&quot;.equals(resultat.devise())) {</span>
-<span class="nc" id="L101">            throw LectureApiExterne.incoherence(&quot;BAUX&quot;);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (!&quot;1&quot;.equals(resultat.versionContrat())</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                || !id.equals(resultat.bailId())</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                || !debut.equals(resultat.periodeDebut())</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">                || !fin.equals(resultat.periodeFin())</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.locataireId())</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.bienId())</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                || !LectureApiExterne.identifiantValide(resultat.bailleurId())</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                || !LectureApiExterne.textePresent(resultat.nomBailleur())</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                || resultat.debutBail() == null</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                || resultat.loyerDu() == null</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                || resultat.chargesDues() == null</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                || !&quot;MAD&quot;.equals(resultat.devise())) {</span>
+<span class="nc" id="L103">            throw LectureApiExterne.incoherence(&quot;BAUX&quot;);</span>
         }
 
-<span class="fc" id="L104">        return resultat;</span>
+<span class="fc" id="L106">        return resultat;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

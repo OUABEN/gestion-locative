@@ -40,5 +40,25 @@ public class PreparationQuittanceService {
 <span class="fc" id="L40">                resultat.affectations()</span>
         );
     }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public UUID preparerPourGestionnaire(
+            org.springframework.security.core.Authentication authentication,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin
+    ) {
+<span class="fc" id="L51">        var resultat = constructionService.construirePourGestionnaire(</span>
+                authentication,
+                bailId,
+                debut,
+                fin
+        );
+
+<span class="fc" id="L58">        return enregistrementService.enregistrer(</span>
+<span class="fc" id="L59">                resultat.document(),</span>
+<span class="fc" id="L60">                resultat.affectations()</span>
+        );
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -49,14 +50,57 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: ${{ matrix.service == 'quittances' && '21' || '17' }}
 
       - name: Initialiser la base (scripts database/init)
+        if: matrix.service != 'quittances'
         run: |
           for f in database/init/*.sql; do
             psql "postgresql://postgres:postgres@localhost:5432/db_gestion_locative" -v ON_ERROR_STOP=1 -f "$f"
           done
 
+      - name: Initialiser la base de tests Quittances
+        if: matrix.service == 'quittances'
+        run: |
+          psql "postgresql://postgres:postgres@localhost:5432/postgres" -v ON_ERROR_STOP=1 -c "CREATE DATABASE quittances_automatisation_test;"
+
+      - name: Configurer les tests Quittances
+        if: matrix.service == 'quittances'
+        run: |
+          {
+            echo "QUITTANCES_DB_HOST=127.0.0.1"
+            echo "QUITTANCES_DB_PORT=5432"
+            echo "QUITTANCES_DB_NAME=quittances_automatisation_test"
+            echo "QUITTANCES_DB_USER=postgres"
+            echo "QUITTANCES_DB_PASSWORD=postgres"
+            echo "SPRING_DATASOURCE_URL=jdbc:postgresql://127.0.0.1:5432/quittances_automatisation_test"
+            echo "SPRING_FLYWAY_ENABLED=true"
+            echo "SPRING_JPA_HIBERNATE_DDL_AUTO=validate"
+          } >> "$GITHUB_ENV"
+      - name: Generer les cles RSA de test Quittances
+        if: matrix.service == 'quittances'
+        working-directory: backend/backend_gestion_quittances
+        run: |
+          mkdir -p .local-jwt
+          chmod 700 .local-jwt
+
+          openssl genpkey -algorithm RSA \
+            -pkeyopt rsa_keygen_bits:2048 \
+            -out .local-jwt/private.pem
+
+          openssl pkcs8 -topk8 -nocrypt \
+            -in .local-jwt/private.pem \
+            -outform DER \
+            -out .local-jwt/private.der
+
+          openssl pkey \
+            -in .local-jwt/private.pem \
+            -pubout -outform DER \
+            -out .local-jwt/public.der
+
+          chmod 600 .local-jwt/private.pem .local-jwt/private.der
+
+          test -s .local-jwt/public.der
       - name: Tests du service ${{ matrix.service }}
         working-directory: backend/backend_gestion_${{ matrix.service }}
         run: |

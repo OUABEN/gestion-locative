@@ -137,7 +137,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            @Value("${quittances.securite.mode}") String mode)
+            @Value("${quittances.securite.mode}") String mode,
+            com.gestionlocative.quittances.client.LocataireClient locataires)
             throws Exception {
 
         JwtAuthenticationConverter authentication =
@@ -164,6 +165,7 @@ public class SecurityConfiguration {
                         .ignoringRequestMatchers("/api/**")
                 )
                 .authorizeHttpRequests(authorisations -> authorisations
+                    .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/",
@@ -185,7 +187,9 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/quittances",
                                 "/api/v1/quittances/**"
-                        ).hasAnyRole("BAILLEUR", "LOCATAIRE")
+                        ).hasAnyRole("COMMUN".equals(mode)
+                                ? new String[]{"BAILLEUR", "GESTIONNAIRE", "LOCATAIRE"}
+                                : new String[]{"BAILLEUR", "LOCATAIRE"})
                         .anyRequest().denyAll()
                 )
                 .oauth2ResourceServer(oauth -> oauth
@@ -193,6 +197,13 @@ public class SecurityConfiguration {
                                 .jwtAuthenticationConverter(authentication)
                         )
                 );
+
+        if ("COMMUN".equals(mode)) {
+            http.addFilterAfter(
+                    new ResolutionLocataireFiltre(locataires),
+                    org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class
+            );
+        }
 
         return http.build();
     }

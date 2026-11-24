@@ -44,9 +44,9 @@ public class ValidationQuittanceService {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "La validation est réservée au bailleur."
+                    "La validation est réservée au bailleur ou au gestionnaire."
             );
         }
 
@@ -62,9 +62,9 @@ public class ValidationQuittanceService {
         String acteur = contexteAudit.sujet();
         String emetteur = contexteAudit.emetteurIdentite();
 
-        Quittance document = repository.trouverPourModification(
-                id,
-                lecteur.identifiant()
+        Quittance document = (lecteur.gestionnaire()
+                ? repository.trouverPourModificationGestionnaire(id)
+                : repository.trouverPourModification(id, lecteur.identifiant())
         ).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,

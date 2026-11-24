@@ -1,6 +1,7 @@
 package com.gestionlocative.quittances.service;
 
 import com.gestionlocative.quittances.dto.RemplacementQuittanceResponse;
+import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.security.IdentiteAudit;
 import com.gestionlocative.quittances.security.LecteurQuittances;
 import org.springframework.http.HttpStatus;
@@ -20,17 +21,20 @@ public class RemplacementQuittanceService {
     private final ConstructionBrouillonService constructionService;
     private final EnregistrementRemplacementService enregistrementService;
     private final IdentiteAudit identiteAudit;
+    private final QuittanceRepository repository;
 
     public RemplacementQuittanceService(
             ConsultationQuittanceService consultationService,
             ConstructionBrouillonService constructionService,
             EnregistrementRemplacementService enregistrementService,
-            IdentiteAudit identiteAudit
+            IdentiteAudit identiteAudit,
+            QuittanceRepository repository
     ) {
         this.consultationService = consultationService;
         this.constructionService = constructionService;
         this.enregistrementService = enregistrementService;
         this.identiteAudit = identiteAudit;
+        this.repository = repository;
     }
 
     @Transactional(propagation = Propagation.NEVER)
@@ -43,9 +47,9 @@ public class RemplacementQuittanceService {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "Le remplacement est réservé au bailleur."
+                    "Le remplacement est réservé au bailleur ou au gestionnaire."
             );
         }
 
@@ -77,8 +81,16 @@ public class RemplacementQuittanceService {
             );
         }
 
+        String bailleurId = lecteur.gestionnaire()
+                ? repository.findById(precedentId)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Document introuvable."))
+                        .getBailleurId()
+                : lecteur.identifiant();
+
         var preparation = constructionService.construire(
-                lecteur.identifiant(),
+                bailleurId,
                 precedent.bailId(),
                 precedent.periodeDebut(),
                 precedent.periodeFin()
@@ -86,7 +98,7 @@ public class RemplacementQuittanceService {
 
         UUID nouveauId = enregistrementService.enregistrer(
                 precedentId,
-                lecteur.identifiant(),
+                bailleurId,
                 acteur,
                 emetteur,
                 motif.strip(),

@@ -1,3 +1,4 @@
+import { decodeToken } from '../utils/jwt';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BIENS_URL || '/api/biens';
@@ -33,3 +34,19 @@ httpClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const ensureValidToken = async () => {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+  const session = token ? decodeToken(token) : null;
+
+  if (!session || session.isExpired) {
+    window.dispatchEvent(new Event('auth:session-rejected'));
+    throw new Error('Session invalide ou expiree.');
+  }
+  return token;
+};
+
+export const generateFreshToken = async () => {
+  window.dispatchEvent(new Event('auth:session-rejected'));
+  throw new Error('Session expiree. Veuillez vous reconnecter.');
+};

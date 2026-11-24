@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmissionReelleController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.controller</a> &gt; <span class="el_source">EmissionReelleController.java</span></div><h1>EmissionReelleController.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.controller;
+
+import com.gestionlocative.quittances.service.EmissionReelleService;
+import com.gestionlocative.quittances.service.EmissionReelleTransactions;
+import java.util.UUID;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(&quot;/api/v1/quittances/{id}/emission&quot;)
+public class EmissionReelleController {
+    private final EmissionReelleService service;
+
+<span class="fc" id="L24">    public EmissionReelleController(EmissionReelleService service) {</span>
+<span class="fc" id="L25">        this.service = service;</span>
+<span class="fc" id="L26">    }</span>
+<span class="fc" id="L27">    public record Demande(Boolean confirmation) {}</span>
+
+    @PostMapping
+    public EmissionReelleTransactions.Resultat emettre(Authentication auth,
+            @PathVariable UUID id, @RequestBody Demande demande) {
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        return service.emettre(auth, id, demande == null ? null : demande.confirmation());</span>
+    }
+
+    @GetMapping(&quot;/verification&quot;)
+    public EmissionReelleTransactions.Verification verifier(Authentication auth,
+            @PathVariable UUID id) {
+<span class="fc" id="L38">        return service.verifier(auth, id);</span>
+    }
+
+    @GetMapping(value = &quot;/pdf&quot;, produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity&lt;byte[]&gt; telechargerPdf(Authentication auth,
+            @PathVariable UUID id) {
+<span class="fc" id="L44">        byte[] contenu = service.telechargerPdf(auth, id);</span>
+<span class="fc" id="L45">        return fichier(contenu, &quot;application/pdf&quot;, &quot;quittance-&quot; + id + &quot;.pdf&quot;);</span>
+    }
+
+    @GetMapping(value = &quot;/preuve&quot;, produces = &quot;application/zip&quot;)
+    public ResponseEntity&lt;byte[]&gt; telechargerPreuve(Authentication auth,
+            @PathVariable UUID id) {
+<span class="fc" id="L51">        byte[] contenu = service.telechargerPreuve(auth, id);</span>
+<span class="fc" id="L52">        return fichier(contenu, &quot;application/zip&quot;, &quot;preuve-&quot; + id + &quot;.zip&quot;);</span>
+    }
+
+    private ResponseEntity&lt;byte[]&gt; fichier(byte[] contenu, String type, String nom) {
+<span class="fc" id="L56">        return ResponseEntity.ok().cacheControl(CacheControl.noStore())</span>
+<span class="fc" id="L57">                .header(HttpHeaders.CONTENT_DISPOSITION,</span>
+<span class="fc" id="L58">                        ContentDisposition.attachment().filename(nom).build().toString())</span>
+<span class="fc" id="L59">                .contentType(MediaType.parseMediaType(type)).contentLength(contenu.length)</span>
+<span class="fc" id="L60">                .body(contenu);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

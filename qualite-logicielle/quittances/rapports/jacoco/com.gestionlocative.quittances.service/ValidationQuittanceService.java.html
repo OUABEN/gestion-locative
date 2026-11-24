@@ -44,9 +44,9 @@ public class ValidationQuittanceService {
 <span class="fc" id="L44">        LecteurQuittances lecteur =</span>
 <span class="fc" id="L45">                LecteurQuittances.depuis(authentication);</span>
 
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!lecteur.bailleur()) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (!lecteur.peutEcrire()) {</span>
 <span class="fc" id="L48">            throw new AccessDeniedException(</span>
-                    &quot;La validation est réservée au bailleur.&quot;
+                    &quot;La validation est réservée au bailleur ou au gestionnaire.&quot;
             );
         }
 
@@ -62,9 +62,9 @@ public class ValidationQuittanceService {
 <span class="fc" id="L62">        String acteur = contexteAudit.sujet();</span>
 <span class="fc" id="L63">        String emetteur = contexteAudit.emetteurIdentite();</span>
 
-<span class="fc" id="L65">        Quittance document = repository.trouverPourModification(</span>
-                id,
-<span class="fc" id="L67">                lecteur.identifiant()</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        Quittance document = (lecteur.gestionnaire()</span>
+<span class="nc" id="L66">                ? repository.trouverPourModificationGestionnaire(id)</span>
+<span class="fc" id="L67">                : repository.trouverPourModification(id, lecteur.identifiant())</span>
 <span class="fc" id="L68">        ).orElseThrow(</span>
 <span class="fc" id="L69">                () -&gt; new ResponseStatusException(</span>
                         HttpStatus.NOT_FOUND,

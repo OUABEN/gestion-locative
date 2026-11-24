@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResolutionLocataireFiltre.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.security</a> &gt; <span class="el_source">ResolutionLocataireFiltre.java</span></div><h1>ResolutionLocataireFiltre.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.security;
+
+import com.gestionlocative.quittances.client.LocataireClient;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+public final class ResolutionLocataireFiltre
+        extends OncePerRequestFilter {
+
+    private final LocataireClient locataires;
+
+<span class="fc" id="L21">    public ResolutionLocataireFiltre(LocataireClient locataires) {</span>
+<span class="fc" id="L22">        this.locataires = locataires;</span>
+<span class="fc" id="L23">    }</span>
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain chain
+    ) throws ServletException, IOException {
+
+<span class="fc" id="L32">        var contexte = SecurityContextHolder.getContext();</span>
+<span class="fc" id="L33">        var authentication = contexte.getAuthentication();</span>
+
+<span class="fc" id="L35">        String chemin = request.getServletPath();</span>
+
+<span class="fc" id="L37">        boolean routeQuittances =</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                &quot;/api/v1/quittances&quot;.equals(chemin)</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">                || chemin.startsWith(&quot;/api/v1/quittances/&quot;);</span>
+
+<span class="fc bfc" id="L41" title="All 4 branches covered.">        if (!routeQuittances</span>
+<span class="fc" id="L42">                || !(authentication instanceof JwtAuthenticationToken jwt)</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                || !authentication.isAuthenticated()</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                || jwt.getAuthorities().stream().noneMatch(</span>
+<span class="fc" id="L45">                        a -&gt; &quot;ROLE_LOCATAIRE&quot;.equals(a.getAuthority()))) {</span>
+
+<span class="fc" id="L47">            chain.doFilter(request, response);</span>
+<span class="fc" id="L48">            return;</span>
+        }
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (!&quot;GET&quot;.equals(request.getMethod())) {</span>
+<span class="fc" id="L52">            response.sendError(HttpServletResponse.SC_FORBIDDEN);</span>
+<span class="fc" id="L53">            return;</span>
+        }
+
+        try {
+<span class="fc" id="L57">            String identifiant = locataires.identifierConnecte();</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">            if (identifiant == null</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                    || identifiant.isBlank()</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                    || identifiant.length() &gt; 100</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">                    || !identifiant.equals(identifiant.trim())) {</span>
+<span class="nc" id="L63">                response.sendError(HttpServletResponse.SC_FORBIDDEN);</span>
+<span class="nc" id="L64">                return;</span>
+            }
+
+<span class="fc" id="L67">            Jwt original = jwt.getToken();</span>
+
+<span class="fc" id="L69">            var claims = new HashMap&lt;&gt;(original.getClaims());</span>
+<span class="fc" id="L70">            claims.put(&quot;locataire_id&quot;, identifiant);</span>
+
+<span class="fc" id="L72">            Jwt enrichi = new Jwt(</span>
+<span class="fc" id="L73">                    original.getTokenValue(),</span>
+<span class="fc" id="L74">                    original.getIssuedAt(),</span>
+<span class="fc" id="L75">                    original.getExpiresAt(),</span>
+<span class="fc" id="L76">                    original.getHeaders(),</span>
+                    claims
+            );
+
+<span class="fc" id="L80">            var identite = new JwtAuthenticationToken(</span>
+                    enrichi,
+<span class="fc" id="L82">                    jwt.getAuthorities(),</span>
+<span class="fc" id="L83">                    jwt.getName()</span>
+            );
+
+<span class="fc" id="L86">            identite.setDetails(jwt.getDetails());</span>
+<span class="fc" id="L87">            contexte.setAuthentication(identite);</span>
+
+<span class="fc" id="L89">        } catch (AccessDeniedException exception) {</span>
+<span class="fc" id="L90">            response.sendError(HttpServletResponse.SC_FORBIDDEN);</span>
+<span class="fc" id="L91">            return;</span>
+
+<span class="fc" id="L93">        } catch (com.gestionlocative.quittances.exception.ServiceExterneException exception) {</span>
+<span class="fc" id="L94">            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);</span>
+<span class="fc" id="L95">            return;</span>
+<span class="fc" id="L96">        }</span>
+
+<span class="fc" id="L98">        chain.doFilter(request, response);</span>
+<span class="fc" id="L99">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

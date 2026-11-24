@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RemplacementQuittanceService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">RemplacementQuittanceService.java</span></div><h1>RemplacementQuittanceService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
 
 import com.gestionlocative.quittances.dto.RemplacementQuittanceResponse;
+import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.security.IdentiteAudit;
 import com.gestionlocative.quittances.security.LecteurQuittances;
 import org.springframework.http.HttpStatus;
@@ -20,18 +21,21 @@ public class RemplacementQuittanceService {
     private final ConstructionBrouillonService constructionService;
     private final EnregistrementRemplacementService enregistrementService;
     private final IdentiteAudit identiteAudit;
+    private final QuittanceRepository repository;
 
     public RemplacementQuittanceService(
             ConsultationQuittanceService consultationService,
             ConstructionBrouillonService constructionService,
             EnregistrementRemplacementService enregistrementService,
-            IdentiteAudit identiteAudit
-<span class="fc" id="L29">    ) {</span>
-<span class="fc" id="L30">        this.consultationService = consultationService;</span>
-<span class="fc" id="L31">        this.constructionService = constructionService;</span>
-<span class="fc" id="L32">        this.enregistrementService = enregistrementService;</span>
-<span class="fc" id="L33">        this.identiteAudit = identiteAudit;</span>
-<span class="fc" id="L34">    }</span>
+            IdentiteAudit identiteAudit,
+            QuittanceRepository repository
+<span class="fc" id="L32">    ) {</span>
+<span class="fc" id="L33">        this.consultationService = consultationService;</span>
+<span class="fc" id="L34">        this.constructionService = constructionService;</span>
+<span class="fc" id="L35">        this.enregistrementService = enregistrementService;</span>
+<span class="fc" id="L36">        this.identiteAudit = identiteAudit;</span>
+<span class="fc" id="L37">        this.repository = repository;</span>
+<span class="fc" id="L38">    }</span>
 
     @Transactional(propagation = Propagation.NEVER)
     public RemplacementQuittanceResponse preparer(
@@ -40,60 +44,68 @@ public class RemplacementQuittanceService {
             String motif,
             Boolean confirmation
     ) {
-<span class="fc" id="L43">        LecteurQuittances lecteur =</span>
-<span class="fc" id="L44">                LecteurQuittances.depuis(authentication);</span>
+<span class="fc" id="L47">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L48">                LecteurQuittances.depuis(authentication);</span>
 
-<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (!lecteur.bailleur()) {</span>
-<span class="fc" id="L47">            throw new AccessDeniedException(</span>
-                    &quot;Le remplacement est réservé au bailleur.&quot;
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (!lecteur.peutEcrire()) {</span>
+<span class="fc" id="L51">            throw new AccessDeniedException(</span>
+                    &quot;Le remplacement est réservé au bailleur ou au gestionnaire.&quot;
             );
         }
 
-<span class="pc bpc" id="L52" title="2 of 4 branches missed.">        if (!Boolean.TRUE.equals(confirmation)</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">        if (!Boolean.TRUE.equals(confirmation)</span>
                 || motif == null
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">                || motif.isBlank()</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                || motif.strip().length() &gt; 2000) {</span>
-<span class="nc" id="L56">            throw new ResponseStatusException(</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">                || motif.isBlank()</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">                || motif.strip().length() &gt; 2000) {</span>
+<span class="nc" id="L60">            throw new ResponseStatusException(</span>
                     HttpStatus.BAD_REQUEST,
                     &quot;Une confirmation et un motif de 1 à 2000 caractères &quot;
                             + &quot;sont obligatoires.&quot;
             );
         }
 
-<span class="fc" id="L63">        IdentiteAudit.Acteur contexteAudit =</span>
-<span class="fc" id="L64">                identiteAudit.depuis(authentication);</span>
-<span class="fc" id="L65">        String acteur = contexteAudit.sujet();</span>
-<span class="fc" id="L66">        String emetteur = contexteAudit.emetteurIdentite();</span>
+<span class="fc" id="L67">        IdentiteAudit.Acteur contexteAudit =</span>
+<span class="fc" id="L68">                identiteAudit.depuis(authentication);</span>
+<span class="fc" id="L69">        String acteur = contexteAudit.sujet();</span>
+<span class="fc" id="L70">        String emetteur = contexteAudit.emetteurIdentite();</span>
 
-<span class="fc" id="L68">        var precedent = consultationService.consulter(</span>
+<span class="fc" id="L72">        var precedent = consultationService.consulter(</span>
                 authentication,
                 precedentId
         );
 
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (!&quot;ANNULE&quot;.equals(precedent.statut())) {</span>
-<span class="fc" id="L74">            throw new ResponseStatusException(</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (!&quot;ANNULE&quot;.equals(precedent.statut())) {</span>
+<span class="fc" id="L78">            throw new ResponseStatusException(</span>
                     HttpStatus.CONFLICT,
                     &quot;Annulez d'abord le document avec un motif.&quot;
             );
         }
 
-<span class="fc" id="L80">        var preparation = constructionService.construire(</span>
-<span class="fc" id="L81">                lecteur.identifiant(),</span>
-<span class="fc" id="L82">                precedent.bailId(),</span>
-<span class="fc" id="L83">                precedent.periodeDebut(),</span>
-<span class="fc" id="L84">                precedent.periodeFin()</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        String bailleurId = lecteur.gestionnaire()</span>
+<span class="nc" id="L85">                ? repository.findById(precedentId)</span>
+<span class="nc" id="L86">                        .orElseThrow(() -&gt; new ResponseStatusException(</span>
+                                HttpStatus.NOT_FOUND,
+                                &quot;Document introuvable.&quot;))
+<span class="nc" id="L89">                        .getBailleurId()</span>
+<span class="fc" id="L90">                : lecteur.identifiant();</span>
+
+<span class="fc" id="L92">        var preparation = constructionService.construire(</span>
+                bailleurId,
+<span class="fc" id="L94">                precedent.bailId(),</span>
+<span class="fc" id="L95">                precedent.periodeDebut(),</span>
+<span class="fc" id="L96">                precedent.periodeFin()</span>
         );
 
-<span class="fc" id="L87">        UUID nouveauId = enregistrementService.enregistrer(</span>
+<span class="fc" id="L99">        UUID nouveauId = enregistrementService.enregistrer(</span>
                 precedentId,
-<span class="fc" id="L89">                lecteur.identifiant(),</span>
+                bailleurId,
                 acteur,
                 emetteur,
-<span class="fc" id="L92">                motif.strip(),</span>
+<span class="fc" id="L104">                motif.strip(),</span>
                 preparation
         );
 
-<span class="fc" id="L96">        return new RemplacementQuittanceResponse(</span>
+<span class="fc" id="L108">        return new RemplacementQuittanceResponse(</span>
                 nouveauId,
                 precedentId,
                 &quot;BROUILLON&quot;,

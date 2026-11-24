@@ -220,20 +220,38 @@ class ControlePrealableEmissionServiceTest {
     }
 
     @Test
-    void gestionnaireEstRefuse() throws Exception {
-        assertThrows(
-                AccessDeniedException.class,
-                () -> service("COMMUN", "INTEGRATION", referentielsIntegres())
-                        .verifier(
-                                authentification(
-                                        "GESTIONNAIRE",
-                                        BAILLEUR_ID
-                                ),
-                                quittanceId()
-                        )
+    void gestionnairePeutVerifierDocumentAutreBailleur() throws Exception {
+        String gestionnaireId =
+                "22222222-2222-2222-2222-222222222222";
+
+        when(quittances.findById(quittanceId()))
+                .thenReturn(Optional.of(document));
+
+        var authentication = authentification(
+                "GESTIONNAIRE",
+                gestionnaireId
         );
 
-        verifyNoInteractions(quittances, biensBaux, locataires, paiements);
+        service("COMMUN", "INTEGRATION", referentielsIntegres())
+                .verifier(authentication, quittanceId());
+
+        verify(quittances).findById(quittanceId());
+
+        verify(biensBaux).consulterBail(
+                BAIL_ID,
+                PERIODE_DEBUT,
+                PERIODE_FIN
+        );
+
+        verify(paiements).consulterAffectations(
+                BAIL_ID,
+                PERIODE_DEBUT,
+                PERIODE_FIN
+        );
+
+        assertEquals(BAILLEUR_ID, document.getBailleurId());
+        assertEquals("EN_ATTENTE_SIGNATURE", document.getStatut().name());
+        assertNull(document.getNumero());
     }
 
     @Test

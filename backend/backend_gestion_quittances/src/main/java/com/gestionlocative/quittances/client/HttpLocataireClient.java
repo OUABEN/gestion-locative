@@ -11,12 +11,22 @@ public class HttpLocataireClient implements LocataireClient {
     private final RestClient client;
     private final String chemin;
     private final boolean formatAhmed;
+    private final boolean resolutionUtilisateurAutorisee;
 
     public HttpLocataireClient(RestClient client, String chemin) {
         this(client, chemin, false);
     }
 
     public HttpLocataireClient(RestClient client, String chemin, boolean formatAhmed) {
+        this(client, chemin, formatAhmed, false);
+    }
+
+    public HttpLocataireClient(
+            RestClient client,
+            String chemin,
+            boolean formatAhmed,
+            boolean resolutionUtilisateurAutorisee) {
+        this.resolutionUtilisateurAutorisee = resolutionUtilisateurAutorisee;
         this.formatAhmed = formatAhmed;
         this.client = client;
         this.chemin = chemin;
@@ -60,5 +70,51 @@ public class HttpLocataireClient implements LocataireClient {
         }
 
         return resultat;
+    }
+
+    public record FicheConnectee(String id) {}
+
+    @Override
+    public String identifierConnecte() {
+        if (!resolutionUtilisateurAutorisee) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "La resolution du locataire exige le JWT utilisateur.");
+        }
+
+        try {
+            FicheConnectee fiche = client.get()
+                    .uri("/api/locataires/me")
+                    .retrieve()
+                    .body(FicheConnectee.class);
+
+            if (fiche == null
+                    || !LectureApiExterne.identifiantValide(fiche.id())
+                    || !fiche.id().equals(fiche.id().trim())) {
+                throw LectureApiExterne.incoherence("LOCATAIRES");
+            }
+
+            return fiche.id();
+
+        } catch (org.springframework.web.client.RestClientResponseException e) {
+            if (e.getStatusCode().value() == 404
+                    || e.getStatusCode().value() == 403
+                    || e.getStatusCode().value() == 401) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "Aucune fiche locataire accessible pour ce compte.");
+            }
+
+            throw new com.gestionlocative.quittances.exception.ServiceExterneException(
+                    "LOCATAIRES",
+                    "ERREUR_HTTP_EXTERNE",
+                    "Impossible de resoudre le locataire connecte.",
+                    e.getStatusCode().value());
+
+        } catch (org.springframework.web.client.RestClientException e) {
+            throw new com.gestionlocative.quittances.exception.ServiceExterneException(
+                    "LOCATAIRES",
+                    "RESOLUTION_INDISPONIBLE",
+                    "Le service Locataires est indisponible.",
+                    null);
+        }
     }
 }

@@ -67,8 +67,16 @@ public class EmissionReelleService {
         }
         // Contrôle externe préalable : preuves réelles, bailleur, paiements et instantané.
         controle.verifier(auth, id);
-        String bailleur = LecteurQuittances.depuis(auth).identifiant();
-        var document = documents.findByIdAndBailleurId(id, bailleur)
+        LecteurQuittances lecteur = LecteurQuittances.depuis(auth);
+
+        if (!lecteur.peutEcrire()) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Emission reservee au bailleur ou au gestionnaire.");
+        }
+
+        var document = (lecteur.gestionnaire()
+                ? documents.findById(id)
+                : documents.findByIdAndBailleurId(id, lecteur.identifiant()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         var donnees = preparation.charger(auth, id);
         if (!id.equals(donnees.document().id())) {

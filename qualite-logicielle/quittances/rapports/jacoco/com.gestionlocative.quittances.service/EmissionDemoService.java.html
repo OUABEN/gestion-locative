@@ -20,6 +20,8 @@ import java.util.zip.*;
 public class EmissionDemoService {
     @Value(&quot;${DARLOC_DOCKER_DEMO:false}&quot;)
     private boolean dockerDemo;
+    @Value(&quot;${DARLOC_SIGNATURE_DEMO_COMMUN:false}&quot;)
+    private boolean demoCommun;
 
     private final EmissionDemoTransactions transactions;
     private final EmissionDemoPdfService pdf;
@@ -31,85 +33,85 @@ public class EmissionDemoService {
             @Value(&quot;${server.address:}&quot;) String adresse,
             @Value(&quot;${quittances.securite.mode:}&quot;) String jwtMode,
             @Value(&quot;${DARLOC_SIGNATURE_PATH:.local-signature/darloc-demo.p12}&quot;) String chemin,
-<span class="fc" id="L34">            @Value(&quot;${DARLOC_SIGNATURE_PASSWORD:}&quot;) String motDePasse) {</span>
-<span class="fc" id="L35">        this.transactions = transactions; this.pdf = pdf; this.paiements = paiements;</span>
-<span class="fc" id="L36">        this.actif = actif; this.adresse = adresse; this.jwtMode = jwtMode;</span>
-<span class="fc" id="L37">        this.chemin = chemin; this.motDePasse = motDePasse;</span>
-<span class="fc" id="L38">    }</span>
+<span class="fc" id="L36">            @Value(&quot;${DARLOC_SIGNATURE_PASSWORD:}&quot;) String motDePasse) {</span>
+<span class="fc" id="L37">        this.transactions = transactions; this.pdf = pdf; this.paiements = paiements;</span>
+<span class="fc" id="L38">        this.actif = actif; this.adresse = adresse; this.jwtMode = jwtMode;</span>
+<span class="fc" id="L39">        this.chemin = chemin; this.motDePasse = motDePasse;</span>
+<span class="fc" id="L40">    }</span>
     public EmissionDemoTransactions.Resultat emettre(Authentication auth, UUID id, Boolean confirmation) {
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (!Boolean.TRUE.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;La confirmation est obligatoire.&quot;);</span>
-<span class="pc bpc" id="L41" title="1 of 8 branches missed.">        if (!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !&quot;LOCAL&quot;.equals(jwtMode) || motDePasse.isBlank())</span>
-<span class="fc" id="L42">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, &quot;Signature de démonstration non activée sur ce serveur local.&quot;);</span>
-<span class="fc" id="L43">        var source = transactions.charger(auth, id);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (!Boolean.TRUE.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;La confirmation est obligatoire.&quot;);</span>
+<span class="pc bpc" id="L43" title="6 of 14 branches missed.">        if (!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !(&quot;LOCAL&quot;.equals(jwtMode) || (dockerDemo &amp;&amp; demoCommun &amp;&amp; &quot;COMMUN&quot;.equals(jwtMode))) || motDePasse.isBlank())</span>
+<span class="fc" id="L44">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, &quot;Signature de démonstration non activée sur ce serveur local.&quot;);</span>
+<span class="fc" id="L45">        var source = transactions.charger(auth, id);</span>
         // Appel distant hors transaction. Tout changement impose une nouvelle préparation.
-<span class="nc" id="L45">        verifierPaiements(source);</span>
+<span class="nc" id="L47">        verifierPaiements(source);</span>
         try {
-<span class="nc" id="L47">            byte[] contenu = pdf.generer(source.donnees(), source.numero(), source.date());</span>
-<span class="nc" id="L48">            var preuve = SignatureLocale.signer(contenu, Path.of(chemin), motDePasse.toCharArray(), source.date());</span>
-<span class="nc" id="L49">            return transactions.enregistrer(auth, id, source, contenu, preuve);</span>
-<span class="nc" id="L50">        } catch (IOException | GeneralSecurityException e) {</span>
-<span class="nc" id="L51">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,</span>
+<span class="nc" id="L49">            byte[] contenu = pdf.generer(source.donnees(), source.numero(), source.date());</span>
+<span class="nc" id="L50">            var preuve = SignatureLocale.signer(contenu, Path.of(chemin), motDePasse.toCharArray(), source.date());</span>
+<span class="nc" id="L51">            return transactions.enregistrer(auth, id, source, contenu, preuve);</span>
+<span class="nc" id="L52">        } catch (IOException | GeneralSecurityException e) {</span>
+<span class="nc" id="L53">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,</span>
                 &quot;Émission impossible : vérifiez la police PDF, le certificat local et son mot de passe.&quot;);
         }
     }
     private void verifierPaiements(EmissionDemoTransactions.Source source) {
-<span class="fc" id="L56">        var doc = source.donnees().document();</span>
-<span class="fc" id="L57">        var actuels = paiements.consulterAffectations(doc.bailId(), doc.periodeDebut(), doc.periodeFin());</span>
-<span class="pc bnc" id="L58" title="All 2 branches missed.">        var confirmes = actuels.stream().filter(a -&gt; a.statut() == com.gestionlocative.quittances.dto.SituationPeriode.StatutPaiement.CONFIRME</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">            &amp;&amp; (a.nature() == com.gestionlocative.quittances.dto.SituationPeriode.Nature.LOYER</span>
-<span class="pc bnc" id="L60" title="All 2 branches missed.">             || a.nature() == com.gestionlocative.quittances.dto.SituationPeriode.Nature.CHARGES)).toList();</span>
-<span class="fc" id="L61">        var archives = source.donnees().affectations();</span>
-<span class="fc" id="L62">        Set&lt;String&gt; ids = new HashSet&lt;&gt;();</span>
-<span class="pc bpc" id="L63" title="3 of 4 branches missed.">        boolean coherent = confirmes.size() == archives.size() &amp;&amp; !archives.isEmpty();</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        for (var a : confirmes) {</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">            if (!ids.add(a.affectationId())) coherent = false;</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">            boolean trouve = archives.stream().anyMatch(b -&gt; Objects.equals(b.affectationId(), a.affectationId())</span>
-<span class="nc bnc" id="L67" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.paiementId(), a.paiementId()) &amp;&amp; Objects.equals(a.bailId(), doc.bailId())</span>
-<span class="nc bnc" id="L68" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.periodeDebut(), a.periodeDebut()) &amp;&amp; Objects.equals(b.periodeFin(), a.periodeFin())</span>
-<span class="nc bnc" id="L69" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.nature(), a.nature().name()) &amp;&amp; a.montant() != null</span>
-<span class="nc bnc" id="L70" title="All 4 branches missed.">                &amp;&amp; b.montant().compareTo(a.montant()) == 0 &amp;&amp; Objects.equals(b.devise(), a.devise()));</span>
-<span class="nc bnc" id="L71" title="All 2 branches missed.">            if (!trouve) coherent = false;</span>
-<span class="nc" id="L72">        }</span>
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (!coherent) throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="fc" id="L58">        var doc = source.donnees().document();</span>
+<span class="fc" id="L59">        var actuels = paiements.consulterAffectations(doc.bailId(), doc.periodeDebut(), doc.periodeFin());</span>
+<span class="pc bnc" id="L60" title="All 2 branches missed.">        var confirmes = actuels.stream().filter(a -&gt; a.statut() == com.gestionlocative.quittances.dto.SituationPeriode.StatutPaiement.CONFIRME</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            &amp;&amp; (a.nature() == com.gestionlocative.quittances.dto.SituationPeriode.Nature.LOYER</span>
+<span class="pc bnc" id="L62" title="All 2 branches missed.">             || a.nature() == com.gestionlocative.quittances.dto.SituationPeriode.Nature.CHARGES)).toList();</span>
+<span class="fc" id="L63">        var archives = source.donnees().affectations();</span>
+<span class="fc" id="L64">        Set&lt;String&gt; ids = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L65" title="3 of 4 branches missed.">        boolean coherent = confirmes.size() == archives.size() &amp;&amp; !archives.isEmpty();</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        for (var a : confirmes) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            if (!ids.add(a.affectationId())) coherent = false;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            boolean trouve = archives.stream().anyMatch(b -&gt; Objects.equals(b.affectationId(), a.affectationId())</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.paiementId(), a.paiementId()) &amp;&amp; Objects.equals(a.bailId(), doc.bailId())</span>
+<span class="nc bnc" id="L70" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.periodeDebut(), a.periodeDebut()) &amp;&amp; Objects.equals(b.periodeFin(), a.periodeFin())</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">                &amp;&amp; Objects.equals(b.nature(), a.nature().name()) &amp;&amp; a.montant() != null</span>
+<span class="nc bnc" id="L72" title="All 4 branches missed.">                &amp;&amp; b.montant().compareTo(a.montant()) == 0 &amp;&amp; Objects.equals(b.devise(), a.devise()));</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            if (!trouve) coherent = false;</span>
+<span class="nc" id="L74">        }</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (!coherent) throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
             &quot;Les paiements ont changé depuis la préparation. Réexaminez le document avant de le remplacer.&quot;);
-<span class="nc" id="L75">    }</span>
-<span class="nc" id="L76">    public record Verification(String modeSignature, boolean integriteValide, boolean signatureValide, String sha256, String numero) {}</span>
+<span class="nc" id="L77">    }</span>
+<span class="nc" id="L78">    public record Verification(String modeSignature, boolean integriteValide, boolean signatureValide, String sha256, String numero) {}</span>
     private EmissionDemoTransactions.Fichier verifier(Authentication auth, UUID id) {
-<span class="nc" id="L78">        var fichier = transactions.consulter(auth, id);</span>
+<span class="nc" id="L80">        var fichier = transactions.consulter(auth, id);</span>
         try {
-<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (!SignatureLocale.verifier(fichier.pdf(), fichier.preuve(), fichier.date()))</span>
-<span class="nc" id="L81">                throw new GeneralSecurityException(&quot;Preuve invalide&quot;);</span>
-<span class="nc" id="L82">            return fichier;</span>
-<span class="nc" id="L83">        } catch (GeneralSecurityException e) {</span>
-<span class="nc" id="L84">            throw new ResponseStatusException(HttpStatus.CONFLICT, &quot;Échec du contrôle d'intégrité ou de signature. Téléchargement bloqué.&quot;);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (!SignatureLocale.verifier(fichier.pdf(), fichier.preuve(), fichier.date()))</span>
+<span class="nc" id="L83">                throw new GeneralSecurityException(&quot;Preuve invalide&quot;);</span>
+<span class="nc" id="L84">            return fichier;</span>
+<span class="nc" id="L85">        } catch (GeneralSecurityException e) {</span>
+<span class="nc" id="L86">            throw new ResponseStatusException(HttpStatus.CONFLICT, &quot;Échec du contrôle d'intégrité ou de signature. Téléchargement bloqué.&quot;);</span>
         }
     }
     public Verification verifierDocument(Authentication auth, UUID id) {
-<span class="nc" id="L88">        var f = verifier(auth, id);</span>
-<span class="nc" id="L89">        transactions.tracerLecture(auth, id, &quot;VERIFICATION_DEMO&quot;);</span>
-<span class="nc" id="L90">        return new Verification(&quot;DEMONSTRATION&quot;, true, true, f.preuve().sha256(), f.numero());</span>
+<span class="nc" id="L90">        var f = verifier(auth, id);</span>
+<span class="nc" id="L91">        transactions.tracerLecture(auth, id, &quot;VERIFICATION_DEMO&quot;);</span>
+<span class="nc" id="L92">        return new Verification(&quot;DEMONSTRATION&quot;, true, true, f.preuve().sha256(), f.numero());</span>
     }
     public byte[] telecharger(Authentication auth, UUID id, boolean archive) {
-<span class="nc" id="L93">        var f = verifier(auth, id);</span>
-<span class="nc" id="L94">        byte[] contenu = f.pdf();</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (archive) {</span>
-<span class="nc" id="L96">            try (var sortie = new ByteArrayOutputStream(); var zip = new ZipOutputStream(sortie)) {</span>
-<span class="nc" id="L97">                ajouter(zip, &quot;document.pdf&quot;, f.pdf());</span>
-<span class="nc" id="L98">                ajouter(zip, &quot;document.sig&quot;, f.preuve().signature());</span>
-<span class="nc" id="L99">                ajouter(zip, &quot;certificat.cer&quot;, f.preuve().certificat());</span>
-<span class="nc" id="L100">                ajouter(zip, &quot;LIRE-MOI.txt&quot;, (&quot;DEMONSTRATION : certificat auto-signe de test, aucune identite certifiee.\n&quot;</span>
+<span class="nc" id="L95">        var f = verifier(auth, id);</span>
+<span class="nc" id="L96">        byte[] contenu = f.pdf();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (archive) {</span>
+<span class="nc" id="L98">            try (var sortie = new ByteArrayOutputStream(); var zip = new ZipOutputStream(sortie)) {</span>
+<span class="nc" id="L99">                ajouter(zip, &quot;document.pdf&quot;, f.pdf());</span>
+<span class="nc" id="L100">                ajouter(zip, &quot;document.sig&quot;, f.preuve().signature());</span>
+<span class="nc" id="L101">                ajouter(zip, &quot;certificat.cer&quot;, f.preuve().certificat());</span>
+<span class="nc" id="L102">                ajouter(zip, &quot;LIRE-MOI.txt&quot;, (&quot;DEMONSTRATION : certificat auto-signe de test, aucune identite certifiee.\n&quot;</span>
                     + &quot;Signature detachee SHA256withRSA du PDF exact, non integree au PDF.\n&quot;
-<span class="nc" id="L102">                    + &quot;SHA-256 : &quot; + f.preuve().sha256() + &quot;\n&quot;</span>
+<span class="nc" id="L104">                    + &quot;SHA-256 : &quot; + f.preuve().sha256() + &quot;\n&quot;</span>
                     + &quot;Le certificat et la date sont conserves par DarLoc, sans horodatage de confiance.\n&quot;)
-<span class="nc" id="L104">                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
-<span class="nc" id="L105">                zip.finish(); contenu = sortie.toByteArray();</span>
-<span class="nc" id="L106">            } catch (IOException e) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Archive indisponible.&quot;); }</span>
+<span class="nc" id="L106">                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
+<span class="nc" id="L107">                zip.finish(); contenu = sortie.toByteArray();</span>
+<span class="nc" id="L108">            } catch (IOException e) { throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Archive indisponible.&quot;); }</span>
         }
-<span class="nc bnc" id="L108" title="All 2 branches missed.">        transactions.tracerLecture(auth, id, archive ? &quot;TELECHARGEMENT_PREUVE_DEMO&quot; : &quot;TELECHARGEMENT_PDF_DEMO&quot;);</span>
-<span class="nc" id="L109">        return contenu;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        transactions.tracerLecture(auth, id, archive ? &quot;TELECHARGEMENT_PREUVE_DEMO&quot; : &quot;TELECHARGEMENT_PDF_DEMO&quot;);</span>
+<span class="nc" id="L111">        return contenu;</span>
     }
     private static void ajouter(ZipOutputStream zip, String nom, byte[] bytes) throws IOException {
-<span class="nc" id="L112">        zip.putNextEntry(new ZipEntry(nom)); zip.write(bytes); zip.closeEntry();</span>
-<span class="nc" id="L113">    }</span>
+<span class="nc" id="L114">        zip.putNextEntry(new ZipEntry(nom)); zip.write(bytes); zip.closeEntry();</span>
+<span class="nc" id="L115">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

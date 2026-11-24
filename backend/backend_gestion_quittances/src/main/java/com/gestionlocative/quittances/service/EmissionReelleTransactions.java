@@ -44,7 +44,33 @@ public class EmissionReelleTransactions {
             boolean signatureCryptographiqueValide, boolean signatureQualifiee) {}
     public record Fichier(byte[] pdf, SignatureLocale.Preuve preuve,
             Instant date, String numero) {
-        @Override public String toString() { return "Fichier[contenu protégé]"; }
+        @Override
+        public boolean equals(Object autre) {
+            if (this == autre) {
+                return true;
+            }
+            if (!(autre instanceof Fichier fichier)) {
+                return false;
+            }
+            return java.util.Arrays.equals(pdf, fichier.pdf)
+                    && Objects.equals(preuve, fichier.preuve)
+                    && Objects.equals(date, fichier.date)
+                    && Objects.equals(numero, fichier.numero);
+        }
+
+        @Override
+        public int hashCode() {
+            int resultat = java.util.Arrays.hashCode(pdf);
+            resultat = 31 * resultat + Objects.hashCode(preuve);
+            resultat = 31 * resultat + Objects.hashCode(date);
+            resultat = 31 * resultat + Objects.hashCode(numero);
+            return resultat;
+        }
+
+        @Override
+        public String toString() {
+            return "Fichier[contenu protégé]";
+        }
     }
 
     @Transactional(timeout = 10, rollbackFor = Exception.class)
@@ -52,9 +78,11 @@ public class EmissionReelleTransactions {
             String numero, Instant date, byte[] pdf, SignatureLocale.Preuve preuve)
             throws GeneralSecurityException {
         var lecteur = LecteurQuittances.depuis(authentification);
-        if (!lecteur.bailleur()) throw new org.springframework.security.access.AccessDeniedException(
+        if (!lecteur.peutEcrire()) throw new org.springframework.security.access.AccessDeniedException(
                 "Émission réservée au bailleur.");
-        Quittance document = documents.trouverPourModification(id, lecteur.identifiant())
+        Quittance document = (lecteur.gestionnaire()
+                ? documents.trouverPourModificationGestionnaire(id)
+                : documents.trouverPourModification(id, lecteur.identifiant()))
                 .orElseThrow(EmissionReelleTransactions::absent);
         if (!Objects.equals(document.getVersion(), version)
                 || document.getStatut() != StatutQuittance.EN_ATTENTE_SIGNATURE

@@ -166,9 +166,35 @@ services:
       DARLOC_MAILPIT_PORT: "1025"
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"
-      # TODO (Akram) : variables *_MODE, *_CHEMIN, *_TOKEN du mode HTTP réel
-      # TODO (Akram) : décommenter quand le schéma de database/init/06_quittances.sql est validé
-      # SPRING_FLYWAY_ENABLED: "false"
+      # Configuration HTTP reelle avec relais du JWT utilisateur
+      SERVER_ADDRESS: "0.0.0.0"
+      DARLOC_DOCKER_DEMO: "false"
+
+      # Biens
+      BIENS_MODE: UTILISATEUR
+      BIENS_CHEMIN: "/api/biens/{id}"
+      BIENS_TOKEN: ""
+
+      # Locataires
+      LOCATAIRES_MODE: UTILISATEUR
+      LOCATAIRES_CHEMIN: "/api/locataires/{id}/quittance-summary"
+      LOCATAIRES_TOKEN: ""
+
+      # Baux (service Loyers)
+      BAUX_MODE: UTILISATEUR
+      BAUX_CHEMIN: "/api/baux/{id}"
+      BAUX_TOKEN: ""
+
+      # Paiements (service Loyers)
+      PAIEMENTS_MODE: UTILISATEUR
+      PAIEMENTS_CHEMIN: "/api/paiements?bailId={bailId}"
+      PAIEMENTS_TOKEN: ""
+
+      # Flyway : source unique du schema Quittances
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     ports:
       - "8084:8084"
     depends_on:

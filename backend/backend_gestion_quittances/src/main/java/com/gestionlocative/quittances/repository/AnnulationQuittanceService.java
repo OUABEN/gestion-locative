@@ -44,9 +44,9 @@ public class AnnulationQuittanceService {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "L'annulation est réservée au bailleur."
+                    "L'annulation est réservée au bailleur ou au gestionnaire."
             );
         }
 
@@ -71,9 +71,9 @@ public class AnnulationQuittanceService {
         String acteur = contexteAudit.sujet();
         String emetteur = contexteAudit.emetteurIdentite();
 
-        Quittance document = repository.trouverPourModification(
-                id,
-                lecteur.identifiant()
+        Quittance document = (lecteur.gestionnaire()
+                ? repository.trouverPourModificationGestionnaire(id)
+                : repository.trouverPourModification(id, lecteur.identifiant())
         ).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,

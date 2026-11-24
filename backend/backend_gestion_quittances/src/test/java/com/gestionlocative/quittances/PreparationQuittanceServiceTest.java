@@ -320,4 +320,83 @@ class PreparationQuittanceServiceTest {
                 "Un appel externe ne doit pas être exécuté dans une transaction."
         );
     }
+
+
+    private org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+            identitePreparation(String role) {
+
+        var jwt = org.springframework.security.oauth2.jwt.Jwt
+                .withTokenValue("jeton-test-preparation")
+                .header("alg", "HS256")
+                .subject("UTILISATEUR-TEST")
+                .claim("role", role)
+                .claim("locataire_id", "LOC-TEST")
+                .claim("bailleur_id", "BAILLEUR-TEST")
+                .build();
+
+        return new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken(
+                jwt,
+                List.of(new org.springframework.security.core.authority
+                        .SimpleGrantedAuthority("ROLE_" + role)));
+    }
+
+    @Test
+    void gestionnairePrepareDocumentPourLeVraiBailleur() {
+        UUID id = preparation.preparerPourGestionnaire(
+                identitePreparation("GESTIONNAIRE"),
+                bailId, DEBUT, FIN);
+
+        Quittance document = quittances.findById(id).orElseThrow();
+
+        assertEquals("BAILLEUR-TEST", document.getBailleurId());
+        assertEquals(StatutQuittance.BROUILLON, document.getStatut());
+        assertEquals(new BigDecimal("3200.00"), document.getTotalPaye());
+        assertEquals(2, affectationsRepository
+                .findByQuittance_IdOrderByAffectationExterneIdAsc(id).size());
+    }
+
+    @Test
+    void locataireNePeutUtiliserPreparationGestionnaire() {
+        assertThrows(
+                org.springframework.security.access.AccessDeniedException.class,
+                () -> preparation.preparerPourGestionnaire(
+                        identitePreparation("LOCATAIRE"),
+                        bailId, DEBUT, FIN));
+
+        verifyNoInteractions(biensBaux, locataires, paiements);
+        assertEquals(0, compterDocuments());
+    }
+
+    @Test
+    void bailleurNePeutUtiliserPreparationGestionnaire() {
+        assertThrows(
+                org.springframework.security.access.AccessDeniedException.class,
+                () -> preparation.preparerPourGestionnaire(
+                        identitePreparation("BAILLEUR"),
+                        bailId, DEBUT, FIN));
+
+        verifyNoInteractions(biensBaux, locataires, paiements);
+        assertEquals(0, compterDocuments());
+    }
+
+    @Test
+    void refusePreparationSansIdentifiantBailleur() {
+        var erreur = assertThrows(
+                RegleMetierException.class,
+                () -> preparation.preparer(null, bailId, DEBUT, FIN));
+
+        assertEquals("ACTEUR_ABSENT", erreur.getCode());
+        verifyNoInteractions(biensBaux, locataires, paiements);
+    }
+
+    @Test
+    void refusePreparationAvecIdentifiantBailleurVide() {
+        var erreur = assertThrows(
+                RegleMetierException.class,
+                () -> preparation.preparer("   ", bailId, DEBUT, FIN));
+
+        assertEquals("ACTEUR_ABSENT", erreur.getCode());
+        verifyNoInteractions(biensBaux, locataires, paiements);
+    }
+
 }

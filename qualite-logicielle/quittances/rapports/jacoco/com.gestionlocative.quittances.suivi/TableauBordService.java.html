@@ -10,32 +10,80 @@ import java.util.List;
 
 @Service
 public class TableauBordService {
+
     private final JdbcTemplate jdbc;
-<span class="fc" id="L14">    public TableauBordService(JdbcTemplate jdbc) { this.jdbc = jdbc; }</span>
-<span class="fc" id="L15">    public record Groupe(String statut, String typeDocument, long nombre) {}</span>
-<span class="fc" id="L16">    public record Tableau(long totalDocuments, List&lt;Groupe&gt; groupes, Instant consulteLe) {}</span>
+
+<span class="fc" id="L16">    public TableauBordService(JdbcTemplate jdbc) {</span>
+<span class="fc" id="L17">        this.jdbc = jdbc;</span>
+<span class="fc" id="L18">    }</span>
+
+<span class="fc" id="L20">    public record Groupe(</span>
+            String statut,
+            String typeDocument,
+            long nombre
+    ) {}
+
+<span class="fc" id="L26">    public record Tableau(</span>
+            long totalDocuments,
+            List&lt;Groupe&gt; groupes,
+            Instant consulteLe
+    ) {}
 
     @Transactional(readOnly = true)
     public Tableau consulter(Authentication authentication) {
-<span class="fc" id="L20">        var lecteur = LecteurQuittances.depuis(authentication);</span>
-        // Choix entre deux requêtes constantes : aucune concaténation de valeurs utilisateur.
-<span class="fc bfc" id="L22" title="All 2 branches covered.">        String sql = lecteur.bailleur()</span>
-<span class="fc" id="L23">                ? &quot;&quot;&quot;</span>
-                  SELECT statut, type_document, COUNT(*) AS nombre
-                  FROM quittance WHERE bailleur_id = ?
-                  GROUP BY statut, type_document
-                  ORDER BY statut, type_document
-                  &quot;&quot;&quot;
-<span class="fc" id="L29">                : &quot;&quot;&quot;</span>
-                  SELECT statut, type_document, COUNT(*) AS nombre
-                  FROM quittance WHERE locataire_id = ? AND emis_le IS NOT NULL
-                  GROUP BY statut, type_document
-                  ORDER BY statut, type_document
-                  &quot;&quot;&quot;;
-<span class="fc" id="L35">        List&lt;Groupe&gt; groupes = jdbc.query(sql,</span>
-<span class="nc" id="L36">                (rs, i) -&gt; new Groupe(rs.getString(&quot;statut&quot;), rs.getString(&quot;type_document&quot;), rs.getLong(&quot;nombre&quot;)),</span>
-<span class="fc" id="L37">                lecteur.identifiant());</span>
-<span class="fc" id="L38">        return new Tableau(groupes.stream().mapToLong(Groupe::nombre).sum(), List.copyOf(groupes), Instant.now());</span>
+
+<span class="fc" id="L35">        var lecteur = LecteurQuittances.depuis(authentication);</span>
+
+        String sql;
+        Object[] parametres;
+
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (lecteur.gestionnaire()) {</span>
+<span class="nc" id="L41">            sql = &quot;&quot;&quot;</span>
+                    SELECT statut, type_document, COUNT(*) AS nombre
+                    FROM quittance
+                    GROUP BY statut, type_document
+                    ORDER BY statut, type_document
+                    &quot;&quot;&quot;;
+
+<span class="nc" id="L48">            parametres = new Object[0];</span>
+
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        } else if (lecteur.bailleur()) {</span>
+<span class="fc" id="L51">            sql = &quot;&quot;&quot;</span>
+                    SELECT statut, type_document, COUNT(*) AS nombre
+                    FROM quittance WHERE bailleur_id = ?
+                    GROUP BY statut, type_document
+                    ORDER BY statut, type_document
+                    &quot;&quot;&quot;;
+
+<span class="fc" id="L58">            parametres = new Object[]{lecteur.identifiant()};</span>
+
+        } else {
+<span class="fc" id="L61">            sql = &quot;&quot;&quot;</span>
+                    SELECT statut, type_document, COUNT(*) AS nombre
+                    FROM quittance
+                    WHERE locataire_id = ? AND emis_le IS NOT NULL
+                    GROUP BY statut, type_document
+                    ORDER BY statut, type_document
+                    &quot;&quot;&quot;;
+
+<span class="fc" id="L69">            parametres = new Object[]{lecteur.identifiant()};</span>
+        }
+
+<span class="fc" id="L72">        List&lt;Groupe&gt; groupes = jdbc.query(</span>
+                sql,
+<span class="nc" id="L74">                (rs, i) -&gt; new Groupe(</span>
+<span class="nc" id="L75">                        rs.getString(&quot;statut&quot;),</span>
+<span class="nc" id="L76">                        rs.getString(&quot;type_document&quot;),</span>
+<span class="nc" id="L77">                        rs.getLong(&quot;nombre&quot;)</span>
+                ),
+                parametres
+        );
+
+<span class="fc" id="L82">        return new Tableau(</span>
+<span class="fc" id="L83">                groupes.stream().mapToLong(Groupe::nombre).sum(),</span>
+<span class="fc" id="L84">                List.copyOf(groupes),</span>
+<span class="fc" id="L85">                Instant.now()</span>
+        );
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

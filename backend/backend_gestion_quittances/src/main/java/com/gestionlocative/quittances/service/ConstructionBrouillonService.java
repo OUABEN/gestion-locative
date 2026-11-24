@@ -42,7 +42,35 @@ public class ConstructionBrouillonService {
             LocalDate debut,
             LocalDate fin
     ) {
-        if (bailleurId == null || bailleurId.isBlank()) {
+        return construireInterne(bailleurId, bailId, debut, fin, false);
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public Resultat construirePourGestionnaire(
+            org.springframework.security.core.Authentication authentication,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin
+    ) {
+        var lecteur = com.gestionlocative.quittances.security
+                .LecteurQuittances.depuis(authentication);
+
+        if (!lecteur.gestionnaire()) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Cette operation est reservee au gestionnaire.");
+        }
+
+        return construireInterne(null, bailId, debut, fin, true);
+    }
+
+    private Resultat construireInterne(
+            String bailleurId,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin,
+            boolean gestionnaire
+    ) {
+        if (!gestionnaire && (bailleurId == null || bailleurId.isBlank())) {
             throw new RegleMetierException(
                     "ACTEUR_ABSENT",
                     "Le bailleur authentifié est obligatoire."
@@ -51,7 +79,13 @@ public class ConstructionBrouillonService {
 
         var bail = bienBailClient.consulterBail(bailId, debut, fin);
 
-        if (!bailleurId.equals(bail.bailleurId())) {
+        if (bail.bailleurId() == null || bail.bailleurId().isBlank()) {
+            throw new RegleMetierException(
+                    "PROPRIETAIRE_ABSENT",
+                    "Le proprietaire du bail doit etre identifie.");
+        }
+
+        if (!gestionnaire && !bailleurId.equals(bail.bailleurId())) {
             throw new RegleMetierException(
                     "ACCES_INTERDIT",
                     "Ce bail ne relève pas de cet utilisateur."

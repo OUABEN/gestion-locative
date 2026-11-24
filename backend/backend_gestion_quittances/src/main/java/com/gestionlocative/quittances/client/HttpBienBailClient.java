@@ -14,7 +14,8 @@ public class HttpBienBailClient implements BienBailClient {
     public record FicheBienReelle(
             String id,
             String adresse,
-            String ville
+            String ville,
+            String bailleurId
     ) {
     }
 
@@ -49,14 +50,15 @@ public class HttpBienBailClient implements BienBailClient {
 
         if (!id.equals(resultat.id())
                 || !LectureApiExterne.textePresent(resultat.adresse())
-                || !LectureApiExterne.textePresent(resultat.ville())) {
+                || !LectureApiExterne.identifiantValide(resultat.bailleurId())) {
             throw LectureApiExterne.incoherence("BIENS");
         }
 
-        String adresseComplete =
-                resultat.adresse().trim() + ", " + resultat.ville().trim();
-
-        return new Bien(null, resultat.id(), adresseComplete, null);
+        String adresseComplete = resultat.adresse().trim();
+        if (LectureApiExterne.textePresent(resultat.ville())) {
+            adresseComplete += ", " + resultat.ville().trim();
+        }
+        return new Bien("1", resultat.id(), adresseComplete, resultat.bailleurId());
     }
 
     @Override

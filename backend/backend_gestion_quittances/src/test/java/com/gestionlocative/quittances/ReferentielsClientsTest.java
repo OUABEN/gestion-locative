@@ -152,7 +152,7 @@ class ReferentielsClientsTest {
     }
 
     @Test
-    void doitAdapterLeContratReelDuBienSansInventerLeBailleur() {
+    void doitAdapterLeContratReelDuBienAvecSonBailleur() {
         reponse = """
                 {
                   "id": "BIEN-1",
@@ -160,6 +160,7 @@ class ReferentielsClientsTest {
                   "ville": "Agadir",
                   "type": "Appartement",
                   "surface": 75,
+                  "bailleurId": "BAILLEUR-1",
                   "prixMensuel": 3000,
                   "charges": 200,
                   "statut": "LIBRE"
@@ -169,8 +170,8 @@ class ReferentielsClientsTest {
         var resultat = biensBaux.consulterBien("BIEN-1");
 
         assertEquals("Adresse fictive à Agadir, Agadir", resultat.adresse());
-        assertNull(resultat.bailleurId());
-        assertNull(resultat.versionContrat());
+        assertEquals("BAILLEUR-1", resultat.bailleurId());
+        assertEquals("1", resultat.versionContrat());
         assertEquals("/api/biens/BIEN-1", chemin.get());
     }
 
@@ -250,21 +251,20 @@ class ReferentielsClientsTest {
     }
 
     @Test
-    void doitRefuserUnBienSansVille() {
+    void doitAccepterUnBienSansVilleSiAdresseEtBailleurValides() {
         reponse = """
                 {
                   "id": "BIEN-1",
                   "adresse": "Adresse fictive",
-                  "ville": ""
+                  "ville": "",
+                  "bailleurId": "BAILLEUR-1"
                 }
                 """;
 
-        ServiceExterneException erreur = assertThrows(
-                ServiceExterneException.class,
-                () -> biensBaux.consulterBien("BIEN-1")
-        );
+        var resultat = biensBaux.consulterBien("BIEN-1");
 
-        assertEquals("REPONSE_INCOHERENTE", erreur.getCode());
+        assertEquals("Adresse fictive", resultat.adresse());
+        assertEquals("BAILLEUR-1", resultat.bailleurId());
     }
 
     @Test
@@ -313,5 +313,23 @@ class ReferentielsClientsTest {
     void contratHabituelResteStrict() {
         reponse = "{\"id\":\"LOC-1\",\"nom\":\"TEST\",\"prenom\":\"Integration\"}";
         assertThrows(ServiceExterneException.class, () -> locataires.consulter("LOC-1"));
+    }
+
+    @Test
+    void doitRefuserUnBienSansBailleur() {
+        reponse = """
+                {
+                  "id": "BIEN-1",
+                  "adresse": "Adresse fictive",
+                  "ville": "Agadir"
+                }
+                """;
+
+        ServiceExterneException erreur = assertThrows(
+                ServiceExterneException.class,
+                () -> biensBaux.consulterBien("BIEN-1")
+        );
+
+        assertEquals("REPONSE_INCOHERENTE", erreur.getCode());
     }
 }

@@ -40,9 +40,9 @@ public class PreparationApercuService {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "La prévisualisation est réservée au bailleur."
+                    "La prévisualisation est réservée au bailleur ou au gestionnaire."
             );
         }
 

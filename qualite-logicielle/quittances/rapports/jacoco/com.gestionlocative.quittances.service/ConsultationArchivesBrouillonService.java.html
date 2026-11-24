@@ -30,43 +30,45 @@ public class ConsultationArchivesBrouillonService {
     public PageArchivesBrouillonResponse consulter(
             Authentication authentication, UUID id, int page, int taille) {
 <span class="fc" id="L32">        LecteurQuittances lecteur = LecteurQuittances.depuis(authentication);</span>
-<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (!lecteur.bailleur()) {</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (!lecteur.peutEcrire()) {</span>
 <span class="fc" id="L34">            throw new AccessDeniedException(</span>
-                    &quot;Les archives de brouillons sont réservées au bailleur.&quot;);
+                    &quot;Les archives de brouillons sont réservées au bailleur ou au gestionnaire.&quot;);
         }
 <span class="fc bfc" id="L37" title="All 8 branches covered.">        if (page &lt; 0 || page &gt; 1_000_000 || taille &lt; 1 || taille &gt; 100) {</span>
 <span class="fc" id="L38">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,</span>
                     &quot;La page doit être comprise entre 0 et 1000000 et la taille entre 1 et 100.&quot;);
         }
-<span class="fc" id="L41">        repository.findByIdAndBailleurId(id, lecteur.identifiant())</span>
-<span class="fc" id="L42">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        (lecteur.gestionnaire()</span>
+<span class="nc" id="L42">                ? repository.findById(id)</span>
+<span class="fc" id="L43">                : repository.findByIdAndBailleurId(id, lecteur.identifiant()))</span>
+<span class="fc" id="L44">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
                         HttpStatus.NOT_FOUND, &quot;Document introuvable.&quot;));
 
-<span class="fc" id="L45">        Long nombre = jdbcTemplate.queryForObject(&quot;&quot;&quot;</span>
+<span class="fc" id="L47">        Long nombre = jdbcTemplate.queryForObject(&quot;&quot;&quot;</span>
                 SELECT COUNT(*) FROM document_fichier
                 WHERE quittance_id = ? AND nature = 'BROUILLON'
                 &quot;&quot;&quot;, Long.class, id);
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (nombre == null) {</span>
-<span class="nc" id="L50">            throw new IllegalStateException(&quot;Le décompte des archives est absent.&quot;);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (nombre == null) {</span>
+<span class="nc" id="L52">            throw new IllegalStateException(&quot;Le décompte des archives est absent.&quot;);</span>
         }
-<span class="fc" id="L52">        var contenu = jdbcTemplate.query(&quot;&quot;&quot;</span>
+<span class="fc" id="L54">        var contenu = jdbcTemplate.query(&quot;&quot;&quot;</span>
                 SELECT id, quittance_id, version_document, nature,
                        sha256, taille_octets, cree_le
                 FROM document_fichier
                 WHERE quittance_id = ? AND nature = 'BROUILLON'
                 ORDER BY cree_le DESC, id DESC
                 LIMIT ? OFFSET ?
-<span class="nc" id="L59">                &quot;&quot;&quot;, (rs, ligne) -&gt; new ArchiveBrouillonResponse(</span>
-<span class="nc" id="L60">                        rs.getObject(&quot;id&quot;, UUID.class),</span>
-<span class="nc" id="L61">                        rs.getObject(&quot;quittance_id&quot;, UUID.class),</span>
-<span class="nc" id="L62">                        rs.getLong(&quot;version_document&quot;),</span>
-<span class="nc" id="L63">                        rs.getString(&quot;nature&quot;),</span>
-<span class="nc" id="L64">                        rs.getString(&quot;sha256&quot;),</span>
-<span class="nc" id="L65">                        rs.getLong(&quot;taille_octets&quot;),</span>
-<span class="nc" id="L66">                        rs.getTimestamp(&quot;cree_le&quot;).toInstant()</span>
-<span class="fc" id="L67">                ), id, taille, (long) page * taille);</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">        long pages = nombre / taille + (nombre % taille == 0 ? 0 : 1);</span>
-<span class="fc" id="L69">        return new PageArchivesBrouillonResponse(contenu, page, taille, nombre, pages);</span>
+<span class="nc" id="L61">                &quot;&quot;&quot;, (rs, ligne) -&gt; new ArchiveBrouillonResponse(</span>
+<span class="nc" id="L62">                        rs.getObject(&quot;id&quot;, UUID.class),</span>
+<span class="nc" id="L63">                        rs.getObject(&quot;quittance_id&quot;, UUID.class),</span>
+<span class="nc" id="L64">                        rs.getLong(&quot;version_document&quot;),</span>
+<span class="nc" id="L65">                        rs.getString(&quot;nature&quot;),</span>
+<span class="nc" id="L66">                        rs.getString(&quot;sha256&quot;),</span>
+<span class="nc" id="L67">                        rs.getLong(&quot;taille_octets&quot;),</span>
+<span class="nc" id="L68">                        rs.getTimestamp(&quot;cree_le&quot;).toInstant()</span>
+<span class="fc" id="L69">                ), id, taille, (long) page * taille);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        long pages = nombre / taille + (nombre % taille == 0 ? 0 : 1);</span>
+<span class="fc" id="L71">        return new PageArchivesBrouillonResponse(contenu, page, taille, nombre, pages);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

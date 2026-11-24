@@ -153,4 +153,56 @@ class QuittanceCreationControllerTest {
                 }
                 """;
     }
+
+
+    @Test
+    void doitAutoriserCreationParGestionnaire() throws Exception {
+        UUID id = UUID.randomUUID();
+        var gestionnaire = identite("GESTIONNAIRE", null);
+
+        when(preparationService.preparerPourGestionnaire(
+                gestionnaire,
+                "BAIL-DEMO-001",
+                LocalDate.of(2026, 10, 1),
+                LocalDate.of(2026, 10, 31)
+        )).thenReturn(id);
+
+        mvc.perform(post("/api/v1/quittances")
+                        .principal(gestionnaire)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(demandeValide()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.statut").value("BROUILLON"));
+
+        verify(preparationService).preparerPourGestionnaire(
+                gestionnaire,
+                "BAIL-DEMO-001",
+                LocalDate.of(2026, 10, 1),
+                LocalDate.of(2026, 10, 31));
+    }
+
+    @Test
+    void doitRefuserCreationParLocataireAvecIdentiteConfirmee()
+            throws Exception {
+
+        var jwt = Jwt.withTokenValue("jeton-locataire-test")
+                .header("alg", "HS256")
+                .subject("COMPTE-LOCATAIRE")
+                .claim("locataire_id", "LOC-TEST")
+                .build();
+
+        var locataire = new JwtAuthenticationToken(
+                jwt,
+                List.of(new SimpleGrantedAuthority("ROLE_LOCATAIRE")));
+
+        mvc.perform(post("/api/v1/quittances")
+                        .principal(locataire)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(demandeValide()))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(preparationService);
+    }
+
 }

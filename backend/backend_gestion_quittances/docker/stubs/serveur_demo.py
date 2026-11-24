@@ -36,13 +36,13 @@ BIENS = {
         "versionContrat": "1",
         "id": "BIEN-DEMO-001",
         "adresse": "Adresse fictive de demonstration 1, Agadir",
-        "bailleurId": "BAILLEUR-TEST",
+        "bailleurId": "11111111-1111-1111-1111-111111111111",
     },
     "BIEN-DEMO-002": {
         "versionContrat": "1",
         "id": "BIEN-DEMO-002",
         "adresse": "Adresse fictive de demonstration 2, Agadir",
-        "bailleurId": "BAILLEUR-TEST",
+        "bailleurId": "11111111-1111-1111-1111-111111111111",
     },
 }
 
@@ -52,7 +52,7 @@ BAUX = {
         "bailId": "BAIL-DEMO-001",
         "locataireId": "LOC-DEMO-001",
         "bienId": "BIEN-DEMO-001",
-        "bailleurId": "BAILLEUR-TEST",
+        "bailleurId": "11111111-1111-1111-1111-111111111111",
         "nomBailleur": "Bailleur fictif de demonstration",
         "debutBail": "2026-01-01",
         "finBail": "2026-12-31",
@@ -67,7 +67,7 @@ BAUX = {
         "bailId": "BAIL-DEMO-002",
         "locataireId": "LOC-DEMO-002",
         "bienId": "BIEN-DEMO-002",
-        "bailleurId": "BAILLEUR-TEST",
+        "bailleurId": "11111111-1111-1111-1111-111111111111",
         "nomBailleur": "Bailleur fictif de demonstration",
         "debutBail": "2026-01-01",
         "finBail": "2026-12-31",
@@ -205,7 +205,7 @@ class Gestionnaire(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlsplit(self.path)
-        chemin = url.path
+        chemin = url.path.replace("/api/biens/", "/api/v1/biens/", 1) if url.path.startswith("/api/biens/") else url.path
         parametres = parse_qs(url.query, keep_blank_values=True)
 
         try:
@@ -315,5 +315,16 @@ def main():
         serveur.server_close()
 
 
+# ===== SCENARIO DE PRESENTATION QUITTANCES CB3CBBC96B =====
+# Les informations de ce bail et de ses paiements sont purement fictives.
+# On reprend le locataire, le bien et le bailleur du bail de demonstration existant.
+BAUX["BAIL-DEMO-PRES-CB3CBBC96B"] = dict(BAUX["BAIL-DEMO-001"], bailId="BAIL-DEMO-PRES-CB3CBBC96B")
+AFFECTATIONS["BAIL-DEMO-PRES-CB3CBBC96B"] = [
+    dict(ligne, bailId="BAIL-DEMO-PRES-CB3CBBC96B",
+         affectationId=f"AFF-PRES-CB3CBBC96B-{i:03d}",
+         paiementId=f"PAY-PRES-CB3CBBC96B-{i:03d}")
+    for i, ligne in enumerate(AFFECTATIONS["BAIL-DEMO-001"], start=1)
+]
+# ===== FIN SCENARIO DE PRESENTATION QUITTANCES CB3CBBC96B =====
 if __name__ == "__main__":
     main()

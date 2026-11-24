@@ -6,48 +6,85 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public record LecteurQuittances(
         boolean bailleur,
-        String identifiant
+        String identifiant,
+        boolean gestionnaire
 ) {
 
-    public static LecteurQuittances depuis(
-            Authentication authentication
-    ) {
+    public LecteurQuittances(boolean bailleur, String identifiant) {
+        this(bailleur, identifiant, false);
+    }
+
+    public boolean locataire() {
+        return !bailleur && !gestionnaire;
+    }
+
+    public boolean peutEcrire() {
+        return bailleur || gestionnaire;
+    }
+
+    public static LecteurQuittances depuis(Authentication authentication) {
+
         if (!(authentication instanceof JwtAuthenticationToken jwt)
                 || !authentication.isAuthenticated()) {
             throw new AccessDeniedException(
-                    "Une identité JWT authentifiée est nécessaire."
+                    "Une identite JWT authentifiee est necessaire."
             );
         }
 
-        boolean estBailleur = possedeRole(authentication, "ROLE_BAILLEUR");
-        boolean estLocataire = possedeRole(authentication, "ROLE_LOCATAIRE");
-        boolean estGestionnaire = possedeRole(authentication, "ROLE_GESTIONNAIRE");
+        boolean estBailleur =
+                possedeRole(authentication, "ROLE_BAILLEUR");
+
+        boolean estLocataire =
+                possedeRole(authentication, "ROLE_LOCATAIRE");
+
+        boolean estGestionnaire =
+                possedeRole(authentication, "ROLE_GESTIONNAIRE");
+
+        int nombreRoles = (estBailleur ? 1 : 0)
+                + (estLocataire ? 1 : 0)
+                + (estGestionnaire ? 1 : 0);
+
+        if (nombreRoles != 1) {
+            throw new AccessDeniedException(
+                    "Un role metier unique est necessaire."
+            );
+        }
 
         if (estGestionnaire) {
-            throw new AccessDeniedException(
-                    "Le périmètre documentaire du rôle GESTIONNAIRE n'est pas défini."
-            );
+            String sujet = jwt.getToken().getSubject();
+
+            if (!identifiantValide(sujet)) {
+                throw new AccessDeniedException(
+                        "Identifiant du gestionnaire invalide."
+                );
+            }
+
+            return new LecteurQuittances(false, sujet, true);
         }
 
-        if (estBailleur == estLocataire) {
-            throw new AccessDeniedException(
-                    "Un rôle unique BAILLEUR ou LOCATAIRE est nécessaire."
-            );
-        }
+        String nomClaim = estBailleur
+                ? "bailleur_id"
+                : "locataire_id";
 
-        String nomClaim = estBailleur ? "bailleur_id" : "locataire_id";
         Object valeur = jwt.getToken().getClaims().get(nomClaim);
 
         if (!(valeur instanceof String identifiant)
-                || identifiant.isBlank()
-                || identifiant.length() > 100
-                || !identifiant.equals(identifiant.trim())) {
+                || !identifiantValide(identifiant)) {
             throw new AccessDeniedException(
-                    "L'identifiant métier de l'utilisateur est invalide."
+                    "Identifiant metier de l'utilisateur invalide."
             );
         }
 
-        return new LecteurQuittances(estBailleur, identifiant);
+        return new LecteurQuittances(
+                estBailleur, identifiant, false
+        );
+    }
+
+    private static boolean identifiantValide(String identifiant) {
+        return identifiant != null
+                && !identifiant.isBlank()
+                && identifiant.length() <= 100
+                && identifiant.equals(identifiant.trim());
     }
 
     private static boolean possedeRole(
@@ -55,6 +92,7 @@ public record LecteurQuittances(
             String role
     ) {
         return authentication.getAuthorities().stream()
-                .anyMatch(autorite -> role.equals(autorite.getAuthority()));
+                .anyMatch(autorite ->
+                        role.equals(autorite.getAuthority()));
     }
 }

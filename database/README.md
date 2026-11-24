@@ -13,14 +13,13 @@ Base **PostgreSQL 16** unique, partagée par les 4 microservices. Les identifian
 | 3 | `03_locataires.sql` | `locataires` (`cin` unique) + index `nom`, `email` | backend_gestion_locataires (8082) |
 | 4 | `04_baux.sql` | `baux` + index unique partiel : **un seul bail `ACTIF` par bien** | backend_gestion_locataires (8082) |
 | 5 | `05_loyers_paiements.sql` | `echeances` (unique `bail_id, mois, annee`) et `paiements` | backend_gestion_loyers (8083) |
-| 6 | `06_quittances.sql` | `quittances` (`numero_quittance` unique) | backend_gestion_quittances (8084) |
 
 Les scripts n'utilisent que `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS` : ils sont **ré-exécutables** sans erreur.
 
 ## Ordre d'exécution
 
 ```
-01_users.sql → 02_biens.sql → 03_locataires.sql → 04_baux.sql → 05_loyers_paiements.sql → 06_quittances.sql
+01_users.sql → 02_biens.sql → 03_locataires.sql → 04_baux.sql → 05_loyers_paiements.sql
 ```
 
 ## Exécution dans pgAdmin
@@ -30,7 +29,7 @@ Les scripts n'utilisent que `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT 
 3. Ouvrir **Tools → Query Tool**.
 4. Cliquer sur **Open File** (icône dossier), choisir `init/01_users.sql`.
 5. Cliquer sur **Execute** (▶ ou `F5`).
-6. Répéter les étapes 4–5 pour chaque fichier, dans l'ordre (02 → 06).
+6. Répéter les étapes 4–5 pour chaque fichier, dans l'ordre (02 → 05).
 7. Vérifier : **Schemas → public → Tables** (clic droit → Refresh).
 
 ## Alternative en ligne de commande (psql)
@@ -49,5 +48,4 @@ V1 à V9). Il n'y a plus de script correspondant dans database/init.
 - Au démarrage, le service applique les migrations (baseline-on-migrate=true,
   baseline-version=0), car la base contient déjà les tables des autres modules.
 - Hibernate reste en mode `validate` : il ne crée ni ne modifie le schéma.
-- Après un changement de schéma, repartir d'une base propre :
-  `docker compose down -v && docker compose up --build`.
+- Valider les migrations sur une base de test neuve et isolee, sans supprimer les donnees existantes.

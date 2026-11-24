@@ -53,10 +53,9 @@ public class ArchiveBrouillonTransactions {
                 id
         );
 
-        Quittance document = repository.findByIdAndBailleurId(
-                id,
-                acteur.bailleurId()
-        ).orElseThrow(this::introuvable);
+        Quittance document = (acteur.gestionnaire()
+                ? repository.findById(id)
+                : repository.findByIdAndBailleurId(id, acteur.bailleurId())).orElseThrow(this::introuvable);
 
         if (archiveExiste(id, document.getVersion())) {
             throw conflit(
@@ -76,10 +75,9 @@ public class ArchiveBrouillonTransactions {
     ) {
         Acteur acteur = identifier(authentication);
 
-        Quittance document = repository.trouverPourModification(
-                quittanceId,
-                acteur.bailleurId()
-        ).orElseThrow(this::introuvable);
+        Quittance document = (acteur.gestionnaire()
+                ? repository.trouverPourModificationGestionnaire(quittanceId)
+                : repository.trouverPourModification(quittanceId, acteur.bailleurId())).orElseThrow(this::introuvable);
 
         if (!Objects.equals(
                 document.getVersion(),
@@ -179,10 +177,9 @@ public class ArchiveBrouillonTransactions {
     ) {
         Acteur acteur = identifier(authentication);
 
-        repository.findByIdAndBailleurId(
-                quittanceId,
-                acteur.bailleurId()
-        ).orElseThrow(this::introuvable);
+        (acteur.gestionnaire()
+                ? repository.findById(quittanceId)
+                : repository.findByIdAndBailleurId(quittanceId, acteur.bailleurId())).orElseThrow(this::introuvable);
 
         var fichiers = jdbcTemplate.query(
                 """
@@ -228,9 +225,9 @@ public class ArchiveBrouillonTransactions {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "Les archives de brouillons sont réservées au bailleur."
+                    "Les archives de brouillons sont réservées au bailleur ou au gestionnaire."
             );
         }
 
@@ -240,7 +237,8 @@ public class ArchiveBrouillonTransactions {
         return new Acteur(
                 lecteur.identifiant(),
                 contexteAudit.sujet(),
-                contexteAudit.emetteurIdentite()
+                contexteAudit.emetteurIdentite(),
+                lecteur.gestionnaire()
         );
     }
 
@@ -273,7 +271,8 @@ public class ArchiveBrouillonTransactions {
     private record Acteur(
             String bailleurId,
             String sujet,
-            String emetteur
+            String emetteur,
+            boolean gestionnaire
     ) {
     }
 }

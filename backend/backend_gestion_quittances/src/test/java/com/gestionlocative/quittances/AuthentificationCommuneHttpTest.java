@@ -40,6 +40,9 @@ class AuthentificationCommuneHttpTest {
     @Value("${local.server.port}")
     private int port;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private com.gestionlocative.quittances.client.LocataireClient locataires;
+
     @DynamicPropertySource
     static void proprietesCommunes(DynamicPropertyRegistry proprietes) {
         proprietes.add("quittances.securite.mode", () -> "COMMUN");
@@ -173,7 +176,7 @@ class AuthentificationCommuneHttpTest {
     }
 
     @Test
-    void doitRefuserLeRoleGestionnairePourLesDocuments() throws Exception {
+    void doitAutoriserLeGestionnairePourLesDocuments() throws Exception {
         String token = signerHs256(
                 "compte-gestionnaire-test",
                 "GESTIONNAIRE",
@@ -181,14 +184,15 @@ class AuthentificationCommuneHttpTest {
                 true
         );
 
-        assertEquals(
-                403,
-                appelerGet("/api/v1/quittances", token).statusCode()
-        );
+        assertEquals(200,
+                appelerGet("/api/v1/quittances", token).statusCode());
     }
 
     @Test
     void doitRefuserLeLocataireSansRattachementConfirme() throws Exception {
+        org.mockito.Mockito.when(locataires.identifierConnecte())
+                .thenThrow(new org.springframework.security.access.AccessDeniedException(
+                        "Aucune fiche associee."));
         String token = signerHs256(
                 "compte-locataire-sans-rattachement",
                 "LOCATAIRE",
@@ -297,5 +301,68 @@ class AuthentificationCommuneHttpTest {
         return "eyJhbGciOiJub25lIn0."
                 + Base64URL.encode(payload.getBytes(StandardCharsets.UTF_8)).toString()
                 + ".";
+    }
+    @Test
+    void doitRetourner503SiLocatairesIndisponible() throws Exception {
+        org.mockito.Mockito.when(locataires.identifierConnecte())
+                .thenThrow(new com.gestionlocative.quittances.exception.ServiceExterneException(
+                        "LOCATAIRES",
+                        "SERVICE_INJOIGNABLE",
+                        "Service indisponible.",
+                        null));
+
+        String token = signerHs256(
+                "compte-locataire-test",
+                "LOCATAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        assertEquals(503,
+                appelerGet("/api/v1/quittances", token).statusCode());
+    }
+
+    @Test
+    void doitAutoriserLocataireAvecRattachementConfirme() throws Exception {
+        org.mockito.Mockito.when(locataires.identifierConnecte())
+                .thenReturn("fiche-locataire-test");
+
+        String token = signerHs256(
+                "compte-locataire-test",
+                "LOCATAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        assertEquals(200,
+                appelerGet("/api/v1/quittances", token).statusCode());
+
+        org.mockito.Mockito.verify(locataires).identifierConnecte();
+    }
+
+    @Test
+    void doitInterdireCreationParLocataire() throws Exception {
+        String token = signerHs256(
+                "compte-locataire-test",
+                "LOCATAIRE",
+                Instant.now().plusSeconds(900),
+                true
+        );
+
+        HttpRequest requete = HttpRequest.newBuilder()
+                .uri(URI.create("http://127.0.0.1:" + port
+                        + "/api/v1/quittances"))
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                .build();
+
+        var reponse = HttpClient.newHttpClient().send(
+                requete,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(403, reponse.statusCode());
+        org.mockito.Mockito.verifyNoInteractions(locataires);
     }
 }
