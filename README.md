@@ -41,3 +41,11 @@ L'API REST est alors accessible sur : `http://localhost:8082/api/v1/locataires`
 - `PUT /api/v1/locataires/{id}` : Mettre à jour l'email et le téléphone
 - `DELETE /api/v1/locataires/{id}` : Supprimer une fiche locataire
 - `GET /api/v1/locataires/{id}/quittance-summary` : Synthèse locataire pour le module Quittances
+
+## Décision : propriétaire de l'entité Bail
+
+Le code actuel contient un modèle Bail dans les services **Loyers** et **Locataires**. Loyers possède un modèle persistant en base et expose `POST /api/baux` pour créer un bail, `GET /api/baux` et `GET /api/baux/{id}` pour le consulter, et `POST /api/baux/{id}/terminer` pour le clôturer. À la création, Loyers consulte le locataire via `GET /api/locataires/{id}`, vérifie la disponibilité du bien via Biens, enregistre le bail, met à jour le statut du bien et peut générer l’échéance du mois.
+
+Locataires expose actuellement des routes Bail de lecture (`GET /api/baux`, `GET /api/baux/{id}`) et son service contient un jeu de baux de démonstration en mémoire. Son contrôleur contient également une fonction de création, mais elle n’est pas raccordée aux routes exposées. Quittances est configuré pour lire les données de bail via une URL configurable; les chemins et URL définis par défaut et ceux surchargés dans Compose ne sont pas identiques.
+
+**Décision finale — à compléter par Ayoub + Ahmed : [EN ATTENTE DE DÉCISION]**
