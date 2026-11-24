@@ -38,6 +38,34 @@ public final class BienBailCollectifClient implements BienBailClient {
             LocalDate dateDebut, LocalDate dateFin, BigDecimal montantLoyer,
             String statut) { }
 
+    public record FicheUtilisateur(
+            String versionContrat, String id, String nom,
+            String prenom, String nomComplet, String role) { }
+
+    private String lireIdentiteBailleur(String bailleurId) {
+        FicheUtilisateur utilisateur = LectureApiExterne.lire(
+                biens, "BIENS", "/api/users/{id}",
+                Map.of("id", bailleurId), FicheUtilisateur.class);
+
+        if (!"1".equals(utilisateur.versionContrat())
+                || !bailleurId.equals(utilisateur.id())
+                || !"BAILLEUR".equals(utilisateur.role())
+                || !LectureApiExterne.textePresent(utilisateur.nom())
+                || !LectureApiExterne.textePresent(utilisateur.prenom())
+                || !LectureApiExterne.textePresent(utilisateur.nomComplet())) {
+            throw LectureApiExterne.incoherence("BIENS");
+        }
+
+        String nomComplet = utilisateur.prenom().trim()
+                + " " + utilisateur.nom().trim();
+
+        if (!nomComplet.equals(utilisateur.nomComplet().trim())) {
+            throw LectureApiExterne.incoherence("BIENS");
+        }
+
+        return nomComplet;
+    }
+
     private FicheBien lireBien(String id) {
         FicheBien bien = LectureApiExterne.lire(biens, "BIENS", cheminBien,
                 Map.of("id", id), FicheBien.class);
@@ -105,21 +133,25 @@ public final class BienBailCollectifClient implements BienBailClient {
                     "Le bien n'appartient pas au bailleur authentifie.");
         }
 
+        String nomBailleur;
+
         if (lecteur.gestionnaire()) {
-            throw new com.gestionlocative.quittances.exception.ServiceExterneException(
-                    "BIENS",
-                    "IDENTITE_BAILLEUR_INDISPONIBLE",
-                    "Le referentiel doit fournir l'identite du proprietaire.",
-                    null);
+            nomBailleur = lireIdentiteBailleur(bien.bailleurId());
+        } else {
+            String nom = jwt.getToken().getClaimAsString("nom");
+            String prenom = jwt.getToken().getClaimAsString("prenom");
+
+            if (!LectureApiExterne.textePresent(nom)
+                    || !LectureApiExterne.textePresent(prenom)) {
+                throw new AccessDeniedException(
+                        "Nom du bailleur absent du JWT verifie.");
+            }
+
+            nomBailleur = prenom.trim() + " " + nom.trim();
         }
 
-String nom = jwt.getToken().getClaimAsString("nom");
-        String prenom = jwt.getToken().getClaimAsString("prenom");
-        if (!LectureApiExterne.textePresent(nom) || !LectureApiExterne.textePresent(prenom)) {
-            throw new AccessDeniedException("Nom du bailleur absent du JWT vérifié.");
-        }
         return new BailPeriode("1", id, bail.locataireId(), bail.bienId(),
-                bien.bailleurId(), prenom.trim() + " " + nom.trim(), bail.dateDebut(),
+                bien.bailleurId(), nomBailleur, bail.dateDebut(),
                 bail.dateFin(), debut, fin, bail.montantLoyer(), bien.charges(), "MAD");
     }
 }

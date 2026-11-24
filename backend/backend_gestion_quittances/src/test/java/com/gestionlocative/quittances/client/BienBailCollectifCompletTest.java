@@ -324,4 +324,134 @@ class BienBailCollectifCompletTest {
                 () -> client.consulterBail(
                         "bail-123", DEBUT, FIN));
     }
+
+
+    private void authentifierGestionnaire() {
+        Jwt jwt = Jwt.withTokenValue("jeton-gestionnaire-test")
+                .header("alg", "HS256")
+                .subject("22222222-2222-2222-2222-222222222222")
+                .claim("nom", "Benjelloun")
+                .claim("prenom", "Sara")
+                .build();
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwt, List.of(
+                        new SimpleGrantedAuthority("ROLE_GESTIONNAIRE"))));
+    }
+
+    private String identiteBailleur() {
+        return """
+                {
+                  "versionContrat": "1",
+                  "id": "%s",
+                  "nom": "Alami",
+                  "prenom": "Mehdi",
+                  "nomComplet": "Mehdi Alami",
+                  "role": "BAILLEUR"
+                }
+                """.formatted(PROPRIETAIRE);
+    }
+
+    @Test
+    void gestionnaireRecupereIdentiteReelle() {
+        authentifierGestionnaire();
+
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl("http://localhost:8081")
+                .requestInterceptor(
+                        new com.gestionlocative.quittances.config
+                                .JwtUtilisateurInterceptor());
+
+        serveur = MockRestServiceServer.bindTo(builder).build();
+
+        RestClient http = builder.build();
+
+        client = new BienBailCollectifClient(
+                http, "/api/biens/{id}",
+                http, "/api/baux/{id}");
+
+        reponseBail(bail());
+        reponseBien(bien());
+
+        serveur.expect(requestTo(
+                "http://localhost:8081/api/users/" + PROPRIETAIRE))
+                .andExpect(
+                        org.springframework.test.web.client.match
+                                .MockRestRequestMatchers.header(
+                                        "Authorization",
+                                        "Bearer jeton-gestionnaire-test"))
+                .andRespond(withSuccess(
+                        identiteBailleur(), MediaType.APPLICATION_JSON));
+
+        BailPeriode resultat = client.consulterBail(
+                "bail-123", DEBUT, FIN);
+
+        assertEquals(PROPRIETAIRE, resultat.bailleurId());
+        assertEquals("Mehdi Alami", resultat.nomBailleur());
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {
+            "id", "role", "version", "nom",
+            "prenom", "nomComplet", "incoherent"
+    })
+    void gestionnaireRefuseIdentiteInvalide(String champ) {
+        authentifierGestionnaire();
+
+        reponseBail(bail());
+        reponseBien(bien());
+
+        String json = identiteBailleur();
+
+        json = switch (champ) {
+            case "id" -> json.replace(PROPRIETAIRE,
+                    "22222222-2222-2222-2222-222222222222");
+            case "role" -> json.replace(
+                    "\"BAILLEUR\"", "\"GESTIONNAIRE\"");
+            case "version" -> json.replace(
+                    "\"1\"", "\"2\"");
+            case "nom" -> json.replace(
+                    "\"Alami\"", "null");
+            case "prenom" -> json.replace(
+                    "\"Mehdi\"", "null");
+            case "nomComplet" -> json.replace(
+                    "\"Mehdi Alami\"", "null");
+            case "incoherent" -> json.replace(
+                    "\"Mehdi Alami\"", "\"Sara Benjelloun\"");
+            default -> throw new IllegalArgumentException(champ);
+        };
+
+        serveur.expect(requestTo(
+                "http://localhost:8081/api/users/" + PROPRIETAIRE))
+                .andRespond(withSuccess(
+                        json, MediaType.APPLICATION_JSON));
+
+        assertThrows(ServiceExterneException.class,
+                () -> client.consulterBail(
+                        "bail-123", DEBUT, FIN));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints = {
+            403, 404, 503
+    })
+    void gestionnaireRefuseSiIdentiteInaccessible(int statut) {
+        authentifierGestionnaire();
+
+        reponseBail(bail());
+        reponseBien(bien());
+
+        serveur.expect(requestTo(
+                "http://localhost:8081/api/users/" + PROPRIETAIRE))
+                .andRespond(
+                        org.springframework.test.web.client.response
+                                .MockRestResponseCreators.withStatus(
+                                        org.springframework.http.HttpStatus
+                                                .valueOf(statut)));
+
+        assertThrows(ServiceExterneException.class,
+                () -> client.consulterBail(
+                        "bail-123", DEBUT, FIN));
+    }
+
 }
