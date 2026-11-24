@@ -1,11 +1,11 @@
 package com.gestionlocative.quittances.service;
 
 import com.gestionlocative.quittances.dto.RemplacementQuittanceResponse;
+import com.gestionlocative.quittances.security.IdentiteAudit;
 import com.gestionlocative.quittances.security.LecteurQuittances;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,15 +19,18 @@ public class RemplacementQuittanceService {
     private final ConsultationQuittanceService consultationService;
     private final ConstructionBrouillonService constructionService;
     private final EnregistrementRemplacementService enregistrementService;
+    private final IdentiteAudit identiteAudit;
 
     public RemplacementQuittanceService(
             ConsultationQuittanceService consultationService,
             ConstructionBrouillonService constructionService,
-            EnregistrementRemplacementService enregistrementService
+            EnregistrementRemplacementService enregistrementService,
+            IdentiteAudit identiteAudit
     ) {
         this.consultationService = consultationService;
         this.constructionService = constructionService;
         this.enregistrementService = enregistrementService;
+        this.identiteAudit = identiteAudit;
     }
 
     @Transactional(propagation = Propagation.NEVER)
@@ -57,22 +60,10 @@ public class RemplacementQuittanceService {
             );
         }
 
-        JwtAuthenticationToken jwt =
-                (JwtAuthenticationToken) authentication;
-
-        String acteur = jwt.getToken().getSubject();
-        String emetteur = jwt.getToken().getClaimAsString("iss");
-
-        if (acteur == null
-                || acteur.isBlank()
-                || acteur.length() > 200
-                || emetteur == null
-                || emetteur.isBlank()
-                || emetteur.length() > 500) {
-            throw new AccessDeniedException(
-                    "L'identité ne permet pas une traçabilité suffisante."
-            );
-        }
+        IdentiteAudit.Acteur contexteAudit =
+                identiteAudit.depuis(authentication);
+        String acteur = contexteAudit.sujet();
+        String emetteur = contexteAudit.emetteurIdentite();
 
         var precedent = consultationService.consulter(
                 authentication,

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidationJwt.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.security</a> &gt; <span class="el_source">ValidationJwt.java</span></div><h1>ValidationJwt.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.security;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Set;
+
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
+import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+
+public final class ValidationJwt {
+
+    private ValidationJwt() {
+    }
+
+    public static void configurerCommun(NimbusJwtDecoder decoder) {
+<span class="fc" id="L22">        OAuth2TokenValidator&lt;Jwt&gt; contenuObligatoire = jwt -&gt; {</span>
+<span class="fc" id="L23">            Object role = jwt.getClaims().get(&quot;role&quot;);</span>
+<span class="fc" id="L24">            Object iat = jwt.getClaims().get(&quot;iat&quot;);</span>
+<span class="fc" id="L25">            Object exp = jwt.getClaims().get(&quot;exp&quot;);</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">            boolean roleReconnu = role instanceof String</span>
+<span class="fc" id="L27">                    &amp;&amp; Set.of(&quot;BAILLEUR&quot;, &quot;GESTIONNAIRE&quot;, &quot;LOCATAIRE&quot;)</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">                            .contains(role);</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">            long iatSecondes = iat instanceof Instant instant</span>
+<span class="fc" id="L30">                    ? instant.getEpochSecond()</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">                    : iat instanceof Number number</span>
+<span class="nc" id="L32">                            ? number.longValue()</span>
+<span class="pc" id="L33">                            : -1L;</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            long expSecondes = exp instanceof Instant instant</span>
+<span class="fc" id="L35">                    ? instant.getEpochSecond()</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">                    : exp instanceof Number number</span>
+<span class="nc" id="L37">                            ? number.longValue()</span>
+<span class="fc" id="L38">                            : -1L;</span>
+<span class="pc bpc" id="L39" title="1 of 4 branches missed.">            boolean tempsNumerique = iatSecondes &gt; 0</span>
+                    &amp;&amp; expSecondes &gt; iatSecondes;
+
+<span class="fc" id="L42">            boolean valide =</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">                    jwt.getSubject() != null</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">                            &amp;&amp; !jwt.getSubject().isBlank()</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                            &amp;&amp; jwt.getIssuedAt() != null</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                            &amp;&amp; jwt.getExpiresAt() != null</span>
+<span class="pc bpc" id="L47" title="2 of 6 branches missed.">                            &amp;&amp; jwt.getExpiresAt().isAfter(jwt.getIssuedAt())</span>
+                            &amp;&amp; tempsNumerique
+                            &amp;&amp; roleReconnu;
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            if (valide) {</span>
+<span class="fc" id="L52">                return OAuth2TokenValidatorResult.success();</span>
+            }
+
+<span class="fc" id="L55">            return OAuth2TokenValidatorResult.failure(</span>
+                    new OAuth2Error(
+                            &quot;invalid_token&quot;,
+                            &quot;Le jeton commun ne contient pas les informations attendues.&quot;,
+                            null
+                    )
+            );
+        };
+
+<span class="fc" id="L64">        decoder.setJwtValidator(</span>
+                new DelegatingOAuth2TokenValidator&lt;&gt;(
+<span class="fc" id="L66">                        new JwtTimestampValidator(Duration.ofSeconds(30)),</span>
+                        contenuObligatoire
+                )
+        );
+<span class="fc" id="L70">    }</span>
+
+    public static void configurer(
+            NimbusJwtDecoder decoder,
+            String issuer,
+            String audience) {
+
+<span class="fc" id="L77">        OAuth2TokenValidator&lt;Jwt&gt; contenuObligatoire = jwt -&gt; {</span>
+<span class="fc" id="L78">            boolean valide =</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                    jwt.getSubject() != null</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">                            &amp;&amp; !jwt.getSubject().isBlank()</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">                            &amp;&amp; jwt.getIssuedAt() != null</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                            &amp;&amp; jwt.getExpiresAt() != null</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">                            &amp;&amp; jwt.getExpiresAt().isAfter(jwt.getIssuedAt())</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">                            &amp;&amp; jwt.getAudience().contains(audience);</span>
+
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            if (valide) {</span>
+<span class="fc" id="L87">                return OAuth2TokenValidatorResult.success();</span>
+            }
+
+<span class="fc" id="L90">            return OAuth2TokenValidatorResult.failure(</span>
+                    new OAuth2Error(
+                            &quot;invalid_token&quot;,
+                            &quot;Le jeton ne contient pas les informations attendues.&quot;,
+                            null
+                    )
+            );
+        };
+
+<span class="fc" id="L99">        decoder.setJwtValidator(</span>
+                new DelegatingOAuth2TokenValidator&lt;&gt;(
+<span class="fc" id="L101">                        new JwtTimestampValidator(Duration.ofSeconds(30)),</span>
+                        new JwtIssuerValidator(issuer),
+                        contenuObligatoire
+                )
+        );
+<span class="fc" id="L106">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

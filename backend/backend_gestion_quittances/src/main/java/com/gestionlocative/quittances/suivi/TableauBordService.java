@@ -18,11 +18,21 @@ public class TableauBordService {
     @Transactional(readOnly = true)
     public Tableau consulter(Authentication authentication) {
         var lecteur = LecteurQuittances.depuis(authentication);
-        // Fragments constants : l'identifiant utilisateur reste un paramètre SQL.
-        String acces = lecteur.bailleur() ? "bailleur_id = ?"
-                : "locataire_id = ? AND emis_le IS NOT NULL";
-        List<Groupe> groupes = jdbc.query("SELECT statut, type_document, COUNT(*) AS nombre "
-                + "FROM quittance WHERE " + acces + " GROUP BY statut, type_document ORDER BY statut, type_document",
+        // Choix entre deux requêtes constantes : aucune concaténation de valeurs utilisateur.
+        String sql = lecteur.bailleur()
+                ? """
+                  SELECT statut, type_document, COUNT(*) AS nombre
+                  FROM quittance WHERE bailleur_id = ?
+                  GROUP BY statut, type_document
+                  ORDER BY statut, type_document
+                  """
+                : """
+                  SELECT statut, type_document, COUNT(*) AS nombre
+                  FROM quittance WHERE locataire_id = ? AND emis_le IS NOT NULL
+                  GROUP BY statut, type_document
+                  ORDER BY statut, type_document
+                  """;
+        List<Groupe> groupes = jdbc.query(sql,
                 (rs, i) -> new Groupe(rs.getString("statut"), rs.getString("type_document"), rs.getLong("nombre")),
                 lecteur.identifiant());
         return new Tableau(groupes.stream().mapToLong(Groupe::nombre).sum(), List.copyOf(groupes), Instant.now());

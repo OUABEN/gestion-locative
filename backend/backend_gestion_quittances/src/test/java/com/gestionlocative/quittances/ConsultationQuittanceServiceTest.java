@@ -103,6 +103,25 @@ class ConsultationQuittanceServiceTest {
     }
 
     @Test
+    void listeBailleurCommunEstLimiteeAuSubVerifie() {
+        String sub = UUID.randomUUID().toString();
+
+        creer(sub, identifiant());
+        creer(identifiant(), identifiant());
+
+        var resultat = service.lister(
+                identiteCommunBailleur(sub),
+                0,
+                20,
+                "creeLe",
+                "desc"
+        );
+
+        assertEquals(1, resultat.contenu().size());
+        assertEquals(1L, resultat.totalElements());
+    }
+
+    @Test
     void listeLocataireExclutBrouillons() {
         String locataire = identifiant();
         creer(identifiant(), locataire);
@@ -177,6 +196,20 @@ class ConsultationQuittanceServiceTest {
         return new JwtAuthenticationToken(
                 jwt,
                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+    }
+
+    private JwtAuthenticationToken identiteCommunBailleur(String sub) {
+        Jwt jwt = Jwt.withTokenValue("jeton-commun-test")
+                .header("alg", "HS256")
+                .subject(sub)
+                .claim("role", "BAILLEUR")
+                .claim("bailleur_id", sub)
+                .build();
+
+        return new JwtAuthenticationToken(
+                jwt,
+                List.of(new SimpleGrantedAuthority("ROLE_BAILLEUR"))
         );
     }
 

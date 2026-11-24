@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArchivageBrouillonService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">ArchivageBrouillonService.java</span></div><h1>ArchivageBrouillonService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
+
+import com.gestionlocative.quittances.document.StockagePdfPrive;
+import com.gestionlocative.quittances.dto.ArchiveBrouillonResponse;
+import com.gestionlocative.quittances.pdf.ApercuPdfService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.UUID;
+
+@Service
+public class ArchivageBrouillonService {
+
+<span class="fc" id="L19">    private static final Logger LOGGER =</span>
+<span class="fc" id="L20">            LoggerFactory.getLogger(ArchivageBrouillonService.class);</span>
+
+    private final ArchiveBrouillonTransactions transactions;
+    private final ApercuPdfService pdfService;
+    private final StockagePdfPrive stockage;
+
+    public ArchivageBrouillonService(
+            ArchiveBrouillonTransactions transactions,
+            ApercuPdfService pdfService,
+            StockagePdfPrive stockage
+<span class="fc" id="L30">    ) {</span>
+<span class="fc" id="L31">        this.transactions = transactions;</span>
+<span class="fc" id="L32">        this.pdfService = pdfService;</span>
+<span class="fc" id="L33">        this.stockage = stockage;</span>
+<span class="fc" id="L34">    }</span>
+
+    @Transactional(propagation = Propagation.NEVER)
+    public ArchiveBrouillonResponse archiver(
+            Authentication authentication,
+            UUID quittanceId
+    ) throws IOException {
+<span class="fc" id="L41">        var source = transactions.charger(authentication, quittanceId);</span>
+
+<span class="fc" id="L43">        byte[] contenu = pdfService.generer(source.donnees());</span>
+<span class="fc" id="L44">        var fichier = stockage.enregistrer(contenu);</span>
+
+        try {
+<span class="fc" id="L47">            return transactions.enregistrer(</span>
+                    authentication,
+                    quittanceId,
+<span class="fc" id="L50">                    source.version(),</span>
+                    fichier
+            );
+
+<span class="fc" id="L54">        } catch (RuntimeException exception) {</span>
+<span class="fc" id="L55">            LOGGER.warn(</span>
+                    &quot;Rattachement du fichier à vérifier après un échec : {}&quot;,
+<span class="fc" id="L57">                    fichier.reference()</span>
+            );
+
+<span class="fc" id="L60">            throw exception;</span>
+        }
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public byte[] telecharger(
+            Authentication authentication,
+            UUID quittanceId,
+            UUID archiveId
+    ) {
+<span class="fc" id="L70">        var fichier = transactions.consulterFichier(</span>
+                authentication,
+                quittanceId,
+                archiveId
+        );
+
+<span class="fc" id="L76">        return stockage.lire(</span>
+<span class="fc" id="L77">                fichier.reference(),</span>
+<span class="fc" id="L78">                fichier.sha256()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

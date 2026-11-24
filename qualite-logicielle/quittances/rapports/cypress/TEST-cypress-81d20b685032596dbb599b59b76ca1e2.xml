@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="18.810" tests="7" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-11-23T19:56:50" tests="0" file="cypress\e2e\quittances.cy.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Quittances — interface React, fournisseurs API simules" timestamp="2026-11-23T19:56:50" tests="7" time="18.804" failures="0">
+    <testcase name="Quittances — interface React, fournisseurs API simules redirige vers la connexion sans session" time="1.194" classname="redirige vers la connexion sans session">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules affiche la liste vide pour un bailleur et ses indicateurs" time="3.247" classname="affiche la liste vide pour un bailleur et ses indicateurs">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules transmet les filtres sans ecrire de document" time="1.866" classname="transmet les filtres sans ecrire de document">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules refuse un role GESTIONNAIRE non reconnu par Quittances" time="3.761" classname="refuse un role GESTIONNAIRE non reconnu par Quittances">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules n affiche pas le formulaire de creation au LOCATAIRE" time="3.032" classname="n affiche pas le formulaire de creation au LOCATAIRE">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules refuse une periode inversee avant tout POST" time="3.747" classname="refuse une periode inversee avant tout POST">
+    </testcase>
+    <testcase name="Quittances — interface React, fournisseurs API simules prepare un brouillon via un POST intercepte et navigue vers son detail" time="1.064" classname="prepare un brouillon via un POST intercepte et navigue vers son detail">
+    </testcase>
+  </testsuite>
+</testsuites>

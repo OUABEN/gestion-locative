@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BiensLocalClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.client</a> &gt; <span class="el_source">BiensLocalClient.java</span></div><h1>BiensLocalClient.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.client;
+
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.UUID;
+import com.gestionlocative.quittances.dto.ReferentielsExternes.Bien;
+import com.gestionlocative.quittances.dto.ReferentielsExternes.BailPeriode;
+import org.springframework.web.client.RestClient;
+
+/** Adaptateur de démonstration : propriété configurée, jamais fournie par l'API Biens. */
+public final class BiensLocalClient implements BienBailClient {
+    private final BienBailClient delegate;
+    private final RestClient client;
+    private final String bienId;
+<span class="fc" id="L15">    public BiensLocalClient(BienBailClient delegate, RestClient client, String bienId) {</span>
+<span class="fc" id="L16">        UUID.fromString(bienId);</span>
+<span class="fc" id="L17">        this.delegate = delegate;</span>
+<span class="fc" id="L18">        this.client = client;</span>
+<span class="fc" id="L19">        this.bienId = bienId;</span>
+<span class="fc" id="L20">    }</span>
+<span class="fc" id="L21">    public record FicheBien(String id, String adresse, String ville) {}</span>
+
+    @Override public Bien consulterBien(String id) {
+<span class="fc" id="L24">        LectureApiExterne.verifierIdentifiant(id);</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (!bienId.equals(id)) throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
+<span class="fc" id="L26">        FicheBien fiche = LectureApiExterne.lire(client, &quot;BIENS&quot;, &quot;/api/biens/{id}&quot;,</span>
+<span class="fc" id="L27">                Map.of(&quot;id&quot;, id), FicheBien.class);</span>
+<span class="pc bpc" id="L28" title="2 of 4 branches missed.">        if (!id.equals(fiche.id()) || !LectureApiExterne.textePresent(fiche.adresse())</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">                || !LectureApiExterne.textePresent(fiche.ville())) {</span>
+<span class="nc" id="L30">            throw LectureApiExterne.incoherence(&quot;BIENS&quot;);</span>
+        }
+        // Version interne et association fictive explicite limitée au bien configuré.
+<span class="fc" id="L33">        return new Bien(&quot;1&quot;, id, fiche.adresse() + &quot;, &quot; + fiche.ville(), &quot;BAILLEUR-TEST&quot;);</span>
+    }
+    @Override public BailPeriode consulterBail(String id, LocalDate debut, LocalDate fin) {
+<span class="fc" id="L36">        return delegate.consulterBail(id, debut, fin);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

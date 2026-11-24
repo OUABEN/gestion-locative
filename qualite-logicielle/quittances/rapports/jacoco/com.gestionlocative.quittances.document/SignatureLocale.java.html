@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SignatureLocale.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.document</a> &gt; <span class="el_source">SignatureLocale.java</span></div><h1>SignatureLocale.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.document;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HexFormat;
+import java.time.Instant;
+
+/** Signature détachée de démonstration, sans certification d'identité. */
+public final class SignatureLocale {
+    private SignatureLocale() {}
+<span class="fc" id="L19">    public record Preuve(byte[] signature, byte[] certificat, String sha256) {</span>
+        @Override
+        public boolean equals(Object autre) {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">            if (this == autre) return true;</span>
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">            if (!(autre instanceof Preuve preuve)) return false;</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">            return Arrays.equals(signature, preuve.signature)</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">                    &amp;&amp; Arrays.equals(certificat, preuve.certificat)</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">                    &amp;&amp; java.util.Objects.equals(sha256, preuve.sha256);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="fc" id="L31">            int resultat = Arrays.hashCode(signature);</span>
+<span class="fc" id="L32">            resultat = 31 * resultat + Arrays.hashCode(certificat);</span>
+<span class="fc" id="L33">            resultat = 31 * resultat + java.util.Objects.hashCode(sha256);</span>
+<span class="fc" id="L34">            return resultat;</span>
+        }
+
+        @Override
+        public String toString() {
+            // Résumé du contenu des tableaux : jamais de signature/certificat brut dans les logs.
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            return &quot;Preuve[tailleSignature=&quot; + (signature == null ? 0 : signature.length)</span>
+<span class="fc" id="L41">                    + &quot;, hashSignatureJava=&quot; + Arrays.hashCode(signature)</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                    + &quot;, tailleCertificat=&quot; + (certificat == null ? 0 : certificat.length)</span>
+<span class="fc" id="L43">                    + &quot;, hashCertificatJava=&quot; + Arrays.hashCode(certificat)</span>
+                    + &quot;, sha256=&quot; + sha256 + &quot;]&quot;;
+        }
+    }
+    public static Preuve signer(byte[] pdf, Path chemin, char[] motDePasse, Instant date)
+            throws GeneralSecurityException, IOException {
+        try {
+<span class="fc" id="L50">            KeyStore store = KeyStore.getInstance(&quot;PKCS12&quot;);</span>
+<span class="fc" id="L51">            try (var flux = Files.newInputStream(chemin)) { store.load(flux, motDePasse); }</span>
+<span class="fc" id="L52">            var cle = store.getKey(&quot;darloc-demo&quot;, motDePasse);</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">            if (!(cle instanceof PrivateKey privee) || !(store.getCertificate(&quot;darloc-demo&quot;) instanceof X509Certificate certificat))</span>
+<span class="nc" id="L54">                throw new GeneralSecurityException(&quot;Clé de démonstration absente.&quot;);</span>
+<span class="fc" id="L55">            certificat.checkValidity(Date.from(date));</span>
+<span class="pc bpc" id="L56" title="2 of 4 branches missed.">            if (!(certificat.getPublicKey() instanceof RSAPublicKey rsa) || rsa.getModulus().bitLength() &lt; 2048)</span>
+<span class="nc" id="L57">                throw new GeneralSecurityException(&quot;Clé RSA insuffisante.&quot;);</span>
+<span class="fc" id="L58">            Signature signature = Signature.getInstance(&quot;SHA256withRSA&quot;);</span>
+<span class="fc" id="L59">            signature.initSign(privee); signature.update(pdf);</span>
+<span class="fc" id="L60">            var preuve = new Preuve(signature.sign(), certificat.getEncoded(), empreinte(pdf));</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">            if (!verifier(pdf, preuve, date)) throw new GeneralSecurityException(&quot;Signature non vérifiable.&quot;);</span>
+<span class="fc" id="L62">            return preuve;</span>
+<span class="fc" id="L63">        } finally { Arrays.fill(motDePasse, '\0'); }</span>
+    }
+    public static String empreinte(byte[] contenu) throws GeneralSecurityException {
+<span class="fc" id="L66">        return HexFormat.of().formatHex(MessageDigest.getInstance(&quot;SHA-256&quot;).digest(contenu));</span>
+    }
+    public static boolean verifier(byte[] pdf, Preuve preuve, Instant date) throws GeneralSecurityException {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (!empreinte(pdf).equals(preuve.sha256())) return false;</span>
+<span class="fc" id="L70">        var certificat = (X509Certificate) CertificateFactory.getInstance(&quot;X.509&quot;)</span>
+<span class="fc" id="L71">                .generateCertificate(new ByteArrayInputStream(preuve.certificat()));</span>
+<span class="fc" id="L72">        certificat.checkValidity(Date.from(date));</span>
+<span class="fc" id="L73">        Signature verification = Signature.getInstance(&quot;SHA256withRSA&quot;);</span>
+<span class="fc" id="L74">        verification.initVerify(certificat.getPublicKey()); verification.update(pdf);</span>
+<span class="fc" id="L75">        return verification.verify(preuve.signature());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

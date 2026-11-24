@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IdentiteAudit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.security</a> &gt; <span class="el_source">IdentiteAudit.java</span></div><h1>IdentiteAudit.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.security;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+
+@Component
+public final class IdentiteAudit {
+
+    public static final String SOURCE_JWT_COMMUN = &quot;JWT_COMMUN&quot;;
+
+    private final String modeJwt;
+
+    public IdentiteAudit(
+            @Value(&quot;${quittances.securite.mode}&quot;) String modeJwt
+<span class="fc" id="L18">    ) {</span>
+<span class="fc" id="L19">        this.modeJwt = modeJwt;</span>
+<span class="fc" id="L20">    }</span>
+
+    public Acteur depuis(Authentication authentication) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if (!(authentication instanceof JwtAuthenticationToken jwt)</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">                || !authentication.isAuthenticated()) {</span>
+<span class="nc" id="L25">            throw new AccessDeniedException(</span>
+                    &quot;Une identité JWT authentifiée est nécessaire pour l'audit.&quot;
+            );
+        }
+
+<span class="fc" id="L30">        String sujet = jwt.getToken().getSubject();</span>
+<span class="pc bpc" id="L31" title="3 of 6 branches missed.">        if (sujet == null || sujet.isBlank() || sujet.length() &gt; 200) {</span>
+<span class="nc" id="L32">            throw new AccessDeniedException(</span>
+                    &quot;Le sujet JWT ne permet pas une traçabilité suffisante.&quot;
+            );
+        }
+
+        String emetteurIdentite;
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (&quot;COMMUN&quot;.equals(modeJwt)) {</span>
+            // Provenance d'authentification, jamais un issuer prétendu du JWT.
+<span class="fc" id="L40">            emetteurIdentite = SOURCE_JWT_COMMUN;</span>
+        } else {
+<span class="fc" id="L42">            emetteurIdentite = jwt.getToken().getClaimAsString(&quot;iss&quot;);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">            if (emetteurIdentite == null</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">                    || emetteurIdentite.isBlank()</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                    || emetteurIdentite.length() &gt; 500) {</span>
+<span class="fc" id="L46">                throw new AccessDeniedException(</span>
+                        &quot;L'émetteur JWT ne permet pas une traçabilité suffisante.&quot;
+                );
+            }
+        }
+
+<span class="fc" id="L52">        return new Acteur(sujet, emetteurIdentite);</span>
+    }
+
+<span class="fc" id="L55">    public record Acteur(String sujet, String emetteurIdentite) {</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

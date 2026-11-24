@@ -51,6 +51,7 @@ quittances:
     issuer: ${JWT_ISSUER:urn:gestionlocative:dev}
     audience: ${JWT_AUDIENCE:service-quittances}
     cle-publique: ${JWT_PUBLIC_KEY_PATH:.local-jwt/public.der}
+    jwt-secret: ${JWT_SECRET:}
   integration:
     paiements:
       mode: ${PAIEMENTS_MODE:SIMULATION}
@@ -68,7 +69,7 @@ quittances:
     biens:
       mode: ${BIENS_MODE:SIMULATION}
       base-url: ${BIENS_BASE_URL:http://127.0.0.1:8093}
-      chemin: "${BIENS_CHEMIN:/api/v1/biens/{id}}"
+      chemin: "${BIENS_CHEMIN:/api/biens/{id}}"
       token: ${BIENS_TOKEN:}
 
     baux:

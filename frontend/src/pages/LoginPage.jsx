@@ -22,22 +22,22 @@ import styles from './LoginPage.module.css';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth();
+  const { loginWithToken, sessionNotice } = useAuth();
   const { addToast } = useToast();
 
   // 'login' | 'register'
   const [mode, setMode] = useState('login');
 
   // États Connexion
-  const [email, setEmail] = useState('bailleur@gestion-locative.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // États Inscription
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
-  const [regRole, setRegRole] = useState('BAILLEUR');
+  const [regRole, setRegRole] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -75,7 +75,7 @@ export const LoginPage = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!nom.trim() || !prenom.trim() || !regEmail.trim() || !regPassword) {
+    if (!nom.trim() || !prenom.trim() || !regEmail.trim() || !regPassword || !regRole) {
       setError('Veuillez remplir tous les champs obligatoires.');
       return;
     }
@@ -106,26 +106,6 @@ export const LoginPage = () => {
         err.message ||
         "Une erreur est survenue lors de la création du compte.";
       setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Connexion instantanée en 1 clic sur un profil de démonstration
-  const handleQuickLogin = async (accEmail, accRole) => {
-    setEmail(accEmail);
-    setPassword('admin123');
-    setError('');
-    setLoading(true);
-    try {
-      const data = await authApi.login(accEmail, 'admin123');
-      if (data?.token) {
-        const loggedUser = loginWithToken(data.token);
-        addToast(`Session ${accRole} ouverte (${loggedUser.email}).`);
-        navigate('/', { replace: true });
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Erreur de connexion rapide.');
     } finally {
       setLoading(false);
     }
@@ -168,7 +148,7 @@ export const LoginPage = () => {
             <p className={styles.cardSubtitle}>
               {mode === 'register'
                 ? 'Inscrivez-vous pour accéder immédiatement au tableau de bord.'
-                : 'Connectez-vous en un clic à votre tableau de bord immobilier.'}
+                : 'Connectez-vous avec votre compte pour accéder à la plateforme.'}
             </p>
           </div>
 
@@ -198,6 +178,11 @@ export const LoginPage = () => {
             </button>
           </div>
 
+          {sessionNotice && (
+            <div className={styles.errorAlert} role="alert">
+              {sessionNotice}
+            </div>
+          )}
           {error && (
             <div className={styles.errorAlert} role="alert">
               {error}
@@ -218,7 +203,7 @@ export const LoginPage = () => {
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="bailleur@gestion-locative.com"
+                    placeholder="nom@exemple.ma"
                     className={styles.input}
                     required
                   />
@@ -261,39 +246,6 @@ export const LoginPage = () => {
                 {loading ? 'Ouverture du tableau de bord...' : 'Se connecter'}
               </Button>
 
-              <div className={styles.quickAccounts}>
-                <span className={styles.quickAccountsTitle}>
-                  Accès direct en 1 clic (Comptes de démonstration) :
-                </span>
-                <div className={styles.quickBadges}>
-                  <button
-                    type="button"
-                    className={styles.quickBadge}
-                    disabled={loading}
-                    onClick={() => handleQuickLogin('bailleur@gestion-locative.com', 'BAILLEUR')}
-                  >
-                    Bailleur (Accès complet)
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.quickBadge}
-                    disabled={loading}
-                    onClick={() =>
-                      handleQuickLogin('gestionnaire@gestion-locative.com', 'GESTIONNAIRE')
-                    }
-                  >
-                    Gestionnaire
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.quickBadge}
-                    disabled={loading}
-                    onClick={() => handleQuickLogin('locataire@gestion-locative.com', 'LOCATAIRE')}
-                  >
-                    Locataire (Lecture)
-                  </button>
-                </div>
-              </div>
             </form>
           )}
 
@@ -349,7 +301,7 @@ export const LoginPage = () => {
                     id="reg-email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="votre.email@gestion-locative.com"
+                    placeholder="votre.email@exemple.ma"
                     className={styles.input}
                     required
                   />
@@ -393,7 +345,9 @@ export const LoginPage = () => {
                     value={regRole}
                     onChange={(e) => setRegRole(e.target.value)}
                     className={styles.input}
+                    required
                   >
+                    <option value="" disabled>Choisissez un profil</option>
                     <option value="BAILLEUR">BAILLEUR — Propriétaire (Ajout, Modif, Suppression)</option>
                     <option value="GESTIONNAIRE">GESTIONNAIRE — Agence (Ajout, Modif, Suppression)</option>
                     <option value="LOCATAIRE">LOCATAIRE — Consultation en lecture seule</option>

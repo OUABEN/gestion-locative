@@ -35,6 +35,10 @@ class EmissionDemoServiceTest {
         assertThrows(ResponseStatusException.class,()->service(true,"127.0.0.1","INTEGRATION").emettre(auth,id,true));
         verifyNoInteractions(transactions,paiements,pdf);
     }
+    @Test void modeCommunRefuse() {
+        assertThrows(ResponseStatusException.class,()->service(true,"127.0.0.1","COMMUN").emettre(auth,id,true));
+        verifyNoInteractions(transactions,paiements,pdf);
+    }
     @Test void adressePubliqueRefusee() {
         assertThrows(ResponseStatusException.class,()->service(true,"0.0.0.0","LOCAL").emettre(auth,id,true));
         verifyNoInteractions(transactions,paiements,pdf);

@@ -1,0 +1,2522 @@
+{
+  "dependencyCount": 108,
+  "displayTargetFile": "pom.xml",
+  "filesystemPolicy": false,
+  "filtered": {
+    "ignore": [],
+    "patch": []
+  },
+  "hasUnknownVersions": false,
+  "ignoreSettings": {
+    "adminOnly": false,
+    "autoApproveIgnores": false,
+    "disregardFilesystemIgnores": false,
+    "reasonRequired": false
+  },
+  "isPrivate": true,
+  "licensesPolicy": {
+    "orgLicenseRules": null,
+    "severities": null
+  },
+  "ok": false,
+  "org": "akraaaaaaaaam",
+  "packageManager": "maven",
+  "path": "C:\\Users\\akram\\AppData\\Local\\Temp\\quittances-snyk-e0f9adcfd4\\backend",
+  "policy": "",
+  "projectName": "com.gestionlocative:service-quittances",
+  "remediation": {
+    "ignore": null,
+    "pin": {},
+    "unresolved": [
+      {
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:L",
+        "alternativeIds": [],
+        "creationTime": "2026-10-13T14:40:58.767662Z",
+        "credit": [
+          "Huzaifa Sidhpurwala"
+        ],
+        "cvssDetails": [
+          {
+            "assigner": "Red Hat",
+            "cvssV3BaseScore": 5.9,
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "modificationTime": "2026-11-19T05:29:41.825355Z",
+            "severity": "medium"
+          }
+        ],
+        "cvssScore": 8.3,
+        "cvssSources": [
+          {
+            "assigner": "Snyk",
+            "baseScore": 8.3,
+            "cvssVersion": "4.0",
+            "modificationTime": "2026-11-19T05:29:42.250258Z",
+            "severity": "high",
+            "type": "primary",
+            "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:N/VA:L/SC:N/SI:N/SA:N"
+          },
+          {
+            "assigner": "Snyk",
+            "baseScore": 6.5,
+            "cvssVersion": "3.1",
+            "modificationTime": "2026-11-19T05:29:42.250258Z",
+            "severity": "medium",
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:L"
+          },
+          {
+            "assigner": "Red Hat",
+            "baseScore": 5.9,
+            "cvssVersion": "3.1",
+            "modificationTime": "2026-11-19T05:29:41.825355Z",
+            "severity": "medium",
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+          }
+        ],
+        "description": "## Overview\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection in the `createParserFactory` and `createDocumentBuilderFactory` methods of the `XmlFactory` class, which set only `XMLConstants.FEATURE_SECURE_PROCESSING` on the factory and leave `disallow-doctype-decl`, `external-general-entities`, `external-parameter-entities`, and `load-external-dtd` at their defaults. An attacker can read local files out of band by submitting XML containing an external entity declaration to an application that unmarshals untrusted documents. Exploitation depends on the JAXP implementation in use, because secure processing alone does not block external entity resolution on every implementation.\n\n## Details\nXXE Injection is a type of attack against an application that parses XML input.\nXML is a markup language that defines a set of rules for encoding documents in a format that is both human-readable and machine-readable. By default, many XML processors allow specification of an external entity, a URI that is dereferenced and evaluated during XML processing. When an XML document is being parsed, the parser can make a request and include the content at the specified URI inside of the XML document.\n\nAttacks can include disclosing local files, which may contain sensitive data such as passwords or private user data, using file: schemes or relative paths in the system identifier.\n\nFor example, below is a sample XML document, containing an XML element- username.\n\n```\n<xml>\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n   <username>John</username>\n</xml>\n```\n\nAn external XML entity - `xxe`, is defined using a system identifier and present within a DOCTYPE header. These entities can access local or remote content. For example the below code contains an external XML entity that would fetch the content of  `/etc/passwd` and display it to the user rendered by `username`.\n\n```\n<xml>\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE foo [\n   <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\n   <username>&xxe;</username>\n</xml>\n```\n\nOther XXE Injection attacks can access local resources that may not stop returning data, possibly impacting application availability and leading to Denial of Service.\n\n## Remediation\nA fix was pushed into the `master` branch but not yet published.\n## References\n- [GitHub Commit](https://github.com/eclipse-ee4j/jaxb-ri/commit/abf8c9707046d78bd3b7e834596feb3d3c21dbcb)\n- [GitHub Commit](https://github.com/eclipse-ee4j/jaxb-ri/commit/c08fde59)\n- [GitHub PR](https://github.com/eclipse-ee4j/jaxb-ri/pull/2013)\n- [GitLab Work Item](https://gitlab.eclipse.org/security/cve-assignment/-/work_items/310)\n",
+        "disclosureTime": "2026-10-12T14:44:11.378000Z",
+        "epssDetails": {
+          "modelVersion": "v2026.06.15",
+          "percentile": "0.17041",
+          "probability": "0.00265"
+        },
+        "exploit": "Not Defined",
+        "exploitDetails": {
+          "maturityLevels": [
+            {
+              "format": "CVSSv3",
+              "level": "Not Defined",
+              "type": "secondary"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Not Defined",
+              "type": "primary"
+            }
+          ],
+          "sources": []
+        },
+        "fixedIn": [],
+        "from": [
+          "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+          "org.springframework.boot:spring-boot-starter-data-jpa@4.1.2",
+          "org.springframework.boot:spring-boot-data-jpa@4.1.2",
+          "org.springframework.boot:spring-boot-hibernate@4.1.2",
+          "org.hibernate.orm:hibernate-core@7.4.13.Final",
+          "org.glassfish.jaxb:jaxb-runtime@4.0.9",
+          "org.glassfish.jaxb:jaxb-core@4.0.9"
+        ],
+        "functions": [],
+        "functions_new": [],
+        "id": "SNYK-JAVA-ORGGLASSFISHJAXB-20883142",
+        "identifiers": {
+          "CVE": [
+            "CVE-2026-92877"
+          ],
+          "CWE": [
+            "CWE-611"
+          ]
+        },
+        "insights": {
+          "triageAdvice": null
+        },
+        "isDisputed": false,
+        "isPatchable": false,
+        "isUpgradable": false,
+        "language": "java",
+        "malicious": false,
+        "mavenModuleName": {
+          "artifactId": "jaxb-core",
+          "groupId": "org.glassfish.jaxb"
+        },
+        "modificationTime": "2026-11-19T05:29:42.250258Z",
+        "moduleName": "org.glassfish.jaxb:jaxb-core",
+        "name": "org.glassfish.jaxb:jaxb-core",
+        "packageManager": "maven",
+        "packageName": "org.glassfish.jaxb:jaxb-core",
+        "patches": [],
+        "proprietary": false,
+        "publicationTime": "2026-10-13T14:40:58.917729Z",
+        "references": [
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/eclipse-ee4j/jaxb-ri/commit/abf8c9707046d78bd3b7e834596feb3d3c21dbcb"
+          },
+          {
+            "title": "GitHub Commit",
+            "url": "https://github.com/eclipse-ee4j/jaxb-ri/commit/c08fde59"
+          },
+          {
+            "title": "GitHub PR",
+            "url": "https://github.com/eclipse-ee4j/jaxb-ri/pull/2013"
+          },
+          {
+            "title": "GitLab Work Item",
+            "url": "https://gitlab.eclipse.org/security/cve-assignment/-/work_items/310"
+          }
+        ],
+        "semver": {
+          "vulnerable": [
+            "[4.0.0-M4,]"
+          ]
+        },
+        "severity": "high",
+        "severityBasedOn": "CVSS",
+        "severityWithCritical": "high",
+        "socialTrendAlert": false,
+        "title": "XML External Entity (XXE) Injection",
+        "upgradePath": [],
+        "version": "4.0.9"
+      }
+    ],
+    "upgrade": {
+      "com.fasterxml.jackson.core:jackson-databind@2.21.7": {
+        "upgradeTo": "com.fasterxml.jackson.core:jackson-databind@2.21.8",
+        "upgrades": [
+          "com.fasterxml.jackson.core:jackson-databind@2.21.7"
+        ],
+        "vulns": [
+          "SNYK-JAVA-COMFASTERXMLJACKSONCORE-21761837"
+        ]
+      },
+      "org.flywaydb:flyway-database-postgresql@12.4.0": {
+        "upgradeTo": "org.flywaydb:flyway-database-postgresql@13.5.0",
+        "upgrades": [
+          "tools.jackson.core:jackson-databind@3.1.7"
+        ],
+        "vulns": [
+          "SNYK-JAVA-TOOLSJACKSONCORE-21761838"
+        ]
+      },
+      "org.springframework.boot:spring-boot-starter-mail@4.1.2": {
+        "upgradeTo": "org.springframework.boot:spring-boot-starter-mail@4.2.0",
+        "upgrades": [
+          "ch.qos.logback:logback-classic@1.5.38",
+          "ch.qos.logback:logback-classic@1.5.38",
+          "org.springframework:spring-beans@7.0.10"
+        ],
+        "vulns": [
+          "SNYK-JAVA-CHQOSLOGBACK-19882330",
+          "SNYK-JAVA-CHQOSLOGBACK-20824362",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727191"
+        ]
+      },
+      "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.2": {
+        "upgradeTo": "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.3",
+        "upgrades": [
+          "org.springframework.boot:spring-boot-security@4.1.2",
+          "org.springframework.security:spring-security-core@7.1.2",
+          "org.springframework.security:spring-security-core@7.1.2",
+          "org.springframework.security:spring-security-web@7.1.2"
+        ],
+        "vulns": [
+          "SNYK-JAVA-ORGSPRINGFRAMEWORKBOOT-22730851",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729233",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729282",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729313"
+        ]
+      },
+      "org.springframework.boot:spring-boot-starter-test@4.1.2": {
+        "upgradeTo": "org.springframework.boot:spring-boot-starter-test@4.1.3",
+        "upgrades": [
+          "org.springframework:spring-core@7.0.10"
+        ],
+        "vulns": [
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727152"
+        ]
+      },
+      "org.springframework.boot:spring-boot-starter-webmvc@4.1.2": {
+        "upgradeTo": "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "upgrades": [
+          "org.springframework:spring-expression@7.0.10",
+          "org.springframework:spring-expression@7.0.10",
+          "org.springframework:spring-web@7.0.10",
+          "org.springframework:spring-web@7.0.10",
+          "org.springframework:spring-web@7.0.10",
+          "org.springframework:spring-web@7.0.10",
+          "org.springframework:spring-webmvc@7.0.10"
+        ],
+        "vulns": [
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727167",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727178",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727194",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727208",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727213",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727223",
+          "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727242"
+        ]
+      }
+    }
+  },
+  "summary": "18 vulnerable dependency paths",
+  "targetFile": "",
+  "uniqueCount": 18,
+  "vulnerabilities": [
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T11:04:16.127960Z",
+      "credit": [
+        "winfriedgerlach"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 9.1,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.1,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T11:04:16.460669Z",
+          "severity": "critical",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T11:04:16.460669Z",
+          "severity": "high",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+        }
+      ],
+      "description": "## Overview\n[org.springframework.security:spring-security-core](http://spring.io/spring-security) is a package that provides security services for the Spring IO Platform.\n\nAffected versions of this package are vulnerable to User Impersonation in the `IpInetAddressMatcher` class, whose `matches` method compares the masked leading bytes of the remote and configured addresses without first checking they belong to the same address family. An attacker can satisfy an IP-based access rule from outside the intended range when the remote address is presented in a different family than the configured CIDR, for example an IPv4-mapped IPv6 address matching an IPv6 range, because a 4-byte and a 16-byte address are compared by prefix. This applies to applications using `IpAddressMatcher`, `IpAddressServerWebExchangeMatcher`, or `InetAddressMatchers` for IP access control where the network stack can present a remote address in a different family than the configured range.\n## Remediation\nUpgrade `org.springframework.security:spring-security-core` to version 7.1.3 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-security/commit/38d8f90db6ef3067cdae11389c1e348c33ec71bc)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59333)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.1.3"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.2",
+        "org.springframework.boot:spring-boot-security-oauth2-resource-server@4.1.2",
+        "org.springframework.security:spring-security-oauth2-jose@7.1.2",
+        "org.springframework.security:spring-security-core@7.1.2"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729233",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59333"
+        ],
+        "CWE": [
+          "CWE-290"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-security-core",
+        "groupId": "org.springframework.security"
+      },
+      "modificationTime": "2026-11-22T11:04:16.460669Z",
+      "moduleName": "org.springframework.security:spring-security-core",
+      "name": "org.springframework.security:spring-security-core",
+      "packageManager": "maven",
+      "packageName": "org.springframework.security:spring-security-core",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T11:04:16.289054Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-security/commit/38d8f90db6ef3067cdae11389c1e348c33ec71bc"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59333"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[7.1.0-M3,7.1.3)"
+        ]
+      },
+      "severity": "critical",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "critical",
+      "socialTrendAlert": false,
+      "title": "User Impersonation",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.3",
+        "org.springframework.boot:spring-boot-security-oauth2-resource-server@4.1.3",
+        "org.springframework.security:spring-security-oauth2-jose@7.1.3",
+        "org.springframework.security:spring-security-core@7.1.3"
+      ],
+      "version": "7.1.2"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-10-11T08:45:05.798486Z",
+      "credit": [
+        "Unknown"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 5.6,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+          "modificationTime": "2026-10-03T06:05:52.893547Z",
+          "severity": "medium"
+        }
+      ],
+      "cvssScore": 6.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-10-11T08:47:33.856867Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.6,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-10-11T08:47:33.856867Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 5.6,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-10-03T06:05:52.893547Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        }
+      ],
+      "description": "## Overview\n[ch.qos.logback:logback-classic](https://mvnrepository.com/artifact/ch.qos.logback/logback-classic) is a reliable, generic, fast and flexible logging library for Java.\n\nAffected versions of this package are vulnerable to Directory Traversal via unsanitized input in the `MDCDiscriminator` process. An attacker can create or append log files outside the intended directory by supplying crafted values, such as through HTTP headers, that influence the log file path. This is only exploitable if `SiftingAppender` is active and unsanitized data is used by `MDCDiscriminator`.\r\n \r\n## Workaround \r\nThis vulnerability can be mitigated by sanitizing relevant data provided by the user.\n\n## Details\n\nA Directory Traversal attack (also known as path traversal) aims to access files and directories that are stored outside the intended folder. By manipulating files with \"dot-dot-slash (../)\" sequences and its variations, or by using absolute file paths, it may be possible to access arbitrary files and directories stored on file system, including application source code, configuration, and other critical system files.\n\nDirectory Traversal vulnerabilities can be generally divided into two types:\n\n- **Information Disclosure**: Allows the attacker to gain information about the folder structure or read the contents of sensitive files on the system.\n\n`st` is a module for serving static files on web pages, and contains a [vulnerability of this type](https://snyk.io/vuln/npm:st:20140206). In our example, we will serve files from the `public` route.\n\nIf an attacker requests the following URL from our server, it will in turn leak the sensitive private key of the root user.\n\n```\ncurl http://localhost:8080/public/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/root/.ssh/id_rsa\n```\n**Note** `%2e` is the URL encoded version of `.` (dot).\n\n- **Writing arbitrary files**: Allows the attacker to create or replace existing files. This type of vulnerability is also known as `Zip-Slip`. \n\nOne way to achieve this is by using a malicious `zip` archive that holds path traversal filenames. When each filename in the zip archive gets concatenated to the target extraction folder, without validation, the final path ends up outside of the target folder. If an executable or a configuration file is overwritten with a file containing malicious code, the problem can turn into an arbitrary code execution issue quite easily.\n\nThe following is an example of a `zip` archive with one benign file and one malicious file. Extracting the malicious file will result in traversing out of the target folder, ending up in `/root/.ssh/` overwriting the `authorized_keys` file:\n\n```\n2018-04-15 22:04:29 .....           19           19  good.txt\n2018-04-15 22:04:42 .....           20           20  ../../../../../../root/.ssh/authorized_keys\n```\n\n## Remediation\nUpgrade `ch.qos.logback:logback-classic` to version 1.6.5 or higher.\n## References\n- [GitHub Release](https://github.com/qos-ch/logback/releases/tag/v_1.6.5)\n- [logback.qos.ch](https://logback.qos.ch/news.html#1.6.5)\n",
+      "disclosureTime": "2026-10-02T14:26:31.000000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.24106",
+        "probability": "0.00332"
+      },
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "1.6.5"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-mail@4.1.2",
+        "org.springframework.boot:spring-boot-starter@4.1.2",
+        "org.springframework.boot:spring-boot-starter-logging@4.1.2",
+        "ch.qos.logback:logback-classic@1.5.38"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-CHQOSLOGBACK-20824362",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-104721"
+        ],
+        "CWE": [
+          "CWE-22"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "logback-classic",
+        "groupId": "ch.qos.logback"
+      },
+      "modificationTime": "2026-10-11T08:47:33.856867Z",
+      "moduleName": "ch.qos.logback:logback-classic",
+      "name": "ch.qos.logback:logback-classic",
+      "packageManager": "maven",
+      "packageName": "ch.qos.logback:logback-classic",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-10-11T08:45:06.025380Z",
+      "references": [
+        {
+          "title": "GitHub Release",
+          "url": "https://github.com/qos-ch/logback/releases/tag/v_1.6.5"
+        },
+        {
+          "title": "logback.qos.ch",
+          "url": "https://logback.qos.ch/news.html%231.6.5"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[0.9.14,1.6.5)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Directory Traversal",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-mail@4.2.0",
+        "org.springframework.boot:spring-boot-starter@4.2.0",
+        "org.springframework.boot:spring-boot-starter-logging@4.2.0",
+        "ch.qos.logback:logback-classic@1.6.6"
+      ],
+      "version": "1.5.38"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:06:05.231517Z",
+      "credit": [
+        "Project Canopy"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 8.7,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 8.7,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:06:05.607184Z",
+          "severity": "high",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:06:05.607184Z",
+          "severity": "high",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-beans](https://www.baeldung.com/spring-bean) is a package that is the basis for Spring Framework's IoC container. The BeanFactory interface provides an advanced configuration mechanism capable of managing any type of object.\n\nAffected versions of this package are vulnerable to Incorrect Behavior Order: Validate Before Canonicalize in the `AbstractNestablePropertyAccessor` class, which parses indexed and mapped property paths after the field name has already been matched against the binder's `allowedFields` and `disallowedFields` patterns. An attacker can write to a property the application excluded by submitting a request parameter whose indexed, mapped, or nested key is formatted so it does not match the exact exclusion pattern yet still resolves to the excluded property. This affects only applications that bind request parameters with `DataBinder` and rely on an exact `disallowedFields` pattern, or a restrictive `allowedFields` pattern, that excludes a nested, map-keyed, or list-indexed property with no wildcard pattern in place.\n## Remediation\nUpgrade `org.springframework:spring-beans` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/4721da88cdbbc11ae02a26f0d8c4d7d8bb9eca89)\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/6f5c6130bffc797c85cc5149c88dff68a2b67443)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59374)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-mail@4.1.2",
+        "org.springframework.boot:spring-boot-mail@4.1.2",
+        "org.springframework:spring-context-support@7.0.10",
+        "org.springframework:spring-beans@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727191",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59374"
+        ],
+        "CWE": [
+          "CWE-180"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-beans",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:06:05.607184Z",
+      "moduleName": "org.springframework:spring-beans",
+      "name": "org.springframework:spring-beans",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-beans",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:06:05.411368Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/4721da88cdbbc11ae02a26f0d8c4d7d8bb9eca89"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/6f5c6130bffc797c85cc5149c88dff68a2b67443"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59374"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,7.0.11)"
+        ]
+      },
+      "severity": "high",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "high",
+      "socialTrendAlert": false,
+      "title": "Incorrect Behavior Order: Validate Before Canonicalize",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-mail@4.1.3",
+        "org.springframework.boot:spring-boot-mail@4.1.3",
+        "org.springframework:spring-context-support@7.0.11",
+        "org.springframework:spring-beans@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:43:54.167636Z",
+      "credit": [
+        "h1ei1, Opensec Intelligence, Joe Kuhel, YongHo Shin, kuron3k0"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 5.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:43:54.619655Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:43:54.619655Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-webmvc](https://mvnrepository.com/artifact/org.springframework/spring-webmvc) is a package that provides Model-View-Controller (MVC) architecture and ready components that can be used to develop flexible and loosely coupled web applications.\n\nAffected versions of this package are vulnerable to Open Redirect in the `UrlHandlerFilter` class, in both its Servlet and reactive variants, which builds the trailing-slash redirect location from the request URI without collapsing all leading slashes. An attacker can redirect a user to an external origin by sending a request whose path begins with three or more slashes, for example `///evil.com`, so the filter emits a `Location` that browsers resolve as a protocol-relative URL to a different host. This affects only applications that register `UrlHandlerFilter` to redirect trailing-slash URLs, and requires the victim to follow the redirect.\n\n**Note:** This is a follow-up to the vulnerability described in [CVE-2026-47883](https://security.snyk.io/vuln/SNYK-JAVA-ORGSPRINGFRAMEWORK-19267433), whose partial fix (collapsing a single leading `//`) it completes. It is also related to the reactive path vulnerability described in [spring-webflux](https://security.snyk.io/vuln/SNYK-JAVA-ORGSPRINGFRAMEWORK-19267434).\n## Remediation\nUpgrade `org.springframework:spring-webmvc` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/68a7048b974dad82c8f58f257c18bf170059985a)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59394)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-webmvc@4.1.2",
+        "org.springframework:spring-webmvc@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727242",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59394"
+        ],
+        "CWE": [
+          "CWE-601"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-webmvc",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:43:54.619655Z",
+      "moduleName": "org.springframework:spring-webmvc",
+      "name": "org.springframework:spring-webmvc",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-webmvc",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:43:54.323153Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/68a7048b974dad82c8f58f257c18bf170059985a"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59394"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[6.2.0,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Open Redirect",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-webmvc@4.1.3",
+        "org.springframework:spring-webmvc@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T13:57:16.976201Z",
+      "credit": [
+        "李秉卓, LiZhiyao"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 9.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T14:41:45.979192Z",
+          "severity": "critical",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T14:41:45.979192Z",
+          "severity": "critical",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Use of Non-Canonical URL Paths for Authorization Decisions in the `EndpointRequest` and `PathRequest` classes, which build Spring Security request matchers from a raw endpoint, H2-console, or static-resource path without normalizing it. A path whose configured form differs from the dispatched request path (for example by a trailing slash) is not matched by the intended security rule, leaving that path unsecured. This affects applications relying on `EndpointRequest` or `PathRequest` matchers to secure actuator endpoints, the H2 console, or static resource locations.\n## Remediation\nUpgrade `org.springframework.boot:spring-boot-security` to version 4.0.10, 4.1.3 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-boot/commit/7681ebe18ace1334adc395d802beed7681237b39)\n- [GitHub Commit](https://github.com/spring-projects/spring-boot/commit/a540dafae61eeb1312d7b9baa985be6cbc6914ff)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59414)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "4.0.10",
+        "4.1.3"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.2",
+        "org.springframework.boot:spring-boot-starter-security@4.1.2",
+        "org.springframework.boot:spring-boot-security@4.1.2"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORKBOOT-22730851",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59414"
+        ],
+        "CWE": [
+          "CWE-647"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-boot-security",
+        "groupId": "org.springframework.boot"
+      },
+      "modificationTime": "2026-11-22T14:41:45.979192Z",
+      "moduleName": "org.springframework.boot:spring-boot-security",
+      "name": "org.springframework.boot:spring-boot-security",
+      "packageManager": "maven",
+      "packageName": "org.springframework.boot:spring-boot-security",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T13:57:17.196061Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-boot/commit/7681ebe18ace1334adc395d802beed7681237b39"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-boot/commit/a540dafae61eeb1312d7b9baa985be6cbc6914ff"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59414"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,4.0.10)",
+          "[4.1.0-M1,4.1.3)"
+        ]
+      },
+      "severity": "critical",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "critical",
+      "socialTrendAlert": false,
+      "title": "Use of Non-Canonical URL Paths for Authorization Decisions",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.3",
+        "org.springframework.boot:spring-boot-starter-security@4.1.3",
+        "org.springframework.boot:spring-boot-security@4.1.3"
+      ],
+      "version": "4.1.2"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T11:14:28.400248Z",
+      "credit": [
+        "waydesh, emmaw96"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 2.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 2.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T11:14:29.018503Z",
+          "severity": "low",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 3.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T11:14:29.018503Z",
+          "severity": "low",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N"
+        }
+      ],
+      "description": "## Overview\n[org.springframework.security:spring-security-core](http://spring.io/spring-security) is a package that provides security services for the Spring IO Platform.\n\nAffected versions of this package are vulnerable to Timing Attack in the `AbstractUserDetailsReactiveAuthenticationManager` class (and its subclass `UserDetailsRepositoryReactiveAuthenticationManager`), whose `authenticate` method does not invoke the `PasswordEncoder` when the submitted username does not exist. An attacker can enumerate valid usernames by measuring that authentication requests for unknown users return faster than requests for known users with an incorrect password. This applies to reactive applications that authenticate through these managers, such as reactive `formLogin`, with the authentication endpoint reachable by the attacker.\n## Remediation\nUpgrade `org.springframework.security:spring-security-core` to version 7.0.9, 7.1.3 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-security/commit/448c847b7fcc77201ff2be8dff273387ce534c3d)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59329)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.9",
+        "7.1.3"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.2",
+        "org.springframework.boot:spring-boot-security-oauth2-resource-server@4.1.2",
+        "org.springframework.security:spring-security-oauth2-jose@7.1.2",
+        "org.springframework.security:spring-security-core@7.1.2"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729282",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59329"
+        ],
+        "CWE": [
+          "CWE-208"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-security-core",
+        "groupId": "org.springframework.security"
+      },
+      "modificationTime": "2026-11-22T11:14:29.018503Z",
+      "moduleName": "org.springframework.security:spring-security-core",
+      "name": "org.springframework.security:spring-security-core",
+      "packageManager": "maven",
+      "packageName": "org.springframework.security:spring-security-core",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T11:14:28.587291Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-security/commit/448c847b7fcc77201ff2be8dff273387ce534c3d"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59329"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[5.7.0,7.0.9)",
+          "[7.1.0-M1,7.1.3)"
+        ]
+      },
+      "severity": "low",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "low",
+      "socialTrendAlert": false,
+      "title": "Timing Attack",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.3",
+        "org.springframework.boot:spring-boot-security-oauth2-resource-server@4.1.3",
+        "org.springframework.security:spring-security-oauth2-jose@7.1.3",
+        "org.springframework.security:spring-security-core@7.1.3"
+      ],
+      "version": "7.1.2"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-10-13T14:40:58.767662Z",
+      "credit": [
+        "Huzaifa Sidhpurwala"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 5.9,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "modificationTime": "2026-11-19T05:29:41.825355Z",
+          "severity": "medium"
+        }
+      ],
+      "cvssScore": 8.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 8.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-19T05:29:42.250258Z",
+          "severity": "high",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:N/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-19T05:29:42.250258Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:L"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-19T05:29:41.825355Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection in the `createParserFactory` and `createDocumentBuilderFactory` methods of the `XmlFactory` class, which set only `XMLConstants.FEATURE_SECURE_PROCESSING` on the factory and leave `disallow-doctype-decl`, `external-general-entities`, `external-parameter-entities`, and `load-external-dtd` at their defaults. An attacker can read local files out of band by submitting XML containing an external entity declaration to an application that unmarshals untrusted documents. Exploitation depends on the JAXP implementation in use, because secure processing alone does not block external entity resolution on every implementation.\n\n## Details\nXXE Injection is a type of attack against an application that parses XML input.\nXML is a markup language that defines a set of rules for encoding documents in a format that is both human-readable and machine-readable. By default, many XML processors allow specification of an external entity, a URI that is dereferenced and evaluated during XML processing. When an XML document is being parsed, the parser can make a request and include the content at the specified URI inside of the XML document.\n\nAttacks can include disclosing local files, which may contain sensitive data such as passwords or private user data, using file: schemes or relative paths in the system identifier.\n\nFor example, below is a sample XML document, containing an XML element- username.\n\n```\n<xml>\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n   <username>John</username>\n</xml>\n```\n\nAn external XML entity - `xxe`, is defined using a system identifier and present within a DOCTYPE header. These entities can access local or remote content. For example the below code contains an external XML entity that would fetch the content of  `/etc/passwd` and display it to the user rendered by `username`.\n\n```\n<xml>\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE foo [\n   <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\n   <username>&xxe;</username>\n</xml>\n```\n\nOther XXE Injection attacks can access local resources that may not stop returning data, possibly impacting application availability and leading to Denial of Service.\n\n## Remediation\nA fix was pushed into the `master` branch but not yet published.\n## References\n- [GitHub Commit](https://github.com/eclipse-ee4j/jaxb-ri/commit/abf8c9707046d78bd3b7e834596feb3d3c21dbcb)\n- [GitHub Commit](https://github.com/eclipse-ee4j/jaxb-ri/commit/c08fde59)\n- [GitHub PR](https://github.com/eclipse-ee4j/jaxb-ri/pull/2013)\n- [GitLab Work Item](https://gitlab.eclipse.org/security/cve-assignment/-/work_items/310)\n",
+      "disclosureTime": "2026-10-12T14:44:11.378000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.17041",
+        "probability": "0.00265"
+      },
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-data-jpa@4.1.2",
+        "org.springframework.boot:spring-boot-data-jpa@4.1.2",
+        "org.springframework.boot:spring-boot-hibernate@4.1.2",
+        "org.hibernate.orm:hibernate-core@7.4.13.Final",
+        "org.glassfish.jaxb:jaxb-runtime@4.0.9",
+        "org.glassfish.jaxb:jaxb-core@4.0.9"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGGLASSFISHJAXB-20883142",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-92877"
+        ],
+        "CWE": [
+          "CWE-611"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": false,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "jaxb-core",
+        "groupId": "org.glassfish.jaxb"
+      },
+      "modificationTime": "2026-11-19T05:29:42.250258Z",
+      "moduleName": "org.glassfish.jaxb:jaxb-core",
+      "name": "org.glassfish.jaxb:jaxb-core",
+      "packageManager": "maven",
+      "packageName": "org.glassfish.jaxb:jaxb-core",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-10-13T14:40:58.917729Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/eclipse-ee4j/jaxb-ri/commit/abf8c9707046d78bd3b7e834596feb3d3c21dbcb"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/eclipse-ee4j/jaxb-ri/commit/c08fde59"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/eclipse-ee4j/jaxb-ri/pull/2013"
+        },
+        {
+          "title": "GitLab Work Item",
+          "url": "https://gitlab.eclipse.org/security/cve-assignment/-/work_items/310"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[4.0.0-M4,]"
+        ]
+      },
+      "severity": "high",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "high",
+      "socialTrendAlert": false,
+      "title": "XML External Entity (XXE) Injection",
+      "upgradePath": [],
+      "version": "4.0.9"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T08:41:17.546496Z",
+      "credit": [
+        "YLChen-007"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 8.2,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T08:41:17.950407Z",
+          "severity": "high",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T08:41:17.950407Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-core](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22spring-core%22) is a core package within the spring-framework that contains multiple classes and utilities.\n\nAffected versions of this package are vulnerable to Improper Cleanup on Thrown Exception in the `processDataBuffer()` method of `AbstractCharSequenceDecoder`, the superclass of `StringDecoder`. An attacker can leak pooled `DataBuffer` memory until the application is denied service by sending requests whose decoded text lines exceed the configured `maxInMemorySize`, because the resulting `DataBufferLimitException` is thrown without releasing the buffers already split from the input. This affects only Spring WebFlux applications on Reactor Netty that decode request bodies as a stream of `String` values and set `maxInMemorySize` below the server's buffer size (8KB by default on HTTP/1.1), so the default 256KB limit is unaffected.\n## Remediation\nUpgrade `org.springframework:spring-core` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/ec2ec114d643ae9972321787fbbaa4746b053968)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59418)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-test@4.1.2",
+        "org.springframework:spring-core@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727152",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59418"
+        ],
+        "CWE": [
+          "CWE-460"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-core",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T08:41:17.950407Z",
+      "moduleName": "org.springframework:spring-core",
+      "name": "org.springframework:spring-core",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-core",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T08:41:17.737889Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/ec2ec114d643ae9972321787fbbaa4746b053968"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59418"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[6.1.0,7.0.11)"
+        ]
+      },
+      "severity": "high",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "high",
+      "socialTrendAlert": false,
+      "title": "Improper Cleanup on Thrown Exception",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-test@4.1.3",
+        "org.springframework:spring-core@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:18:35.479963Z",
+      "credit": [
+        "YLChen-007"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 8.2,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:18:35.960149Z",
+          "severity": "high",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:18:35.960149Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-web](https://github.com/spring-projects/spring-framework) is a package that provides a comprehensive programming and configuration model for modern Java-based enterprise applications - on any kind of deployment platform.\n\nAffected versions of this package are vulnerable to Allocation of Resources Without Limits or Throttling in the `method()` function of `DefaultClientRequestObservationConvention`, which records the outgoing HTTP method as a low-cardinality `http.client.requests` metric tag without restricting it to known methods. An attacker can exhaust application memory by causing HTTP client requests to be sent with many distinct non-standard methods, each of which registers a new metric series. This affects only applications that instrument `RestClient`, `RestTemplate`, or `WebClient` with a Micrometer `ObservationRegistry` using the default `ClientRequestObservationConvention`, send requests with a remote-user-controlled method, and use a `ClientHttpRequestFactory` or `ClientHttpConnector` that accepts non-standard methods.\n## Remediation\nUpgrade `org.springframework:spring-web` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/ea0d8eb40fb07ccd008c5579e10b5ba0228696c3)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59419)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-http-converter@4.1.2",
+        "org.springframework:spring-web@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727208",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59419"
+        ],
+        "CWE": [
+          "CWE-770"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-web",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:18:35.960149Z",
+      "moduleName": "org.springframework:spring-web",
+      "name": "org.springframework:spring-web",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-web",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:18:35.639243Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/ea0d8eb40fb07ccd008c5579e10b5ba0228696c3"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59419"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[6.0.0,7.0.11)"
+        ]
+      },
+      "severity": "high",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "high",
+      "socialTrendAlert": false,
+      "title": "Allocation of Resources Without Limits or Throttling",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-http-converter@4.1.3",
+        "org.springframework:spring-web@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:24:15.820376Z",
+      "credit": [
+        "Unknown"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 6.9,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.9,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:24:16.167794Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.3,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:24:16.167794Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-web](https://github.com/spring-projects/spring-framework) is a package that provides a comprehensive programming and configuration model for modern Java-based enterprise applications - on any kind of deployment platform.\n\nAffected versions of this package are vulnerable to HTTP Request Smuggling in the `MultipartParser` class, whose `parseHeaders()` method accepts part headers that contain a bare CR or LF or that are not terminated by CR LF, and whose boundary matching does not require the delimiter that must follow a boundary. An attacker can smuggle a part past an application's multipart checks so that a downstream service it relays to interprets the request differently, by sending a multipart body with malformed part headers or a boundary not followed by CR LF or the closing double hyphen. This affects only Spring WebFlux applications that parse untrusted multipart requests, inspect their content, and relay them to a downstream service.\n## Remediation\nUpgrade `org.springframework:spring-web` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/2aa1e69fb08389e91060645e4a1a0bafb0602f19)\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/d40e19af2fc2af8a4ca5df9922987c2a1227640c)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59389)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-http-converter@4.1.2",
+        "org.springframework:spring-web@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727223",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59389"
+        ],
+        "CWE": [
+          "CWE-444",
+          "CWE-93"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-web",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:24:16.167794Z",
+      "moduleName": "org.springframework:spring-web",
+      "name": "org.springframework:spring-web",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-web",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:24:15.992902Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/2aa1e69fb08389e91060645e4a1a0bafb0602f19"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/d40e19af2fc2af8a4ca5df9922987c2a1227640c"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59389"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[5.3.0,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "HTTP Request Smuggling",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-http-converter@4.1.3",
+        "org.springframework:spring-web@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T11:22:04.607541Z",
+      "credit": [
+        "Unknown"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 9.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T11:22:04.842748Z",
+          "severity": "critical",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T11:22:04.842748Z",
+          "severity": "critical",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        }
+      ],
+      "description": "## Overview\n[org.springframework.security:spring-security-web](https://mvnrepository.com/artifact/org.springframework.security/spring-security-web) is a package within Spring Security that provides security services for the Spring IO Platform.\n\nAffected versions of this package are vulnerable to Eval Injection in the `ELRequestMatcher` class, whose `createELContext` method evaluates the matcher's SpEL expression against a `StandardEvaluationContext` that permits reflection, type references, and arbitrary method invocation. An attacker can execute arbitrary code when application data binding populates a bean property of the `ELRequestMatcher` type from attacker-controlled input, because Spring's property-editor discovery then evaluates that input as SpEL in the unrestricted context. This requires the application to bind external input to a property of this type.\n## Remediation\nUpgrade `org.springframework.security:spring-security-web` to version 7.0.9, 7.1.3 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-security/commit/5d28474a5cefab43d41b0da8c487ce40df957855)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59273)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.9",
+        "7.1.3"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.2",
+        "org.springframework.boot:spring-boot-starter-security@4.1.2",
+        "org.springframework.boot:spring-boot-security@4.1.2",
+        "org.springframework.security:spring-security-web@7.1.2"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-22729313",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59273"
+        ],
+        "CWE": [
+          "CWE-95"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-security-web",
+        "groupId": "org.springframework.security"
+      },
+      "modificationTime": "2026-11-22T11:22:04.842748Z",
+      "moduleName": "org.springframework.security:spring-security-web",
+      "name": "org.springframework.security:spring-security-web",
+      "packageManager": "maven",
+      "packageName": "org.springframework.security:spring-security-web",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T11:22:04.759654Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-security/commit/5d28474a5cefab43d41b0da8c487ce40df957855"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59273"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,7.0.9)",
+          "[7.1.0-M1,7.1.3)"
+        ]
+      },
+      "severity": "critical",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "critical",
+      "socialTrendAlert": false,
+      "title": "Eval Injection",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-security-oauth2-resource-server@4.1.3",
+        "org.springframework.boot:spring-boot-starter-security@4.1.3",
+        "org.springframework.boot:spring-boot-security@4.1.3",
+        "org.springframework.security:spring-security-web@7.1.3"
+      ],
+      "version": "7.1.2"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T08:57:52.064589Z",
+      "credit": [
+        "WangYuhui"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 6.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T08:57:52.444449Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.6,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T08:57:52.444449Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Improper Protection of Alternate Path in the `SimpleEvaluationContext` class, which backs its default type conversion with the reflective converters of `DefaultConversionService`. An attacker can invoke constructors and methods that the context is meant to forbid by supplying an expression that triggers an implicit type conversion, which reflectively calls a target type's `valueOf(String)` factory method or its `String`-argument constructor. This affects only applications that evaluate untrusted SpEL with a `SimpleEvaluationContext` whose type converter is the default or a `ConversionService` that includes the default converters of `DefaultConversionService`.\n## Remediation\nUpgrade `org.springframework:spring-expression` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/8c2418724b596727a57ad6e960c3a39b61dc8e98)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59430)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-webmvc@4.1.2",
+        "org.springframework:spring-webmvc@7.0.10",
+        "org.springframework:spring-expression@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727178",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59430"
+        ],
+        "CWE": [
+          "CWE-424"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-expression",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T08:57:52.444449Z",
+      "moduleName": "org.springframework:spring-expression",
+      "name": "org.springframework:spring-expression",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-expression",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T08:57:52.230404Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/8c2418724b596727a57ad6e960c3a39b61dc8e98"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59430"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Improper Protection of Alternate Path",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-webmvc@4.1.3",
+        "org.springframework:spring-webmvc@7.0.11",
+        "org.springframework:spring-expression@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:21:18.775119Z",
+      "credit": [
+        "Daehyun Kang"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 6.9,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.9,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:21:19.223277Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.3,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:21:19.223277Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-web](https://github.com/spring-projects/spring-framework) is a package that provides a comprehensive programming and configuration model for modern Java-based enterprise applications - on any kind of deployment platform.\n\nAffected versions of this package are vulnerable to Allocation of Resources Without Limits or Throttling in the `AbstractMappingContentNegotiationStrategy` class, which caches every media type resolved for an unregistered content-negotiation key into its file-extension resolver maps. An attacker can exhaust application memory by sending requests with many distinct content-negotiation parameter values, each of which is resolved and added to the unbounded mappings. This affects only Spring MVC and WebFlux applications with parameter-based content negotiation enabled, and for Spring MVC only when it is not restricted to registered extensions via `useRegisteredExtensionsOnly`.\n## Remediation\nUpgrade `org.springframework:spring-web` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/ac57aa4de88fafb7c575dbf7853e078270f0683d)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59398)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-http-converter@4.1.2",
+        "org.springframework:spring-web@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727213",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59398"
+        ],
+        "CWE": [
+          "CWE-770"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-web",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:21:19.223277Z",
+      "moduleName": "org.springframework:spring-web",
+      "name": "org.springframework:spring-web",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-web",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:21:18.938113Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/ac57aa4de88fafb7c575dbf7853e078270f0683d"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59398"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[5.0.0,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Allocation of Resources Without Limits or Throttling",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-http-converter@4.1.3",
+        "org.springframework:spring-web@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P",
+      "alternativeIds": [],
+      "creationTime": "2026-10-28T09:14:58.666822Z",
+      "credit": [
+        "AdamKorcz",
+        "Ada Logics",
+        "François Martin"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 8.1,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "modificationTime": "2026-10-23T08:37:35.004729Z",
+          "severity": "high"
+        }
+      ],
+      "cvssScore": 9.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-21T14:06:02.115550Z",
+          "severity": "critical",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-21T14:06:02.115550Z",
+          "severity": "critical",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 8.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-10-23T08:37:35.004729Z",
+          "severity": "high",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Deserialization of Untrusted Data in the `_resolveAndValidateGeneric()` and `_validateTypeParameter()` methods of the `DatabindContext` class. An attacker can instantiate arbitrary classes by supplying a class-name type ID whose generic arguments or array element type name a class that is not validated, because only the outer type is checked against the `PolymorphicTypeValidator`. Exploitation requires deserializing untrusted JSON with class-name type IDs, through annotation-based polymorphism or default typing, where the outer base type is approved, and a usable gadget class is on the classpath.\n\n## Workaround\n\nThis vulnerability can be avoided by using narrow subtype rules, preventing attackers from writing serialized cache or session values, or removing unnecessary dependencies that provide gadget classes.\n\n**Note:** This is a bypass of the fix for the vulnerability described in [CVE-2026-54512](https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-17440598).\n\n## Details\n\nSerialization is a process of converting an object into a sequence of bytes which can be persisted to a disk or database or can be sent through streams. The reverse process of creating object from sequence of bytes is called deserialization. Serialization is commonly used for communication (sharing objects between multiple hosts) and persistence (store the object state in a file or a database). It is an integral part of popular protocols like _Remote Method Invocation (RMI)_, _Java Management Extension (JMX)_, _Java Messaging System (JMS)_, _Action Message Format (AMF)_, _Java Server Faces (JSF) ViewState_, etc.\n\n_Deserialization of untrusted data_ ([CWE-502](https://cwe.mitre.org/data/definitions/502.html)) is when the application deserializes untrusted data without sufficiently verifying that the resulting data will be valid, thus allowing the attacker to control the state or the flow of the execution.\n  \n## Remediation\nUpgrade `tools.jackson.core:jackson-databind` to version 3.1.8, 3.2.4 or higher.\n## References\n- [GitHub Advisory](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-m8xf-2cr7-77ph)\n- [GitHub Commit](https://github.com/FasterXML/jackson-databind/commit/9e7c79ca2731d5c95e3d505110427435c02d9868)\n- [GitHub PR](https://github.com/FasterXML/jackson-databind/pull/6287)\n- [GitHub PR](https://github.com/FasterXML/jackson-databind/pull/6289)\n",
+      "disclosureTime": "2026-10-28T01:42:15.509000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.59819",
+        "probability": "0.00874"
+      },
+      "exploit": "Proof of Concept",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Proof of Concept",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Proof of Concept",
+            "type": "primary"
+          }
+        ],
+        "sources": [
+          "Snyk"
+        ]
+      },
+      "fixedIn": [
+        "3.1.8",
+        "3.2.4"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.flywaydb:flyway-database-postgresql@12.4.0",
+        "org.flywaydb:flyway-core@12.4.0",
+        "tools.jackson.core:jackson-databind@3.1.7"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-TOOLSJACKSONCORE-21761838",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-110879"
+        ],
+        "CWE": [
+          "CWE-502"
+        ],
+        "GHSA": [
+          "GHSA-m8xf-2cr7-77ph"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "jackson-databind",
+        "groupId": "tools.jackson.core"
+      },
+      "modificationTime": "2026-11-21T14:06:02.115550Z",
+      "moduleName": "tools.jackson.core:jackson-databind",
+      "name": "tools.jackson.core:jackson-databind",
+      "packageManager": "maven",
+      "packageName": "tools.jackson.core:jackson-databind",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-10-28T09:14:58.825988Z",
+      "references": [
+        {
+          "title": "GitHub Advisory",
+          "url": "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-m8xf-2cr7-77ph"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/FasterXML/jackson-databind/commit/9e7c79ca2731d5c95e3d505110427435c02d9868"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/FasterXML/jackson-databind/pull/6287"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/FasterXML/jackson-databind/pull/6289"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[3.0.0, 3.1.8)",
+          "[3.2.0, 3.2.4)"
+        ]
+      },
+      "severity": "critical",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "critical",
+      "socialTrendAlert": false,
+      "title": "Deserialization of Untrusted Data",
+      "upgradePath": [
+        false,
+        "org.flywaydb:flyway-database-postgresql@13.5.0",
+        "org.flywaydb:flyway-core@13.5.0"
+      ],
+      "version": "3.1.7"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:C/C:H/I:L/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-09-17T09:20:28.009091Z",
+      "credit": [
+        "Unknown"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "SUSE",
+          "cvssV3BaseScore": 6.5,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L",
+          "modificationTime": "2026-11-12T11:53:15.976043Z",
+          "severity": "medium"
+        },
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 6.5,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L",
+          "modificationTime": "2026-09-01T05:31:20.346600Z",
+          "severity": "medium"
+        }
+      ],
+      "cvssScore": 5.9,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.9,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-13T02:01:38.739071Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:L/AC:L/AT:P/PR:H/UI:P/VC:H/VI:L/VA:L/SC:H/SI:L/SA:L"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-13T02:01:38.739071Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:C/C:H/I:L/A:L"
+        },
+        {
+          "assigner": "SUSE",
+          "baseScore": 6.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-12T11:53:15.976043Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 6.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-09-01T05:31:20.346600Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+        }
+      ],
+      "description": "## Overview\n[ch.qos.logback:logback-classic](https://mvnrepository.com/artifact/ch.qos.logback/logback-classic) is a reliable, generic, fast and flexible logging library for Java.\n\nAffected versions of this package are vulnerable to Directory Traversal in `MDCBasedDiscriminator`, used by `SiftingAppender`, which takes an MDC value as the discriminating key without removing path separators, so the value reaches the nested `FileAppender` path unsanitized. An attacker can direct log output to a file outside the intended directory by supplying an MDC value containing `/` or `\\` path segments. This requires a configuration whose `SiftingAppender` discriminates on MDC and whose nested `FileAppender` interpolates the discriminating key into its file path, with that MDC value populated from attacker-influenced input.\n\n**Note:** This is a bypass of the fix for the vulnerability described in [CVE-2025-11226](https://security.snyk.io/vuln/SNYK-JAVA-CHQOSLOGBACK-13169722).\n\n## Details\n\nA Directory Traversal attack (also known as path traversal) aims to access files and directories that are stored outside the intended folder. By manipulating files with \"dot-dot-slash (../)\" sequences and its variations, or by using absolute file paths, it may be possible to access arbitrary files and directories stored on file system, including application source code, configuration, and other critical system files.\n\nDirectory Traversal vulnerabilities can be generally divided into two types:\n\n- **Information Disclosure**: Allows the attacker to gain information about the folder structure or read the contents of sensitive files on the system.\n\n`st` is a module for serving static files on web pages, and contains a [vulnerability of this type](https://snyk.io/vuln/npm:st:20140206). In our example, we will serve files from the `public` route.\n\nIf an attacker requests the following URL from our server, it will in turn leak the sensitive private key of the root user.\n\n```\ncurl http://localhost:8080/public/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/root/.ssh/id_rsa\n```\n**Note** `%2e` is the URL encoded version of `.` (dot).\n\n- **Writing arbitrary files**: Allows the attacker to create or replace existing files. This type of vulnerability is also known as `Zip-Slip`. \n\nOne way to achieve this is by using a malicious `zip` archive that holds path traversal filenames. When each filename in the zip archive gets concatenated to the target extraction folder, without validation, the final path ends up outside of the target folder. If an executable or a configuration file is overwritten with a file containing malicious code, the problem can turn into an arbitrary code execution issue quite easily.\n\nThe following is an example of a `zip` archive with one benign file and one malicious file. Extracting the malicious file will result in traversing out of the target folder, ending up in `/root/.ssh/` overwriting the `authorized_keys` file:\n\n```\n2018-04-15 22:04:29 .....           19           19  good.txt\n2018-04-15 22:04:42 .....           20           20  ../../../../../../root/.ssh/authorized_keys\n```\n\n## Remediation\nUpgrade `ch.qos.logback:logback-classic` to version 1.6.3 or higher.\n## References\n- [GitHub Commit](https://github.com/qos-ch/logback/commit/761821bfaacac3a0ad44fa546cfc814429bf9312)\n- [Release Notes](https://logback.qos.ch/news.html#1.6.3)\n",
+      "disclosureTime": "2026-08-14T16:51:34.793000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.24106",
+        "probability": "0.00332"
+      },
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "1.6.3"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-mail@4.1.2",
+        "org.springframework.boot:spring-boot-starter@4.1.2",
+        "org.springframework.boot:spring-boot-starter-logging@4.1.2",
+        "ch.qos.logback:logback-classic@1.5.38"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-CHQOSLOGBACK-19882330",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-19880"
+        ],
+        "CWE": [
+          "CWE-22"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "logback-classic",
+        "groupId": "ch.qos.logback"
+      },
+      "modificationTime": "2026-11-13T02:01:38.739071Z",
+      "moduleName": "ch.qos.logback:logback-classic",
+      "name": "ch.qos.logback:logback-classic",
+      "packageManager": "maven",
+      "packageName": "ch.qos.logback:logback-classic",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-09-17T09:20:28.220612Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/qos-ch/logback/commit/761821bfaacac3a0ad44fa546cfc814429bf9312"
+        },
+        {
+          "title": "Release Notes",
+          "url": "https://logback.qos.ch/news.html%231.6.3"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[0.9.14,1.6.3)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Directory Traversal",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-mail@4.2.0",
+        "org.springframework.boot:spring-boot-starter@4.2.0",
+        "org.springframework.boot:spring-boot-starter-logging@4.2.0",
+        "ch.qos.logback:logback-classic@1.6.6"
+      ],
+      "version": "1.5.38"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P",
+      "alternativeIds": [],
+      "creationTime": "2026-10-28T09:14:58.489877Z",
+      "credit": [
+        "AdamKorcz",
+        "Ada Logics",
+        "François Martin"
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "cvssV3BaseScore": 8.1,
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "modificationTime": "2026-10-23T08:37:35.004729Z",
+          "severity": "high"
+        }
+      ],
+      "cvssScore": 9.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-21T14:06:02.110875Z",
+          "severity": "critical",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 9.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-21T14:06:02.110875Z",
+          "severity": "critical",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:P"
+        },
+        {
+          "assigner": "Red Hat",
+          "baseScore": 8.1,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-10-23T08:37:35.004729Z",
+          "severity": "high",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        }
+      ],
+      "description": "## Overview\n[com.fasterxml.jackson.core:jackson-databind](https://github.com/FasterXML/jackson-databind) is a library which contains the general-purpose data-binding functionality and tree-model for Jackson Data Processor.\n\nAffected versions of this package are vulnerable to Deserialization of Untrusted Data in the `_resolveAndValidateGeneric()` and `_validateTypeParameter()` methods of the `DatabindContext` class. An attacker can instantiate arbitrary classes by supplying a class-name type ID whose generic arguments or array element type name a class that is not validated, because only the outer type is checked against the `PolymorphicTypeValidator`. Exploitation requires deserializing untrusted JSON with class-name type IDs, through annotation-based polymorphism or default typing, where the outer base type is approved, and a usable gadget class is on the classpath.\n\n## Workaround\n\nThis vulnerability can be avoided by using narrow subtype rules, preventing attackers from writing serialized cache or session values, or removing unnecessary dependencies that provide gadget classes.\n\n**Note:** This is a bypass of the fix for the vulnerability described in [CVE-2026-54512](https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-17440598).\n\n## Details\n\nSerialization is a process of converting an object into a sequence of bytes which can be persisted to a disk or database or can be sent through streams. The reverse process of creating object from sequence of bytes is called deserialization. Serialization is commonly used for communication (sharing objects between multiple hosts) and persistence (store the object state in a file or a database). It is an integral part of popular protocols like _Remote Method Invocation (RMI)_, _Java Management Extension (JMX)_, _Java Messaging System (JMS)_, _Action Message Format (AMF)_, _Java Server Faces (JSF) ViewState_, etc.\n\n_Deserialization of untrusted data_ ([CWE-502](https://cwe.mitre.org/data/definitions/502.html)) is when the application deserializes untrusted data without sufficiently verifying that the resulting data will be valid, thus allowing the attacker to control the state or the flow of the execution.\n  \n## Remediation\nUpgrade `com.fasterxml.jackson.core:jackson-databind` to version 2.18.12, 2.21.8, 2.22.4 or higher.\n## References\n- [GitHub Advisory](https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-m8xf-2cr7-77ph)\n- [GitHub Commit](https://github.com/FasterXML/jackson-databind/commit/9e7c79ca2731d5c95e3d505110427435c02d9868)\n- [GitHub PR](https://github.com/FasterXML/jackson-databind/pull/6287)\n- [GitHub PR](https://github.com/FasterXML/jackson-databind/pull/6289)\n",
+      "disclosureTime": "2026-10-28T01:42:15.509000Z",
+      "epssDetails": {
+        "modelVersion": "v2026.06.15",
+        "percentile": "0.59819",
+        "probability": "0.00874"
+      },
+      "exploit": "Proof of Concept",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Proof of Concept",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Proof of Concept",
+            "type": "primary"
+          }
+        ],
+        "sources": [
+          "Snyk"
+        ]
+      },
+      "fixedIn": [
+        "2.18.12",
+        "2.21.8",
+        "2.22.4"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "com.fasterxml.jackson.core:jackson-databind@2.21.7"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-COMFASTERXMLJACKSONCORE-21761837",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-110879"
+        ],
+        "CWE": [
+          "CWE-502"
+        ],
+        "GHSA": [
+          "GHSA-m8xf-2cr7-77ph"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "jackson-databind",
+        "groupId": "com.fasterxml.jackson.core"
+      },
+      "modificationTime": "2026-11-21T14:06:02.110875Z",
+      "moduleName": "com.fasterxml.jackson.core:jackson-databind",
+      "name": "com.fasterxml.jackson.core:jackson-databind",
+      "packageManager": "maven",
+      "packageName": "com.fasterxml.jackson.core:jackson-databind",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-10-28T09:14:58.647192Z",
+      "references": [
+        {
+          "title": "GitHub Advisory",
+          "url": "https://github.com/FasterXML/jackson-databind/security/advisories/GHSA-m8xf-2cr7-77ph"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/FasterXML/jackson-databind/commit/9e7c79ca2731d5c95e3d505110427435c02d9868"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/FasterXML/jackson-databind/pull/6287"
+        },
+        {
+          "title": "GitHub PR",
+          "url": "https://github.com/FasterXML/jackson-databind/pull/6289"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[2.10.0,2.18.12)",
+          "[2.19.0,2.21.8)",
+          "[2.22.0,2.22.4)"
+        ]
+      },
+      "severity": "critical",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "critical",
+      "socialTrendAlert": false,
+      "title": "Deserialization of Untrusted Data",
+      "upgradePath": [
+        false,
+        "com.fasterxml.jackson.core:jackson-databind@2.21.8"
+      ],
+      "version": "2.21.7"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T08:51:24.198532Z",
+      "credit": [
+        "YLChen-007"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 6.9,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.9,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T08:51:24.525802Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 5.3,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T08:51:24.525802Z",
+          "severity": "medium",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Excessive Iteration in the `Selection` class, which implements the SpEL collection selection operators (`.?[...]`, `.^[...]`, `.$[...]`). An attacker can exhaust CPU by submitting an expression that selects over a large collection, because the selection criterion is evaluated for every element while only matching elements count against the `maxOperations` limit. This affects only applications that accept and evaluate untrusted SpEL expressions.\n\n**Note:** This is a bypass of the fix for the vulnerability described in [CVE-2026-41850](https://security.snyk.io/vuln/SNYK-JAVA-ORGSPRINGFRAMEWORK-17253311).\n## Remediation\nUpgrade `org.springframework:spring-expression` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/37c9d20d1330e1de6b9d25040d901e4a99362e32)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59431)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-webmvc@4.1.2",
+        "org.springframework:spring-webmvc@7.0.10",
+        "org.springframework:spring-expression@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727167",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59431"
+        ],
+        "CWE": [
+          "CWE-770",
+          "CWE-834"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-expression",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T08:51:24.525802Z",
+      "moduleName": "org.springframework:spring-expression",
+      "name": "org.springframework:spring-expression",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-expression",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T08:51:24.371504Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/37c9d20d1330e1de6b9d25040d901e4a99362e32"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59431"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[5.3.0,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Excessive Iteration",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-webmvc@4.1.3",
+        "org.springframework:spring-webmvc@7.0.11",
+        "org.springframework:spring-expression@7.0.11"
+      ],
+      "version": "7.0.10"
+    },
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L",
+      "alternativeIds": [],
+      "creationTime": "2026-11-22T09:09:32.086184Z",
+      "credit": [
+        "YLChen-007,Aditya Bavadekar"
+      ],
+      "cvssDetails": [],
+      "cvssScore": 6.3,
+      "cvssSources": [
+        {
+          "assigner": "Snyk",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2026-11-22T09:09:32.334772Z",
+          "severity": "medium",
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+        },
+        {
+          "assigner": "Snyk",
+          "baseScore": 3.7,
+          "cvssVersion": "3.1",
+          "modificationTime": "2026-11-22T09:09:32.334772Z",
+          "severity": "low",
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
+        }
+      ],
+      "description": "## Overview\n[org.springframework:spring-web](https://github.com/spring-projects/spring-framework) is a package that provides a comprehensive programming and configuration model for modern Java-based enterprise applications - on any kind of deployment platform.\n\nAffected versions of this package are vulnerable to Regular Expression Denial of Service (ReDoS) in the `RegexPathElement` and `CaptureVariablePathElement` classes, which match a request path segment against the regex of a `PathPattern` `{name:regex}` variable without bounding the matcher's work. An attacker can consume excessive CPU during request matching by sending request paths that drive a backtracking-prone path-variable regex into catastrophic backtracking. This affects only applications whose `PathPattern` mappings, in Spring MVC or WebFlux request mappings or via `PathPatternParser` directly, include a `{name:regex}` variable with a regex susceptible to excessive backtracking.\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its original and legitimate users. There are many types of DoS attacks, ranging from trying to clog the network pipes to the system by generating a large volume of traffic from many machines (a Distributed Denial of Service - DDoS - attack) to sending crafted requests that cause a system to crash or take a disproportional amount of time to process.\n\nThe Regular expression Denial of Service (ReDoS) is a type of Denial of Service attack. Regular expressions are incredibly powerful, but they aren't very intuitive and can ultimately end up making it easy for attackers to take your site down.\n\nLet’s take the following regular expression as an example:\n```js\nregex = /A(B|C+)+D/\n```\n\nThis regular expression accomplishes the following:\n- `A` The string must start with the letter 'A'\n- `(B|C+)+` The string must then follow the letter A with either the letter 'B' or some number of occurrences of the letter 'C' (the `+` matches one or more times). The `+` at the end of this section states that we can look for one or more matches of this section.\n- `D` Finally, we ensure this section of the string ends with a 'D'\n\nThe expression would match inputs such as `ABBD`, `ABCCCCD`, `ABCBCCCD` and `ACCCCCD`\n\nIt most cases, it doesn't take very long for a regex engine to find a match:\n\n```bash\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCD\")'\n0.04s user 0.01s system 95% cpu 0.052 total\n\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCX\")'\n1.79s user 0.02s system 99% cpu 1.812 total\n```\n\nThe entire process of testing it against a 30 characters long string takes around ~52ms. But when given an invalid string, it takes nearly two seconds to complete the test, over ten times as long as it took to test a valid string. The dramatic difference is due to the way regular expressions get evaluated.\n\nMost Regex engines will work very similarly (with minor differences). The engine will match the first possible way to accept the current character and proceed to the next one. If it then fails to match the next one, it will backtrack and see if there was another way to digest the previous character. If it goes too far down the rabbit hole only to find out the string doesn’t match in the end, and if many characters have multiple valid regex paths, the number of backtracking steps can become very large, resulting in what is known as _catastrophic backtracking_.\n\nLet's look at how our expression runs into this problem, using a shorter string: \"ACCCX\". While it seems fairly straightforward, there are still four different ways that the engine could match those three C's:\n1. CCC\n2. CC+C\n3. C+CC\n4. C+C+C.\n\nThe engine has to try each of those combinations to see if any of them potentially match against the expression. When you combine that with the other steps the engine must take, we can use [RegEx 101 debugger](https://regex101.com/debugger) to see the engine has to take a total of 38 steps before it can determine the string doesn't match.\n\nFrom there, the number of steps the engine must use to validate a string just continues to grow.\n\n| String | Number of C's | Number of steps |\n| -------|-------------:| -----:|\n| ACCCX | 3 | 38\n| ACCCCX | 4 | 71\n| ACCCCCX | 5 | 136\n| ACCCCCCCCCCCCCCX | 14 | 65,553\n\n\nBy the time the string includes 14 C's, the engine has to take over 65,000 steps just to see if the string is valid. These extreme situations can cause them to work very slowly (exponentially related to input size, as shown above), allowing an attacker to exploit this and can cause the service to excessively consume CPU, resulting in a Denial of Service.\n\n## Remediation\nUpgrade `org.springframework:spring-web` to version 7.0.11 or higher.\n## References\n- [GitHub Commit](https://github.com/spring-projects/spring-framework/commit/03e5bfe3270a28bb989e1cc2d0ce8fb9f29cfc9e)\n- [Spring Security Advisory](https://spring.io/security/cve-2026-59429)\n",
+      "disclosureTime": "2026-11-19T00:00:00.000000Z",
+      "exploit": "Not Defined",
+      "exploitDetails": {
+        "maturityLevels": [
+          {
+            "format": "CVSSv3",
+            "level": "Not Defined",
+            "type": "secondary"
+          },
+          {
+            "format": "CVSSv4",
+            "level": "Not Defined",
+            "type": "primary"
+          }
+        ],
+        "sources": []
+      },
+      "fixedIn": [
+        "7.0.11"
+      ],
+      "from": [
+        "com.gestionlocative:service-quittances@0.0.1-SNAPSHOT",
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.2",
+        "org.springframework.boot:spring-boot-http-converter@4.1.2",
+        "org.springframework:spring-web@7.0.10"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGSPRINGFRAMEWORK-22727194",
+      "identifiers": {
+        "CVE": [
+          "CVE-2026-59429"
+        ],
+        "CWE": [
+          "CWE-1333"
+        ]
+      },
+      "insights": {
+        "triageAdvice": null
+      },
+      "isDisputed": false,
+      "isPatchable": false,
+      "isUpgradable": true,
+      "language": "java",
+      "malicious": false,
+      "mavenModuleName": {
+        "artifactId": "spring-web",
+        "groupId": "org.springframework"
+      },
+      "modificationTime": "2026-11-22T09:09:32.334772Z",
+      "moduleName": "org.springframework:spring-web",
+      "name": "org.springframework:spring-web",
+      "packageManager": "maven",
+      "packageName": "org.springframework:spring-web",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2026-11-22T09:09:32.236388Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/spring-projects/spring-framework/commit/03e5bfe3270a28bb989e1cc2d0ce8fb9f29cfc9e"
+        },
+        {
+          "title": "Spring Security Advisory",
+          "url": "https://spring.io/security/cve-2026-59429"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,7.0.11)"
+        ]
+      },
+      "severity": "medium",
+      "severityBasedOn": "CVSS",
+      "severityWithCritical": "medium",
+      "socialTrendAlert": false,
+      "title": "Regular Expression Denial of Service (ReDoS)",
+      "upgradePath": [
+        false,
+        "org.springframework.boot:spring-boot-starter-webmvc@4.1.3",
+        "org.springframework.boot:spring-boot-http-converter@4.1.3",
+        "org.springframework:spring-web@7.0.11"
+      ],
+      "version": "7.0.10"
+    }
+  ]
+}

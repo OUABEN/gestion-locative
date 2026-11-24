@@ -1,0 +1,12 @@
+{
+  "name": "quittances-cypress-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tests navigateur du module Quittances avec API simulee, sans Docker",
+  "scripts": {
+    "test": "cypress run --browser electron"
+  },
+  "devDependencies": {
+    "cypress": "16.3.0"
+  }
+}

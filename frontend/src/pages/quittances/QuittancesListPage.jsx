@@ -50,6 +50,7 @@ export const QuittancesListPage = () => {
   const [dashboardError, setDashboardError] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
+  const [documentaryAccessForbidden, setDocumentaryAccessForbidden] = useState(false);
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export const QuittancesListPage = () => {
       setLoading(true);
       setError('');
       setDashboardError('');
+      setDocumentaryAccessForbidden(false);
       try {
         const verifiedIdentity = readQuittancesIdentity(
           await quittancesApi.getIdentity(token)
@@ -74,13 +76,28 @@ export const QuittancesListPage = () => {
           setResult(listResult.value);
         } else {
           setResult(null);
-          setError(quittanceErrorMessage(listResult.reason));
+          const listError = quittanceErrorMessage(listResult.reason);
+          setError(listError);
+          if (listResult.reason?.status === 403) {
+            setDocumentaryAccessForbidden(true);
+          }
         }
         if (dashboardResult.status === 'fulfilled') {
           setDashboard(dashboardResult.value);
         } else {
           setDashboard(null);
-          setDashboardError(quittanceErrorMessage(dashboardResult.reason));
+          if (
+            listResult.status !== 'fulfilled'
+            && listResult.reason?.status === 403
+            && dashboardResult.reason?.status === 403
+          ) {
+            setDashboardError('');
+          } else {
+            setDashboardError(quittanceErrorMessage(dashboardResult.reason));
+          }
+          if (dashboardResult.reason?.status === 403) {
+            setDocumentaryAccessForbidden(true);
+          }
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -88,6 +105,9 @@ export const QuittancesListPage = () => {
           setResult(null);
           setDashboard(null);
           setError(quittanceErrorMessage(loadError));
+          if (loadError?.status === 403) {
+            setDocumentaryAccessForbidden(true);
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -139,7 +159,7 @@ export const QuittancesListPage = () => {
           >
             Actualiser
           </Button>
-          {identity?.role === 'BAILLEUR' && (
+          {identity?.role === 'BAILLEUR' && !documentaryAccessForbidden && (
             <Link to="/quittances/nouveau">
               <Button icon={FilePlus2}>Préparer une quittance</Button>
             </Link>
@@ -250,7 +270,7 @@ export const QuittancesListPage = () => {
               type="button"
               icon={Download}
               onClick={exportCsv}
-              disabled={exporting || !identity}
+              disabled={exporting || !identity || documentaryAccessForbidden}
             >
               {exporting ? 'Export…' : 'Exporter CSV'}
             </Button>

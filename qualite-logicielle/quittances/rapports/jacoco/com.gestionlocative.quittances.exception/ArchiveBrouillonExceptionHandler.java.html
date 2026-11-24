@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArchiveBrouillonExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.exception</a> &gt; <span class="el_source">ArchiveBrouillonExceptionHandler.java</span></div><h1>ArchiveBrouillonExceptionHandler.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.exception;
+
+import com.gestionlocative.quittances.controller.ArchiveBrouillonController;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+
+@RestControllerAdvice(assignableTypes = ArchiveBrouillonController.class)
+<span class="fc" id="L18">public class ArchiveBrouillonExceptionHandler {</span>
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; statut(
+            ResponseStatusException exception
+    ) {
+<span class="fc" id="L24">        int statut = exception.getStatusCode().value();</span>
+
+<span class="fc" id="L26">        return erreur(</span>
+                statut,
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">                statut == 404 ? &quot;ARCHIVE_INTROUVABLE&quot; : &quot;ARCHIVAGE_REFUSE&quot;,</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">                exception.getReason() == null</span>
+<span class="nc" id="L30">                        ? &quot;L'opération ne peut pas être réalisée.&quot;</span>
+<span class="fc" id="L31">                        : exception.getReason()</span>
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; acces(
+            AccessDeniedException exception
+    ) {
+<span class="nc" id="L39">        return erreur(</span>
+                403,
+                &quot;ACCES_INTERDIT&quot;,
+                &quot;Vous n'êtes pas autorisé à accéder à cette archive.&quot;
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; identifiant(
+            MethodArgumentTypeMismatchException exception
+    ) {
+<span class="nc" id="L50">        return erreur(</span>
+                400,
+                &quot;IDENTIFIANT_INVALIDE&quot;,
+                &quot;Les identifiants doivent être des UUID valides.&quot;
+        );
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; doublon(
+            DuplicateKeyException exception
+    ) {
+<span class="nc" id="L61">        return erreur(</span>
+                409,
+                &quot;ARCHIVE_EN_CONFLIT&quot;,
+                &quot;L'enregistrement entre en conflit avec une archive existante.&quot;
+        );
+    }
+
+    @ExceptionHandler(StockagePdfException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; stockage(
+            StockagePdfException exception
+    ) {
+<span class="nc bnc" id="L72" title="All 3 branches missed.">        int statut = switch (exception.getCode()) {</span>
+<span class="nc" id="L73">            case &quot;PDF_ABSENT&quot; -&gt; 404;</span>
+<span class="nc" id="L74">            case &quot;INTEGRITE_PDF_INVALIDE&quot; -&gt; 409;</span>
+<span class="nc" id="L75">            default -&gt; 500;</span>
+        };
+
+<span class="nc" id="L78">        return erreur(</span>
+                statut,
+<span class="nc" id="L80">                exception.getCode(),</span>
+                &quot;Le fichier ne peut pas être enregistré ou téléchargé.&quot;
+        );
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; generation(IOException exception) {
+<span class="nc" id="L87">        return erreur(</span>
+                500,
+                &quot;GENERATION_PDF_IMPOSSIBLE&quot;,
+                &quot;Le PDF n'a pas pu être généré.&quot;
+        );
+    }
+
+    private ResponseEntity&lt;ProblemDetail&gt; erreur(
+            int statut,
+            String code,
+            String detail
+    ) {
+<span class="fc" id="L99">        ProblemDetail probleme = ProblemDetail.forStatusAndDetail(</span>
+<span class="fc" id="L100">                HttpStatus.valueOf(statut),</span>
+                detail
+        );
+
+<span class="fc" id="L104">        probleme.setProperty(&quot;code&quot;, code);</span>
+
+<span class="fc" id="L106">        return ResponseEntity.status(statut)</span>
+<span class="fc" id="L107">                .contentType(MediaType.APPLICATION_PROBLEM_JSON)</span>
+<span class="fc" id="L108">                .body(probleme);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -19,7 +19,22 @@ export const quittanceErrorMessage = (error) => {
     return 'Session refusée par Quittances (401). Le jeton commun n’est pas reconnu par ce service.';
   }
   if (error?.status === 403) {
-    return 'Accès refusé par Quittances (403). Votre identité ou vos droits ne permettent pas cette opération.';
+    const backendCode = error?.data?.code;
+    const backendText = [
+      error?.message,
+      error?.data?.message,
+      error?.data?.detail,
+      error?.data?.title,
+    ].filter(Boolean).join(' ').toLowerCase();
+    const rattachementIdentifie =
+      backendCode === 'RATTACHEMENT_REQUIS'
+      || backendCode === 'RATTACHEMENT_ABSENT'
+      || backendText.includes('rattachement');
+
+    if (rattachementIdentifie) {
+      return 'Compte connecté, mais l’accès documentaire est refusé (403) : aucun rattachement métier valide n’a été identifié.';
+    }
+    return 'Compte connecté, mais l’accès documentaire nécessaire est refusé (403). Votre compte ne dispose pas des droits ou du rattachement métier requis.';
   }
   if (error?.status === 409) {
     return `Conflit métier (409) : ${error.message || 'le document a changé.'}`;

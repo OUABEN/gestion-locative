@@ -141,6 +141,9 @@ const filterLocalBiens = (list, filters = {}) => {
   });
 };
 
+const isAuthorizationError = (error) =>
+  error?.response?.status === 401 || error?.response?.status === 403;
+
 export const biensApi = {
   // Liste filtrée des biens (PostgreSQL + synchronisation locale de secours)
   getAll: async (filters = {}) => {
@@ -156,7 +159,8 @@ export const biensApi = {
         writeLocalStore(data);
       }
       return data;
-    } catch {
+    } catch (error) {
+      if (isAuthorizationError(error)) throw error;
       const fallback = readLocalStore();
       return filterLocalBiens(fallback, filters);
     }
@@ -167,7 +171,8 @@ export const biensApi = {
     try {
       const response = await httpClient.get(`/${id}`);
       if (response.data) return response.data;
-    } catch {
+    } catch (error) {
+      if (isAuthorizationError(error)) throw error;
       // Repli sur le cache local synchronisé
     }
     const store = readLocalStore();
@@ -182,7 +187,8 @@ export const biensApi = {
     try {
       const response = await httpClient.get(`/${id}/disponibilite`);
       if (response.data) return response.data;
-    } catch {
+    } catch (error) {
+      if (isAuthorizationError(error)) throw error;
       // Repli sur le cache local
     }
     const store = readLocalStore();
@@ -203,7 +209,7 @@ export const biensApi = {
       writeLocalStore([created, ...store.filter((b) => b.id !== created.id)]);
       return created;
     } catch (err) {
-      if (err.response?.status === 400 || err.response?.status === 403) {
+      if (err.response?.status === 400 || isAuthorizationError(err)) {
         throw err;
       }
       const now = new Date().toISOString();
@@ -235,7 +241,7 @@ export const biensApi = {
       writeLocalStore(store.map((b) => (String(b.id) === String(id) ? updated : b)));
       return updated;
     } catch (err) {
-      if (err.response?.status === 400 || err.response?.status === 403) {
+      if (err.response?.status === 400 || isAuthorizationError(err)) {
         throw err;
       }
       const store = readLocalStore();
@@ -272,7 +278,7 @@ export const biensApi = {
       writeLocalStore(store.map((b) => (String(b.id) === String(id) ? updated : b)));
       return updated;
     } catch (err) {
-      if (err.response?.status === 409 || err.response?.status === 400) {
+      if (err.response?.status === 409 || err.response?.status === 400 || isAuthorizationError(err)) {
         throw err;
       }
       const store = readLocalStore();
@@ -303,7 +309,7 @@ export const biensApi = {
       writeLocalStore(store.filter((b) => String(b.id) !== String(id)));
       return response.data;
     } catch (err) {
-      if (err.response?.status === 409 || err.response?.status === 403) {
+      if (err.response?.status === 409 || isAuthorizationError(err)) {
         throw err;
       }
       const store = readLocalStore();

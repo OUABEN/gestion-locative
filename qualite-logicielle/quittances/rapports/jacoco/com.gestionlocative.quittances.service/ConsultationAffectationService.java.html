@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsultationAffectationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">ConsultationAffectationService.java</span></div><h1>ConsultationAffectationService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
+
+import com.gestionlocative.quittances.dto.AffectationQuittanceResponse;
+import com.gestionlocative.quittances.entity.PaiementAffectation;
+import com.gestionlocative.quittances.repository.PaiementAffectationRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ConsultationAffectationService {
+
+    private final ConsultationQuittanceService consultationQuittanceService;
+    private final PaiementAffectationRepository affectationRepository;
+
+    public ConsultationAffectationService(
+            ConsultationQuittanceService consultationQuittanceService,
+            PaiementAffectationRepository affectationRepository
+<span class="fc" id="L22">    ) {</span>
+<span class="fc" id="L23">        this.consultationQuittanceService = consultationQuittanceService;</span>
+<span class="fc" id="L24">        this.affectationRepository = affectationRepository;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Transactional(readOnly = true)
+    public List&lt;AffectationQuittanceResponse&gt; consulter(
+            Authentication authentication,
+            UUID quittanceId
+    ) {
+<span class="fc" id="L32">        consultationQuittanceService.consulter(</span>
+                authentication,
+                quittanceId
+        );
+
+<span class="fc" id="L37">        return affectationRepository</span>
+<span class="fc" id="L38">                .findByQuittance_IdOrderByAffectationExterneIdAsc(quittanceId)</span>
+<span class="fc" id="L39">                .stream()</span>
+<span class="fc" id="L40">                .map(this::convertir)</span>
+<span class="fc" id="L41">                .toList();</span>
+    }
+
+    private AffectationQuittanceResponse convertir(
+            PaiementAffectation affectation
+    ) {
+<span class="fc" id="L47">        return new AffectationQuittanceResponse(</span>
+<span class="fc" id="L48">                affectation.getAffectationExterneId(),</span>
+<span class="fc" id="L49">                affectation.getPaiementExterneId(),</span>
+<span class="fc" id="L50">                affectation.getPeriodeDebut(),</span>
+<span class="fc" id="L51">                affectation.getPeriodeFin(),</span>
+<span class="fc" id="L52">                affectation.getNature(),</span>
+<span class="fc" id="L53">                affectation.getMontant(),</span>
+<span class="fc" id="L54">                affectation.getDevise(),</span>
+<span class="fc" id="L55">                affectation.getStatutSource()</span>
+        );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

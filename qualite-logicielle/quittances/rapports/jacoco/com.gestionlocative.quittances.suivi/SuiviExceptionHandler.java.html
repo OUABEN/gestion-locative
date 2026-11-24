@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SuiviExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.suivi</a> &gt; <span class="el_source">SuiviExceptionHandler.java</span></div><h1>SuiviExceptionHandler.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.suivi;
+
+import com.gestionlocative.quittances.exception.ServiceExterneException;
+import org.springframework.http.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestControllerAdvice(assignableTypes = SuiviQuittanceController.class)
+<span class="fc" id="L11">public class SuiviExceptionHandler {</span>
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; statut(ResponseStatusException ex) {
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        return reponse(ex.getStatusCode(), &quot;REQUETE_INVALIDE&quot;, ex.getReason() == null ? &quot;Demande invalide.&quot; : ex.getReason());</span>
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; acces(AccessDeniedException ex) {
+<span class="nc" id="L18">        return reponse(HttpStatus.FORBIDDEN, &quot;ACCES_INTERDIT&quot;, &quot;Votre compte ne permet pas cette opération.&quot;);</span>
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; parametre(MethodArgumentTypeMismatchException ex) {
+<span class="nc" id="L22">        return reponse(HttpStatus.BAD_REQUEST, &quot;PARAMETRE_INVALIDE&quot;, &quot;Vérifiez les dates et l'identifiant du document.&quot;);</span>
+    }
+    @ExceptionHandler(ServiceExterneException.class)
+    public ResponseEntity&lt;ProblemDetail&gt; source(ServiceExterneException ex) {
+<span class="nc" id="L26">        return reponse(HttpStatus.SERVICE_UNAVAILABLE, &quot;SOURCE_METIER_INDISPONIBLE&quot;,</span>
+                &quot;Le contrôle n'a pas abouti : le service Paiements est indisponible ou sa réponse est incohérente. Aucun résultat de conformité n'est disponible.&quot;);
+    }
+    private ResponseEntity&lt;ProblemDetail&gt; reponse(HttpStatusCode statut, String code, String detail) {
+<span class="nc" id="L30">        var p = ProblemDetail.forStatusAndDetail(statut, detail); p.setProperty(&quot;code&quot;, code);</span>
+<span class="nc" id="L31">        return ResponseEntity.status(statut).cacheControl(CacheControl.noStore()).body(p);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

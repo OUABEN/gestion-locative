@@ -1,4 +1,5 @@
-﻿import { defineConfig } from 'vite';
+
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -13,6 +14,12 @@ export default defineConfig({
       '/api/baux': {
         target: 'http://127.0.0.1:8082',
         changeOrigin: true,
+      },
+      '/api/quittances': {
+        target: 'http://127.0.0.1:8084',
+        changeOrigin: true,
+        rewrite: (path) =>
+          path.replace(/^\/api\/quittances(?=\/|$)/, ''),
       },
       '/api': {
         target: 'http://127.0.0.1:8081',

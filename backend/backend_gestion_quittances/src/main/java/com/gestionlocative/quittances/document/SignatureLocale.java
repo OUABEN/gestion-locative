@@ -16,7 +16,34 @@ import java.time.Instant;
 /** Signature détachée de démonstration, sans certification d'identité. */
 public final class SignatureLocale {
     private SignatureLocale() {}
-    public record Preuve(byte[] signature, byte[] certificat, String sha256) {}
+    public record Preuve(byte[] signature, byte[] certificat, String sha256) {
+        @Override
+        public boolean equals(Object autre) {
+            if (this == autre) return true;
+            if (!(autre instanceof Preuve preuve)) return false;
+            return Arrays.equals(signature, preuve.signature)
+                    && Arrays.equals(certificat, preuve.certificat)
+                    && java.util.Objects.equals(sha256, preuve.sha256);
+        }
+
+        @Override
+        public int hashCode() {
+            int resultat = Arrays.hashCode(signature);
+            resultat = 31 * resultat + Arrays.hashCode(certificat);
+            resultat = 31 * resultat + java.util.Objects.hashCode(sha256);
+            return resultat;
+        }
+
+        @Override
+        public String toString() {
+            // Résumé du contenu des tableaux : jamais de signature/certificat brut dans les logs.
+            return "Preuve[tailleSignature=" + (signature == null ? 0 : signature.length)
+                    + ", hashSignatureJava=" + Arrays.hashCode(signature)
+                    + ", tailleCertificat=" + (certificat == null ? 0 : certificat.length)
+                    + ", hashCertificatJava=" + Arrays.hashCode(certificat)
+                    + ", sha256=" + sha256 + "]";
+        }
+    }
     public static Preuve signer(byte[] pdf, Path chemin, char[] motDePasse, Instant date)
             throws GeneralSecurityException, IOException {
         try {

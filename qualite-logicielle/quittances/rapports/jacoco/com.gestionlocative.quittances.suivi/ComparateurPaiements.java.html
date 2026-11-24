@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComparateurPaiements.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.suivi</a> &gt; <span class="el_source">ComparateurPaiements.java</span></div><h1>ComparateurPaiements.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.suivi;
+
+import com.gestionlocative.quittances.dto.AffectationQuittanceResponse;
+import com.gestionlocative.quittances.dto.SituationPeriode.Affectation;
+import com.gestionlocative.quittances.dto.SituationPeriode.Nature;
+import com.gestionlocative.quittances.dto.SituationPeriode.StatutPaiement;
+import com.gestionlocative.quittances.exception.ServiceExterneException;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.*;
+
+/** Compare les affectations conservées avec la réponse complète du service Paiements. */
+public final class ComparateurPaiements {
+    private ComparateurPaiements() {}
+<span class="fc" id="L15">    public record Ecart(String affectationId, String natureEcart, String detail,</span>
+                        AffectationQuittanceResponse avant, AffectationQuittanceResponse maintenant) {}
+    public static List&lt;Ecart&gt; comparer(String bailId, LocalDate debut, LocalDate fin,
+                                      List&lt;AffectationQuittanceResponse&gt; reference, List&lt;Affectation&gt; actuelles) {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (actuelles == null) throw incoherence();</span>
+<span class="fc" id="L20">        Map&lt;String, Affectation&gt; sources = new TreeMap&lt;&gt;();</span>
+<span class="fc" id="L21">        Map&lt;String, StatutPaiement&gt; statuts = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        for (var a : actuelles) {</span>
+<span class="fc" id="L23">            verifier(a, bailId, debut, fin);</span>
+<span class="fc" id="L24">            var precedent = sources.putIfAbsent(a.affectationId(), a);</span>
+<span class="fc bfc" id="L25" title="All 4 branches covered.">            if (precedent != null &amp;&amp; !equivalent(convertir(precedent), convertir(a))) throw incoherence();</span>
+<span class="fc" id="L26">            var statut = statuts.putIfAbsent(a.paiementId(), a.statut());</span>
+<span class="fc bfc" id="L27" title="All 4 branches covered.">            if (statut != null &amp;&amp; statut != a.statut()) throw incoherence();</span>
+<span class="fc" id="L28">        }</span>
+<span class="fc" id="L29">        List&lt;Ecart&gt; ecarts = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (var avant : reference) {</span>
+<span class="fc" id="L31">            var source = sources.remove(avant.affectationId());</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">            if (source == null) ecarts.add(new Ecart(avant.affectationId(), &quot;ABSENTE&quot;, &quot;Affectation absente de la réponse actuelle.&quot;, avant, null));</span>
+            else {
+<span class="fc" id="L34">                var apres = convertir(source);</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                if (!equivalent(avant, apres)) ecarts.add(new Ecart(avant.affectationId(), &quot;MODIFIEE&quot;,</span>
+                        &quot;Les données ou le statut de cette affectation ont changé.&quot;, avant, apres));
+            }
+<span class="fc" id="L38">        }</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for (var source : sources.values()) {</span>
+<span class="fc bfc" id="L40" title="All 4 branches covered.">            if (source.statut() == StatutPaiement.CONFIRME &amp;&amp; source.montant().signum() &gt; 0</span>
+<span class="pc bpc" id="L41" title="1 of 4 branches missed.">                    &amp;&amp; (source.nature() == Nature.LOYER || source.nature() == Nature.CHARGES)) {</span>
+<span class="fc" id="L42">                ecarts.add(new Ecart(source.affectationId(), &quot;AJOUTEE&quot;, &quot;Nouvelle affectation confirmée pour la période.&quot;, null, convertir(source)));</span>
+            }
+<span class="fc" id="L44">        }</span>
+<span class="fc" id="L45">        return List.copyOf(ecarts);</span>
+    }
+    private static boolean equivalent(AffectationQuittanceResponse a, AffectationQuittanceResponse b) {
+<span class="pc bpc" id="L48" title="1 of 4 branches missed.">        return Objects.equals(a.affectationId(), b.affectationId()) &amp;&amp; Objects.equals(a.paiementId(), b.paiementId())</span>
+<span class="pc bpc" id="L49" title="2 of 4 branches missed.">                &amp;&amp; Objects.equals(a.periodeDebut(), b.periodeDebut()) &amp;&amp; Objects.equals(a.periodeFin(), b.periodeFin())</span>
+<span class="fc bfc" id="L50" title="All 4 branches covered.">                &amp;&amp; Objects.equals(a.nature(), b.nature()) &amp;&amp; a.montant().compareTo(b.montant()) == 0</span>
+<span class="pc bpc" id="L51" title="1 of 4 branches missed.">                &amp;&amp; Objects.equals(a.devise(), b.devise()) &amp;&amp; Objects.equals(a.statutSourceALaPreparation(), b.statutSourceALaPreparation());</span>
+    }
+    private static AffectationQuittanceResponse convertir(Affectation a) {
+<span class="fc" id="L54">        return new AffectationQuittanceResponse(a.affectationId(), a.paiementId(), a.periodeDebut(), a.periodeFin(),</span>
+<span class="fc" id="L55">                a.nature().name(), a.montant(), a.devise(), a.statut().name());</span>
+    }
+    private static void verifier(Affectation a, String bailId, LocalDate debut, LocalDate fin) {
+<span class="pc bpc" id="L58" title="2 of 6 branches missed.">        if (a == null || !identifiant(a.affectationId()) || !identifiant(a.paiementId())</span>
+<span class="pc bpc" id="L59" title="1 of 6 branches missed.">                || !bailId.equals(a.bailId()) || !debut.equals(a.periodeDebut()) || !fin.equals(a.periodeFin())</span>
+<span class="pc bpc" id="L60" title="2 of 6 branches missed.">                || a.nature() == null || a.statut() == null || !&quot;MAD&quot;.equals(a.devise())</span>
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">                || a.montant() == null || a.montant().signum() &lt; 0) throw incoherence();</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        try { if (a.montant().setScale(2, RoundingMode.UNNECESSARY).precision() &gt; 12) throw incoherence(); }</span>
+<span class="fc" id="L63">        catch (ArithmeticException ex) { throw incoherence(); }</span>
+<span class="fc" id="L64">    }</span>
+<span class="pc bpc" id="L65" title="3 of 6 branches missed.">    private static boolean identifiant(String valeur) { return valeur != null &amp;&amp; !valeur.isBlank() &amp;&amp; valeur.length() &lt;= 100; }</span>
+    private static ServiceExterneException incoherence() {
+<span class="fc" id="L67">        return new ServiceExterneException(&quot;PAIEMENTS&quot;, &quot;REPONSE_INCOHERENTE&quot;,</span>
+                &quot;Les données Paiements ne permettent pas une comparaison fiable.&quot;, null);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

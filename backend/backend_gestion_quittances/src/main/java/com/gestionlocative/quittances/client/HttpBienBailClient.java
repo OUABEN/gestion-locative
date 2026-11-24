@@ -11,6 +11,13 @@ import org.springframework.web.client.RestClient;
 
 public class HttpBienBailClient implements BienBailClient {
 
+    public record FicheBienReelle(
+            String id,
+            String adresse,
+            String ville
+    ) {
+    }
+
     private final RestClient biensClient;
     private final String biensChemin;
     private final RestClient bauxClient;
@@ -32,22 +39,24 @@ public class HttpBienBailClient implements BienBailClient {
     public Bien consulterBien(String id) {
         LectureApiExterne.verifierIdentifiant(id);
 
-        Bien resultat = LectureApiExterne.lire(
+        FicheBienReelle resultat = LectureApiExterne.lire(
                 biensClient,
                 "BIENS",
                 biensChemin,
                 Map.of("id", id),
-                Bien.class
+                FicheBienReelle.class
         );
 
-        if (!"1".equals(resultat.versionContrat())
-                || !id.equals(resultat.id())
+        if (!id.equals(resultat.id())
                 || !LectureApiExterne.textePresent(resultat.adresse())
-                || !LectureApiExterne.identifiantValide(resultat.bailleurId())) {
+                || !LectureApiExterne.textePresent(resultat.ville())) {
             throw LectureApiExterne.incoherence("BIENS");
         }
 
-        return resultat;
+        String adresseComplete =
+                resultat.adresse().trim() + ", " + resultat.ville().trim();
+
+        return new Bien(null, resultat.id(), adresseComplete, null);
     }
 
     @Override

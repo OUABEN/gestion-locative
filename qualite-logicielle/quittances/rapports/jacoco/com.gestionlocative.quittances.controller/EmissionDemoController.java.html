@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmissionDemoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.controller</a> &gt; <span class="el_source">EmissionDemoController.java</span></div><h1>EmissionDemoController.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.controller;
+
+import com.gestionlocative.quittances.service.EmissionDemoService;
+import com.gestionlocative.quittances.service.EmissionDemoTransactions;
+import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/api/v1/quittances/{id}/emission-demo&quot;)
+public class EmissionDemoController {
+    private final EmissionDemoService service;
+<span class="fc" id="L14">    public EmissionDemoController(EmissionDemoService service) { this.service = service; }</span>
+<span class="nc" id="L15">    public record Demande(Boolean confirmation) {}</span>
+    @PostMapping
+    public EmissionDemoTransactions.Resultat emettre(Authentication auth, @PathVariable UUID id, @RequestBody Demande demande) {
+<span class="nc" id="L18">        return service.emettre(auth, id, demande.confirmation());</span>
+    }
+    @GetMapping(&quot;/verification&quot;)
+    public EmissionDemoService.Verification verifier(Authentication auth, @PathVariable UUID id) {
+<span class="nc" id="L22">        return service.verifierDocument(auth, id);</span>
+    }
+    @GetMapping(&quot;/pdf&quot;)
+    public ResponseEntity&lt;byte[]&gt; pdf(Authentication auth, @PathVariable UUID id) {
+<span class="nc" id="L26">        return fichier(service.telecharger(auth, id, false), &quot;application/pdf&quot;, &quot;demo-&quot; + id + &quot;.pdf&quot;);</span>
+    }
+    @GetMapping(&quot;/preuve&quot;)
+    public ResponseEntity&lt;byte[]&gt; preuve(Authentication auth, @PathVariable UUID id) {
+<span class="nc" id="L30">        return fichier(service.telecharger(auth, id, true), &quot;application/zip&quot;, &quot;preuve-demo-&quot; + id + &quot;.zip&quot;);</span>
+    }
+    private static ResponseEntity&lt;byte[]&gt; fichier(byte[] bytes, String type, String nom) {
+<span class="nc" id="L33">        return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, &quot;no-store&quot;)</span>
+<span class="nc" id="L34">            .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename(nom).build().toString())</span>
+<span class="nc" id="L35">            .contentType(MediaType.parseMediaType(type)).contentLength(bytes.length).body(bytes);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

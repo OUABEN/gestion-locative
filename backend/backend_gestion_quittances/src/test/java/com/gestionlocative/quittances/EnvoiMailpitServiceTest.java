@@ -27,6 +27,10 @@ class EnvoiMailpitServiceTest {
         assertThrows(ResponseStatusException.class,()->service(true,"INTEGRATION").envoyer(auth,doc,requete,true));
         verifyNoInteractions(transactions,documents);
     }
+    @Test void refuseEnModeCommun(){
+        assertThrows(ResponseStatusException.class,()->service(true,"COMMUN").envoyer(auth,doc,requete,true));
+        verifyNoInteractions(transactions,documents);
+    }
     @Test void repetitionNeRelitPasLePdfEtNeRenvoiePas(){
         var existant=new EnvoiMailpitTransactions.Envoi(envoi,"test@example.test","ENVOYE",Instant.now(),Instant.now(),null);
         when(transactions.reserver(auth,doc,requete)).thenReturn(new EnvoiMailpitTransactions.Reservation(existant,false));

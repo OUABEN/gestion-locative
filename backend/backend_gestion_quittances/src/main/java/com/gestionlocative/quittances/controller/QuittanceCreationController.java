@@ -2,12 +2,12 @@ package com.gestionlocative.quittances.controller;
 
 import com.gestionlocative.quittances.dto.CreationQuittanceRequest;
 import com.gestionlocative.quittances.dto.CreationQuittanceResponse;
+import com.gestionlocative.quittances.security.LecteurQuittances;
 import com.gestionlocative.quittances.service.PreparationQuittanceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,38 +52,15 @@ public class QuittanceCreationController {
     }
 
     private String identifierBailleur(Authentication authentication) {
-        if (!(authentication instanceof JwtAuthenticationToken jwt)
-                || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException(
-                    "Une identité JWT authentifiée est nécessaire."
-            );
-        }
-
-        boolean estBailleur = authentication.getAuthorities().stream()
-                .anyMatch(autorite ->
-                        "ROLE_BAILLEUR".equals(autorite.getAuthority())
-                );
-
-        if (!estBailleur) {
+        LecteurQuittances lecteur =
+                LecteurQuittances.depuis(authentication);
+        if (!lecteur.bailleur()) {
             throw new AccessDeniedException(
                     "La création est réservée au bailleur."
             );
         }
 
-        Object identifiant = jwt.getToken()
-                .getClaims()
-                .get("bailleur_id");
-
-        if (!(identifiant instanceof String bailleurId)
-                || bailleurId.isBlank()
-                || bailleurId.length() > 100
-                || !bailleurId.equals(bailleurId.trim())) {
-            throw new AccessDeniedException(
-                    "L'identifiant du bailleur est absent ou invalide."
-            );
-        }
-
-        return bailleurId;
+        return lecteur.identifiant();
     }
 
     private void verifierDemande(CreationQuittanceRequest demande) {

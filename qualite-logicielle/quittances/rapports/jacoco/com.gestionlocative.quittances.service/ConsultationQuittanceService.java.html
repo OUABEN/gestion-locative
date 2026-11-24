@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsultationQuittanceService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">service-quittances</a> &gt; <a href="index.source.html" class="el_package">com.gestionlocative.quittances.service</a> &gt; <span class="el_source">ConsultationQuittanceService.java</span></div><h1>ConsultationQuittanceService.java</h1><pre class="source lang-java linenums">package com.gestionlocative.quittances.service;
+
+import com.gestionlocative.quittances.dto.PageQuittancesResponse;
+import com.gestionlocative.quittances.dto.QuittanceConsultationResponse;
+import com.gestionlocative.quittances.entity.Quittance;
+import com.gestionlocative.quittances.mapper.QuittanceConsultationMapper;
+import com.gestionlocative.quittances.repository.QuittanceRepository;
+import com.gestionlocative.quittances.security.LecteurQuittances;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+@Service
+@Transactional(readOnly = true)
+public class ConsultationQuittanceService {
+
+<span class="fc" id="L26">    private static final Set&lt;String&gt; TRIS_AUTORISES = Set.of(</span>
+            &quot;creeLe&quot;,
+            &quot;periodeDebut&quot;,
+            &quot;numero&quot;,
+            &quot;totalPaye&quot;
+    );
+
+    private final QuittanceRepository repository;
+    private final QuittanceConsultationMapper mapper;
+
+    public ConsultationQuittanceService(
+            QuittanceRepository repository,
+            QuittanceConsultationMapper mapper
+<span class="fc" id="L39">    ) {</span>
+<span class="fc" id="L40">        this.repository = repository;</span>
+<span class="fc" id="L41">        this.mapper = mapper;</span>
+<span class="fc" id="L42">    }</span>
+
+    public PageQuittancesResponse lister(
+            Authentication authentication,
+            int page,
+            int taille,
+            String tri,
+            String sens
+    ) {
+<span class="fc" id="L51">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L52">                LecteurQuittances.depuis(authentication);</span>
+
+<span class="pc bpc" id="L54" title="2 of 6 branches missed.">        if (page &lt; 0 || taille &lt; 1 || taille &gt; 100) {</span>
+<span class="fc" id="L55">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;La page doit être positive ou nulle, &quot;
+                            + &quot;et la taille comprise entre 1 et 100.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L62" title="2 of 4 branches missed.">        if (tri == null || !TRIS_AUTORISES.contains(tri)) {</span>
+<span class="nc" id="L63">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;Tri autorisé : creeLe, periodeDebut, numero ou totalPaye.&quot;
+            );
+        }
+
+        Sort.Direction direction;
+
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (&quot;asc&quot;.equalsIgnoreCase(sens)) {</span>
+<span class="nc" id="L72">            direction = Sort.Direction.ASC;</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        } else if (&quot;desc&quot;.equalsIgnoreCase(sens)) {</span>
+<span class="fc" id="L74">            direction = Sort.Direction.DESC;</span>
+        } else {
+<span class="nc" id="L76">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;Le sens du tri doit être asc ou desc.&quot;
+            );
+        }
+
+<span class="fc" id="L82">        Sort ordre = Sort.by(direction, tri)</span>
+<span class="fc" id="L83">                .and(Sort.by(direction, &quot;id&quot;));</span>
+
+<span class="fc" id="L85">        PageRequest pagination = PageRequest.of(page, taille, ordre);</span>
+
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        Page&lt;Quittance&gt; resultat = lecteur.bailleur()</span>
+<span class="fc" id="L88">                ? repository.findByBailleurId(</span>
+<span class="fc" id="L89">                lecteur.identifiant(),</span>
+                pagination
+        )
+<span class="fc" id="L92">                : repository.findByLocataireIdAndEmisLeIsNotNull(</span>
+<span class="fc" id="L93">                lecteur.identifiant(),</span>
+                pagination
+        );
+
+<span class="fc" id="L97">        return new PageQuittancesResponse(</span>
+<span class="fc" id="L98">                resultat.getContent().stream()</span>
+<span class="fc" id="L99">                        .map(mapper::convertir)</span>
+<span class="fc" id="L100">                        .toList(),</span>
+<span class="fc" id="L101">                resultat.getNumber(),</span>
+<span class="fc" id="L102">                resultat.getSize(),</span>
+<span class="fc" id="L103">                resultat.getTotalElements(),</span>
+<span class="fc" id="L104">                resultat.getTotalPages()</span>
+        );
+    }
+
+    public PageQuittancesResponse lister(Authentication authentication, int page, int taille,
+            String tri, String sens, String bailId, String numero, String statut,
+            java.time.LocalDate debut, java.time.LocalDate fin) {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (String valeur : new String[]{bailId, numero, statut}) {</span>
+<span class="pc bpc" id="L112" title="3 of 4 branches missed.">            if (valeur != null &amp;&amp; valeur.length() &gt; 100) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Filtre trop long.&quot;);</span>
+        }
+<span class="pc bpc" id="L114" title="5 of 6 branches missed.">        if (debut != null &amp;&amp; fin != null &amp;&amp; fin.isBefore(debut)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Intervalle de dates invalide.&quot;);</span>
+<span class="fc" id="L115">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L116">                LecteurQuittances.depuis(authentication);</span>
+
+<span class="pc bpc" id="L118" title="3 of 6 branches missed.">        if (page &lt; 0 || taille &lt; 1 || taille &gt; 100) {</span>
+<span class="nc" id="L119">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;La page doit être positive ou nulle, &quot;
+                            + &quot;et la taille comprise entre 1 et 100.&quot;
+            );
+        }
+
+<span class="pc bpc" id="L126" title="2 of 4 branches missed.">        if (tri == null || !TRIS_AUTORISES.contains(tri)) {</span>
+<span class="nc" id="L127">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;Tri autorisé : creeLe, periodeDebut, numero ou totalPaye.&quot;
+            );
+        }
+
+        Sort.Direction direction;
+
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (&quot;asc&quot;.equalsIgnoreCase(sens)) {</span>
+<span class="nc" id="L136">            direction = Sort.Direction.ASC;</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        } else if (&quot;desc&quot;.equalsIgnoreCase(sens)) {</span>
+<span class="fc" id="L138">            direction = Sort.Direction.DESC;</span>
+        } else {
+<span class="nc" id="L140">            throw new ResponseStatusException(</span>
+                    HttpStatus.BAD_REQUEST,
+                    &quot;Le sens du tri doit être asc ou desc.&quot;
+            );
+        }
+
+<span class="fc" id="L146">        Sort ordre = Sort.by(direction, tri)</span>
+<span class="fc" id="L147">                .and(Sort.by(direction, &quot;id&quot;));</span>
+
+<span class="fc" id="L149">        PageRequest pagination = PageRequest.of(page, taille, ordre);</span>
+
+<span class="fc" id="L151">        org.springframework.data.jpa.domain.Specification&lt;Quittance&gt; filtre = (root, query, cb) -&gt; {</span>
+<span class="fc" id="L152">            java.util.List&lt;jakarta.persistence.criteria.Predicate&gt; conditions = new java.util.ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">            conditions.add(cb.equal(root.get(lecteur.bailleur() ? &quot;bailleurId&quot; : &quot;locataireId&quot;), lecteur.identifiant()));</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            if (!lecteur.bailleur()) conditions.add(cb.isNotNull(root.get(&quot;emisLe&quot;)));</span>
+<span class="pc bpc" id="L155" title="3 of 4 branches missed.">            if (bailId != null &amp;&amp; !bailId.isBlank()) conditions.add(cb.equal(root.get(&quot;bailId&quot;), bailId.trim()));</span>
+<span class="pc bpc" id="L156" title="3 of 4 branches missed.">            if (numero != null &amp;&amp; !numero.isBlank()) conditions.add(cb.equal(root.get(&quot;numero&quot;), numero.trim()));</span>
+<span class="pc bpc" id="L157" title="3 of 4 branches missed.">            if (statut != null &amp;&amp; !statut.isBlank()) {</span>
+                try {
+<span class="nc" id="L159">                    conditions.add(cb.equal(root.get(&quot;statut&quot;), com.gestionlocative.quittances.entity.StatutQuittance.valueOf(statut)));</span>
+<span class="nc" id="L160">                } catch (IllegalArgumentException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Statut inconnu.&quot;); }</span>
+            }
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if (debut != null) conditions.add(cb.greaterThanOrEqualTo(root.get(&quot;periodeFin&quot;), debut));</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (fin != null) conditions.add(cb.lessThanOrEqualTo(root.get(&quot;periodeDebut&quot;), fin));</span>
+<span class="fc" id="L164">            return cb.and(conditions.toArray(jakarta.persistence.criteria.Predicate[]::new));</span>
+        };
+<span class="fc" id="L166">        Page&lt;Quittance&gt; resultat = repository.findAll(filtre, pagination);</span>
+
+<span class="fc" id="L168">        return new PageQuittancesResponse(</span>
+<span class="fc" id="L169">                resultat.getContent().stream()</span>
+<span class="fc" id="L170">                        .map(mapper::convertir)</span>
+<span class="fc" id="L171">                        .toList(),</span>
+<span class="fc" id="L172">                resultat.getNumber(),</span>
+<span class="fc" id="L173">                resultat.getSize(),</span>
+<span class="fc" id="L174">                resultat.getTotalElements(),</span>
+<span class="fc" id="L175">                resultat.getTotalPages()</span>
+        );
+    }
+
+    public QuittanceConsultationResponse consulter(
+            Authentication authentication,
+            UUID id
+    ) {
+<span class="fc" id="L183">        LecteurQuittances lecteur =</span>
+<span class="fc" id="L184">                LecteurQuittances.depuis(authentication);</span>
+
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        Optional&lt;Quittance&gt; resultat = lecteur.bailleur()</span>
+<span class="fc" id="L187">                ? repository.findByIdAndBailleurId(</span>
+                id,
+<span class="fc" id="L189">                lecteur.identifiant()</span>
+        )
+<span class="fc" id="L191">                : repository.findByIdAndLocataireIdAndEmisLeIsNotNull(</span>
+                id,
+<span class="fc" id="L193">                lecteur.identifiant()</span>
+        );
+
+<span class="fc" id="L196">        Quittance quittance = resultat.orElseThrow(</span>
+<span class="fc" id="L197">                () -&gt; new ResponseStatusException(</span>
+                        HttpStatus.NOT_FOUND,
+                        &quot;Document introuvable.&quot;
+                )
+        );
+
+<span class="fc" id="L203">        return mapper.convertir(quittance);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
