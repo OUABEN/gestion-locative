@@ -14,7 +14,9 @@ export interface JwtPayload {
 }
 
 export interface Bien {
+  versionContrat?: string;
   id: string;
+  bailleurId?: string;
   adresse: string;
   ville: string;
   type: string;
@@ -35,6 +37,7 @@ export interface CreateBienDto {
   prixMensuel: number;
   charges?: number;
   imageUrl?: string | null;
+  bailleurId?: string;
 }
 
 export interface UpdateBienDto {
