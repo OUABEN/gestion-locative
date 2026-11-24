@@ -1,3 +1,154 @@
+# Bilan de qualité logicielle — Quittances
+
+<!-- BILAN-20261124 -->
+
+## 1. Périmètre
+
+Bilan établi le 24 novembre 2026 sur la branche
+`integration-reelle-quittances`.
+
+La validation concerne le microservice Quittances,
+son intégration progressive avec les autres modules
+et les contrôles de qualité logicielle réalisés.
+
+## 2. Tests automatisés
+
+| Indicateur | Résultat |
+|---|---:|
+| Tests exécutés | 306 |
+| Tests réussis | 306 |
+| Échecs | 0 |
+| Erreurs | 0 |
+| Ignorés | 0 |
+
+Résultat Maven : BUILD SUCCESS.
+
+## 3. Couverture JaCoCo
+
+| Indicateur | Couverts | Non couverts | Couverture |
+|---|---:|---:|---:|
+| Instructions | 12 047 | 2 622 | 82,13 % |
+| Branches | 1 154 | 681 | 62,89 % |
+| Lignes | 2 443 | 489 | 83,32 % |
+| Complexité | 725 | 703 | 50,77 % |
+| Méthodes | 418 | 86 | 82,94 % |
+| Classes | 147 | 7 | 95,45 % |
+
+Les mesures sont issues du rapport `jacoco.xml`.
+
+Les rapports HTML, XML et CSV sont disponibles dans
+`qualite-logicielle/quittances/rapports/jacoco/`.
+
+## 4. Checkstyle
+
+| Gravité | Nombre |
+|---|---:|
+| Erreurs | 0 |
+| Avertissements | 1 641 |
+
+Les avertissements restants constituent des axes
+d'amélioration du style et de la maintenabilité.
+
+Checkstyle est utilisé comme contrôle non bloquant.
+L'absence d'erreur ne signifie donc pas que toutes
+les règles de style sont respectées.
+
+## 5. SonarQube
+
+| Mesure | Résultat |
+|---|---|
+| Quality Gate | Passed |
+| Couverture du nouveau code | 80,6 % |
+| Duplication du nouveau code | 0,97 % |
+| Nouveaux problèmes | 0 |
+
+L'analyse porte sur le backend Java Quittances.
+Elle ne constitue pas un audit exhaustif de sécurité.
+
+## 6. Intégration continue
+
+| Vérification | Résultat sur d2154d5 |
+|---|---|
+| Backend Biens | Réussi |
+| Backend Locataires | Réussi |
+| Backend Loyers | Réussi |
+| Backend Quittances | Réussi |
+| Frontend | Réussi |
+| Validation Docker Compose | Réussie |
+| Snyk | Vérification réussie |
+
+Le succès de la vérification Snyk ne constitue pas
+une preuve de l'absence de vulnérabilités.
+
+La CI utilise Java 21 pour Quittances, une base dédiée,
+Flyway et une paire de clés RSA temporaire.
+
+## 7. Validation fonctionnelle et intégration
+
+Les essais locaux avec les services du groupe ont permis
+de vérifier un parcours de création de quittance pour
+un bailleur, après paiement intégral du loyer.
+
+Le document PDF a été généré, signé et vérifié
+cryptographiquement. Une modification du document
+a entraîné l'échec de la vérification de signature.
+
+Le certificat utilisé est un certificat de test
+autosigné. La signature n'est pas qualifiée.
+
+L'envoi de la quittance a été vérifié avec Mailpit.
+Il ne s'agit pas d'un envoi externe de production.
+
+Douze contrôles HTTP d'autorisation ont été effectués :
+
+- Bailleur : consultation, détail et PDF autorisés.
+- Gestionnaire : consultation, détail et PDF autorisés.
+- Locataire non rattaché : accès refusé.
+- Utilisateur sans JWT : accès refusé.
+
+## 8. Résultats historiques
+
+Les campagnes précédentes Postman/Newman, JMeter,
+Cypress, Snyk et ZAP sont conservées.
+
+Elles ne sont pas présentées comme des campagnes
+réexécutées sur la dernière version.
+
+## 9. Points restant à finaliser
+
+- Récupération de l'identité réelle du propriétaire
+  lors de la création d'une quittance par un gestionnaire.
+- Correspondance entre le compte utilisateur et
+  la fiche locataire du référentiel.
+- Validation positive de l'accès du locataire
+  à ses propres quittances émises.
+- Validation complète du scénario Docker collectif.
+- Revue des avertissements Checkstyle et risques
+  de sécurité antérieurement signalés.
+- Réactualisation des campagnes qualité concernées
+  avant la livraison définitive.
+- Validation collective et fusion de la Pull Request.
+
+## 10. Conclusion
+
+Les tests automatisés, les indicateurs de couverture
+et le Quality Gate confirment la validation technique
+du microservice sur le périmètre testé.
+
+Le code source et les rapports JaCoCo et Checkstyle
+sont publiés sur GitHub.
+
+L'intégration définitive reste conditionnée par
+la finalisation des contrats interservices et
+la validation collective du projet.
+
+---
+
+## Historique et documentation anterieure
+
+Les resultats ci-dessous sont conserves comme historique.
+Les mesures anciennes ne remplacent pas le bilan du 24 novembre 2026.
+
 # Synthèse provisoire — Qualité logicielle Quittances
 
 ## Périmètre et environnement

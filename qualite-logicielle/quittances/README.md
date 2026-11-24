@@ -1,5 +1,78 @@
 # Qualité logicielle — Quittances
 
+<!-- BILAN-20261124 -->
+
+## Bilan du 24 novembre 2026
+
+Branche : `integration-reelle-quittances`.
+
+Pull Request : https://github.com/OUABEN/gestion-locative/pull/24
+
+| Outil | Résultat |
+|---|---|
+| JUnit / Maven | 306 tests réussis sur 306 |
+| JaCoCo - Instructions | 82,13 % |
+| JaCoCo - Lignes | 83,32 % |
+| JaCoCo - Branches | 62,89 % |
+| Checkstyle | 0 erreur, 1 641 avertissements |
+| SonarQube Quality Gate | Passed |
+| SonarQube - Couverture du nouveau code | 80,6 % |
+| SonarQube - Duplication du nouveau code | 0,97 % |
+| GitHub Actions | 7 vérifications réussies sur 7 |
+
+La dernière campagne locale utilise Java 21, Maven et une base
+PostgreSQL 17 dédiée aux tests, exécutée sous Docker.
+
+Commande Maven utilisée depuis la racine du dépôt :
+
+```powershell
+mvn -f ".\backend\backend_gestion_quittances\pom.xml" clean verify checkstyle:checkstyle
+```
+
+Cette commande suppose que la base de tests isolée, les variables
+de connexion et les clés JWT locales sont correctement configurées.
+Elle ne doit jamais être dirigée vers une base de production.
+
+La procédure historique utilisant un cluster PostgreSQL temporaire
+reste documentée ci-dessous. Sa compatibilité avec les dernières
+modifications doit être vérifiée avant une nouvelle utilisation.
+
+## Intégration continue
+
+Le workflow `.github/workflows/ci.yml` utilise Java 21 pour
+Quittances et conserve Java 17 pour les autres services concernés.
+
+Pour Quittances, il crée une base PostgreSQL dédiée, active Flyway,
+génère des clés RSA temporaires et exécute `mvn -B test`.
+
+Les clés privées ne sont pas versionnées.
+
+La CI a été validée sur le commit `d2154d5`.
+
+## Consultation des rapports
+
+- [JUnit](rapports/junit/RESULTATS.md)
+- [JaCoCo](rapports/jacoco/index.html)
+- [Checkstyle](rapports/checkstyle/checkstyle.html)
+- [SonarQube](rapports/sonarqube/RESULTATS.md)
+- [Bilan général](rapports/bilan/RAPPORT_PROVISOIRE.md)
+
+Les rapports JaCoCo et Checkstyle actualisés ont été publiés
+dans le commit `c097e76`.
+
+Les campagnes Postman, JMeter, Cypress, Snyk et ZAP antérieures
+restent des résultats historiques. Elles ne constituent pas
+une nouvelle validation de la version du 24 novembre.
+
+---
+
+## Historique et documentation anterieure
+
+Les resultats ci-dessous sont conserves comme historique.
+Les mesures anciennes ne remplacent pas le bilan du 24 novembre 2026.
+
+# Qualité logicielle — Quittances
+
 Cette procédure exécute les tests JUnit du backend Quittances sous Java 21
 contre un cluster PostgreSQL temporaire et génère un rapport JaCoCo. Elle ne
 démarre pas Docker et ne réutilise aucune base existante.
