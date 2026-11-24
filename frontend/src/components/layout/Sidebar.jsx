@@ -160,6 +160,21 @@ export const Sidebar = ({ isOpen, onToggle, onCloseMobile }) => {
           </NavLink>
 
           <NavLink
+            to="/loyers/historique"
+            onClick={onCloseMobile}
+            className={({ isActive }) => `${styles.subNavItem} ${isActive ? styles.subActive : ''}`}
+          >
+            <span>Historique des paiements</span>
+          </NavLink>
+          <NavLink
+            to="/loyers/retards"
+            onClick={onCloseMobile}
+            className={({ isActive }) => `${styles.subNavItem} ${isActive ? styles.subActive : ''}`}
+          >
+            <span>Loyers en retard</span>
+          </NavLink>
+
+          <NavLink
             to="/quittances"
             onClick={onCloseMobile}
             className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}
