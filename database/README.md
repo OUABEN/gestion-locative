@@ -40,3 +40,14 @@ createdb -U postgres db_gestion_locative
 for f in database/init/*.sql; do psql -U postgres -d db_gestion_locative -f "$f"; done
 ```
 
+## Schéma Quittances : Flyway est la seule source de vérité
+
+Les tables du service Quittances sont créées uniquement par les migrations
+Flyway (backend/backend_gestion_quittances/src/main/resources/db/migration,
+V1 à V9). Il n'y a plus de script correspondant dans database/init.
+
+- Au démarrage, le service applique les migrations (baseline-on-migrate=true,
+  baseline-version=0), car la base contient déjà les tables des autres modules.
+- Hibernate reste en mode `validate` : il ne crée ni ne modifie le schéma.
+- Après un changement de schéma, repartir d'une base propre :
+  `docker compose down -v && docker compose up --build`.
