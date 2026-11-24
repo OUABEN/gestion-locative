@@ -48,7 +48,7 @@ service-quittances,com.gestionlocative.quittances.dto,CreationQuittanceRequest,0
 service-quittances,com.gestionlocative.quittances.client,BiensLocalClient.FicheBien,0,12,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,LocataireClient,0,5,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,HttpLocataireClient,4,195,6,28,1,48,5,17,0,5
-service-quittances,com.gestionlocative.quittances.client,BienBailCollectifClient,13,270,11,45,2,54,11,21,0,4
+service-quittances,com.gestionlocative.quittances.client,BienBailCollectifClient,5,338,9,61,1,71,9,31,0,5
 service-quittances,com.gestionlocative.quittances.client,PaiementsCollectifsClient,61,302,36,44,15,47,36,6,0,2
 service-quittances,com.gestionlocative.quittances.client,BienBailCollectifClient.FicheBail,0,24,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,HttpLocataireClient.FicheConnectee,0,6,0,0,0,1,0,1,0,1
@@ -58,6 +58,7 @@ service-quittances,com.gestionlocative.quittances.client,HttpBienBailClient,9,14
 service-quittances,com.gestionlocative.quittances.client,HttpBienBailClient.FicheBienReelle,0,15,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,PaiementsCollectifsClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,PaiementsCollectifsClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
+service-quittances,com.gestionlocative.quittances.client,BienBailCollectifClient.FicheUtilisateur,0,21,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,BiensLocalClient,3,68,3,5,1,14,3,4,0,3
 service-quittances,com.gestionlocative.quittances.client,BienBailCollectifClient.FicheBien,0,18,0,0,0,1,0,1,0,1
 service-quittances,com.gestionlocative.quittances.client,HttpLocataireClient.SyntheseAhmed,0,24,0,0,0,1,0,1,0,1
