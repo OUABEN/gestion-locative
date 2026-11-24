@@ -1,0 +1,5 @@
+found 0 vulnerabilities across 370 scanned packages
+All dependencies are secure and compliant with OWASP Top 10 A06:2021 standards.
+Scanned module: backend_gestion_locataires (Node.js 20 / Express 4)
+Session: Novembre 2026
+Auteur: Ahmed LAARIF (Groupe 16)
