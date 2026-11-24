@@ -1,8 +1,11 @@
 import { pool } from "../config/database";
 import { Bien, CreateBienDto, FilterBiensDto, StatutBien, UpdateBienDto } from "../models/bien.model";
 
+const DEFAULT_BAILLEUR_ID = "11111111-1111-1111-1111-111111111111";
+
 interface BienRow {
   id: string;
+  bailleur_id?: string | null;
   adresse: string;
   ville: string;
   type: string;
@@ -21,6 +24,9 @@ async function ensureImageColumn(): Promise<void> {
   if (imageColumnReady) return;
   try {
     await pool.query("ALTER TABLE biens ADD COLUMN IF NOT EXISTS image_url TEXT");
+    await pool.query(
+      `ALTER TABLE biens ADD COLUMN IF NOT EXISTS bailleur_id UUID NOT NULL DEFAULT '${DEFAULT_BAILLEUR_ID}'`
+    );
     imageColumnReady = true;
   } catch {
     // Ignore if table doesn't exist yet
@@ -30,7 +36,9 @@ async function ensureImageColumn(): Promise<void> {
 export class BienRepository {
   private mapRowToEntity(row: BienRow): Bien {
     return {
+      versionContrat: "1",
       id: row.id,
+      bailleurId: row.bailleur_id || DEFAULT_BAILLEUR_ID,
       adresse: row.adresse,
       ville: row.ville,
       type: row.type,
@@ -66,7 +74,7 @@ export class BienRepository {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
     const query = `
-      SELECT id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
+      SELECT id, bailleur_id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
       FROM biens
       ${whereClause}
       ORDER BY created_at DESC
@@ -79,7 +87,7 @@ export class BienRepository {
   async findById(id: string): Promise<Bien | null> {
     await ensureImageColumn();
     const query = `
-      SELECT id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
+      SELECT id, bailleur_id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
       FROM biens
       WHERE id = $1
     `;
@@ -94,10 +102,11 @@ export class BienRepository {
     await ensureImageColumn();
     const charges = dto.charges ?? 0;
     const imageUrl = dto.imageUrl ?? null;
+    const bailleurId = dto.bailleurId ?? DEFAULT_BAILLEUR_ID;
     const query = `
-      INSERT INTO biens (adresse, ville, type, surface, prix_mensuel, charges, statut, image_url)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
+      INSERT INTO biens (adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, bailleur_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, bailleur_id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
     `;
     const values = [
       dto.adresse,
@@ -108,6 +117,7 @@ export class BienRepository {
       charges,
       StatutBien.LIBRE,
       imageUrl,
+      bailleurId,
     ];
     const res = await pool.query<BienRow>(query, values);
     return this.mapRowToEntity(res.rows[0]);
@@ -130,7 +140,7 @@ export class BienRepository {
           image_url = COALESCE($8, image_url),
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $9
-      RETURNING id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
+      RETURNING id, bailleur_id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
     `;
     const values = [
       dto.adresse,
@@ -161,7 +171,7 @@ export class BienRepository {
       SET statut = $1,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $2 AND statut <> $1
-      RETURNING id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
+      RETURNING id, bailleur_id, adresse, ville, type, surface, prix_mensuel, charges, statut, image_url, created_at, updated_at
     `;
     const res = await pool.query<BienRow>(query, [nouveauStatut, id]);
     if (res.rows.length === 0) {

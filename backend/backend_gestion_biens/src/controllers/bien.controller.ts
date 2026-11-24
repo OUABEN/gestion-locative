@@ -40,6 +40,7 @@ export class BienController {
         prixMensuel: Number(req.body.prixMensuel),
         charges: req.body.charges !== undefined ? Number(req.body.charges) : 0,
         ...(req.body.imageUrl ? { imageUrl: String(req.body.imageUrl) } : {}),
+        ...(req.user?.sub ? { bailleurId: String(req.user.sub) } : {}),
       };
 
       const created = await this.bienService.createBien(dto);
