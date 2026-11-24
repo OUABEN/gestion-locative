@@ -229,4 +229,44 @@ export class AuthController {
       next(error);
     }
   };
+
+  getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await ensureUsersTableAndSeeds();
+
+      if (!req.user) {
+        throw new AppError("Utilisateur non authentifié.", 401);
+      }
+
+      const { id } = req.params;
+
+      if (req.user.role === "BAILLEUR" && req.user.sub !== id) {
+        throw new AppError(
+          "Accès refusé : un bailleur ne peut consulter que sa propre identité.",
+          403
+        );
+      }
+
+      const result = await pool.query<Pick<UserRow, "id" | "nom" | "prenom" | "role">>(
+        "SELECT id, nom, prenom, role FROM users WHERE id = $1",
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        throw new AppError(`Utilisateur introuvable avec l'identifiant : ${id}`, 404);
+      }
+
+      const user = result.rows[0];
+      res.status(200).json({
+        versionContrat: "1",
+        id: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        nomComplet: `${user.prenom} ${user.nom}`.trim(),
+        role: user.role,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
