@@ -2,54 +2,46 @@ package com.gestionlocative.loyers.client;
 
 import com.gestionlocative.loyers.config.LoyersProperties;
 import com.gestionlocative.loyers.exception.ServiceIndisponibleException;
-import com.gestionlocative.loyers.security.JwtService;
-import java.util.List;
+import com.gestionlocative.loyers.security.CurrentUser;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Component
 public class LocatairesRestClient implements LocatairesClient {
 
     private final RestClient restClient;
-    private final JwtService jwtService;
 
-    public LocatairesRestClient(LoyersProperties props, JwtService jwtService, RestClient.Builder builder) {
+    public LocatairesRestClient(LoyersProperties props, RestClient.Builder builder) {
         this.restClient = builder.baseUrl(props.services().locatairesUrl()).build();
-        this.jwtService = jwtService;
     }
 
     @Override
-    public Optional<BailDto> trouverBail(UUID bailId) {
+    public Optional<LocataireDto> trouver(UUID locataireId) {
+        return lire("/api/locataires/" + locataireId);
+    }
+
+    @Override
+    public Optional<LocataireDto> moi() {
+        return lire("/api/locataires/me");
+    }
+
+    private Optional<LocataireDto> lire(String chemin) {
         try {
-            BailDto bail = restClient.get()
-                    .uri("/api/baux/{id}", bailId)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.genererTokenService())
+            return Optional.ofNullable(restClient.get()
+                    .uri(chemin)
+                    .header(HttpHeaders.AUTHORIZATION, CurrentUser.bearerHeader())
                     .retrieve()
-                    .body(BailDto.class);
-            return Optional.ofNullable(bail);
+                    .body(LocataireDto.class));
         } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();
-        } catch (RestClientException e) {
-            throw new ServiceIndisponibleException("Service Locataires indisponible", e);
-        }
-    }
-
-    @Override
-    public List<BailDto> listerBauxActifs() {
-        try {
-            List<BailDto> baux = restClient.get()
-                    .uri(uri -> uri.path("/api/baux").queryParam("statut", "ACTIF").build())
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.genererTokenService())
-                    .retrieve()
-                    .body(new ParameterizedTypeReference<List<BailDto>>() {
-                    });
-            return baux == null ? List.of() : baux;
+        } catch (RestClientResponseException e) {
+            throw new ServiceIndisponibleException("Le service Locataires a répondu " + e.getStatusCode().value(), e);
         } catch (RestClientException e) {
             throw new ServiceIndisponibleException("Service Locataires indisponible", e);
         }

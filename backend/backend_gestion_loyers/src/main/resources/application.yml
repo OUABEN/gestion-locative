@@ -24,6 +24,13 @@ management:
       exposure:
         include: health
 
+# Documentation de l'API
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 # Règles métier des échéances (à confirmer avec l'équipe)
 loyers:
   jour-echeance: 5          # le loyer du mois M est dû le 5 du mois M

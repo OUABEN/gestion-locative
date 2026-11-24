@@ -1,8 +1,9 @@
 package com.gestionlocative.loyers;
 
-import com.gestionlocative.loyers.client.BailDto;
 import com.gestionlocative.loyers.config.LoyersProperties;
+import com.gestionlocative.loyers.model.Bail;
 import com.gestionlocative.loyers.model.Echeance;
+import com.gestionlocative.loyers.model.StatutBail;
 import com.gestionlocative.loyers.model.StatutEcheance;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -32,8 +33,10 @@ public final class TestFixtures {
         return e;
     }
 
-    public static BailDto bail(String statut, LocalDate debut, LocalDate fin, String loyer) {
-        return new BailDto(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                debut, fin, new BigDecimal(loyer), BigDecimal.ZERO, statut);
+    public static Bail bail(String statut, LocalDate debut, LocalDate fin, String loyer) {
+        Bail b = new Bail(UUID.randomUUID(), UUID.randomUUID(), debut, fin, new BigDecimal(loyer), BigDecimal.ZERO);
+        b.setId(UUID.randomUUID());
+        b.setStatut(StatutBail.valueOf(statut));
+        return b;
     }
 }
