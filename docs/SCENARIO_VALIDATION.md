@@ -89,3 +89,30 @@ Dans le code consulté, `BailService.creer` appelle d’abord Locataires, puis B
 
 Pour isoler l’appel fautif, vérifier la valeur effective de `BIENS_SERVICE_URL` dans le processus/conteneur Loyers (depuis Docker, une URL interne telle que `http://biens:8081` est attendue; depuis l’hôte, `http://localhost:8081`), puis relever les logs Loyers autour de la requête et tester les deux appels sortants de création depuis le même contexte réseau : disponibilité et `PATCH /api/biens/{id}/statut` avec le même jeton. L’appel PATCH intervient après l’enregistrement dans la transaction; vérifier également l’état du bail après le 503 avant toute nouvelle tentative. Ces vérifications et la cause racine sont **NON TESTÉES / NON CONFIRMÉES** à ce stade. La création du bail n’est pas validée et les étapes qui en dépendent restent **NON TESTÉES**.
 
+
+## Relevé des résultats Docker communiqué
+
+Ce relevé remplace les résultats précédents du document pour l’état du scénario. Tout résultat non indiqué ci-dessous reste **NON TESTÉ**. Le scénario Docker s’est arrêté à la création du bail. Le scénario local est **NON TESTÉ**.
+
+| Étape | Résultat Docker | Résultat local |
+|---|---|---|
+| Connexion | 200 OK | NON TESTÉ |
+| Sans jeton | 401 OK | NON TESTÉ |
+| Création bien | 201 OK | NON TESTÉ |
+| Création locataire | 201 OK | NON TESTÉ |
+| CIN en double | 409 OK | NON TESTÉ |
+| Création bail | 503 KO — « Service Biens indisponible »; Biens joignable depuis le conteneur Loyers, cause non identifiée | NON TESTÉ |
+| Échéance | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| Paiement | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| Quittance | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| PDF | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| E-mail | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| Téléchargement | NON TESTÉ (scénario arrêté au bail) | NON TESTÉ |
+| Refus d’un second bail actif sur le bien | NON TESTÉ | NON TESTÉ |
+
+## Problèmes constatés
+
+1. **Quittances — Flyway / base / init :** conflit corrigé (PR ayoub-docker).
+2. **Quittances — clients HTTP :** démarrent en mode SIMULATION, refusé en Docker; variables `*_MODE` et `*_CHEMIN` à définir par Akram.
+3. **Loyers — création du bail :** HTTP 503 (« Service Biens indisponible »); Biens est joignable depuis le conteneur Loyers, cause non identifiée.
+4. **Quittances — chemins par défaut :** `/api/v1/paiements/affectations` ne correspond pas aux routes de Loyers.
