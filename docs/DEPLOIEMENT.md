@@ -46,9 +46,10 @@ openssl rand -base64 48   # génère un JWT_SECRET robuste
 |---|---|
 | Construire et démarrer toute la stack | `docker compose up --build` |
 | Idem, en arrière-plan | `docker compose up --build -d` |
+| Construire et démarrer les services sans le frontend | `docker compose up --build -d db biens locataires loyers quittances mailpit` |
 | Démarrer uniquement la base | `docker compose up -d db` |
 | Suivre les logs (tous services) | `docker compose logs -f` |
-| Suivre les logs d'un service | `docker compose logs -f backend_gestion_biens` |
+| Suivre les logs du service Biens | `docker compose logs -f biens` |
 | État des conteneurs | `docker compose ps` |
 | Arrêter (données conservées) | `docker compose down` |
 | Arrêter **et supprimer les données** (volume `pgdata`) | `docker compose down -v` |
@@ -62,16 +63,16 @@ openssl rand -base64 48   # génère un JWT_SECRET robuste
 
 Les conteneurs communiquent **par nom de service** sur le réseau `gl_network` — jamais via `localhost`.
 
+Les noms à utiliser dans les commandes `docker compose` sont les clés déclarées sous `services:` dans le Compose principal : `db`, `mailpit`, `biens`, `locataires`, `loyers`, `quittances` et `frontend`. Les noms de dossiers ou d’images `backend_gestion_*` ne sont pas des noms de service Compose. Ainsi, `docker compose up ... gestion-biens` échoue avec `no such service`; utilisez `biens`.
+
 | Service Docker | Technologie | Port hôte → conteneur | URL interne (réseau `gl_network`) |
 |---|---|---|---|
 | `db` | PostgreSQL 16 (alpine) | **5433** → 5432 | `db:5432` |
-| `backend_gestion_biens` | Node.js 20 + TypeScript | 8081 → 8081 | `http://backend_gestion_biens:8081` |
-| `backend_gestion_locataires` | Node.js 20 + TypeScript | 8082 → 8082 | `http://backend_gestion_locataires:8082` |
-| `backend_gestion_loyers` | Spring Boot (Java 21) | 8083 → 8083 | `http://backend-gestion-loyers:8083` (alias) |
-| `backend_gestion_quittances` | Spring Boot (Java 21) | 8084 → 8084 | `http://backend-gestion-quittances:8084` (alias) |
+| `biens` | Node.js 20 + TypeScript | 8081 → 8081 | `http://biens:8081` |
+| `locataires` | Spring Boot | 8082 → 8082 | `http://locataires:8082` |
+| `loyers` | Spring Boot | 8083 → 8083 | `http://loyers:8083` |
+| `quittances` | Spring Boot | 8084 → 8084 | `http://quittances:8084` |
 | `frontend` | React + nginx | **3000** → 80 | `http://frontend:80` |
-
-> **Pourquoi des alias avec tirets pour loyers / quittances ?** Tomcat (embarqué dans Spring Boot) peut rejeter un en-tête `Host` contenant `_`. Les services Spring sont donc joignables via `backend-gestion-loyers` et `backend-gestion-quittances` (le nom avec `_` reste aussi résolu).
 
 Le port PostgreSQL hôte est **5433** pour éviter le conflit avec une instance locale sur 5432 (modifiable via `POSTGRES_HOST_PORT`).
 
@@ -81,10 +82,10 @@ nginx sert l'application React (fallback SPA vers `index.html`) et relaie les ap
 
 | URL navigateur | Cible interne |
 |---|---|
-| `http://localhost:3000/api/biens/...` | `backend_gestion_biens:8081/...` |
-| `http://localhost:3000/api/locataires/...` | `backend_gestion_locataires:8082/...` |
-| `http://localhost:3000/api/loyers/...` | `backend-gestion-loyers:8083/...` |
-| `http://localhost:3000/api/quittances/...` | `backend-gestion-quittances:8084/...` |
+| `http://localhost:3000/api/biens/...` | `biens:8081/...` |
+| `http://localhost:3000/api/locataires/...` | `locataires:8082/...` |
+| `http://localhost:3000/api/loyers/...` | `loyers:8083/...` |
+| `http://localhost:3000/api/quittances/...` | `quittances:8084/...` |
 
 Le préfixe `/api/<service>` est retiré avant transmission. L'en-tête `Authorization` (JWT) est transmis tel quel.
 
@@ -119,10 +120,10 @@ Le préfixe `/api/<service>` est retiré avant transmission. L'en-tête `Authori
 | `DATABASE_URL` | tous | `postgresql://USER:PASSWORD@db:5432/db_gestion_locative` |
 | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | Spring Boot | `jdbc:postgresql://db:5432/db_gestion_locative` |
 | `JWT_SECRET`, `JWT_EXPIRES_IN` | tous | valeurs du `.env` |
-| `BIENS_SERVICE_URL` | tous (+ frontend) | `http://backend_gestion_biens:8081` |
-| `LOCATAIRES_SERVICE_URL` | tous (+ frontend) | `http://backend_gestion_locataires:8082` |
-| `LOYERS_SERVICE_URL` | tous (+ frontend) | `http://backend-gestion-loyers:8083` |
-| `QUITTANCES_SERVICE_URL` | tous (+ frontend) | `http://backend-gestion-quittances:8084` |
+| `BIENS_SERVICE_URL` | tous (+ frontend) | `http://biens:8081` |
+| `LOCATAIRES_SERVICE_URL` | tous (+ frontend) | `http://locataires:8082` |
+| `LOYERS_SERVICE_URL` | tous (+ frontend) | `http://loyers:8083` |
+| `QUITTANCES_SERVICE_URL` | tous (+ frontend) | `http://quittances:8084` |
 
 Côté React, les URLs d'API sont exposées au build sous `VITE_API_*_URL` **et** `REACT_APP_API_*_URL` (compatible Vite et Create React App).
 
@@ -261,3 +262,29 @@ Get-ChildItem database/init/0*.sql | ForEach-Object {
 
 nginx ne joint pas le backend : vérifier que le service tourne (`docker compose ps`) et écoute bien sur le port attendu (`PORT` / `SERVER_PORT`).
 
+### HTTP 503 « Service Biens indisponible » lors de la création d’un bail
+
+Loyers contacte Biens deux fois pendant `POST /api/baux` : pour lire la disponibilité, puis pour passer le bien à `OCCUPE`. En Docker, contrôler l’URL effective `BIENS_SERVICE_URL` du conteneur Loyers; elle doit utiliser le nom du service sur le réseau Compose, par exemple `http://biens:8081`. Depuis un processus lancé directement sur l’hôte, `http://localhost:8081` convient. Une réponse HTTP d’erreur de Biens est normalement signalée par le client Loyers avec son statut; le détail exact « Service Biens indisponible » indique que le client a rencontré une exception de transport/traitement et ne suffit pas à déterminer la cause.
+
+Les GET directs vers Biens et Locataires rapportés à Ayoub ont répondu 200, alors que `POST /api/baux` a répondu 503 avec ce détail. Ces contrôles directs ne valident pas le routage depuis le processus Loyers, son URL effective ni les appels PATCH de changement de statut. Résultat communiqué, non reproduit indépendamment. Examiner les logs de Loyers et tester depuis son contexte réseau les appels Biens nécessaires, avec le même jeton. Vérifier l’état du bail avant de retenter la création. La cause racine reste **NON CONFIRMÉE**; voir le relevé détaillé dans `SCENARIO_VALIDATION.md`.
+
+## Notes actuelles sur la stack collective
+
+Le Compose actuel publie le frontend sur le port 3000, PostgreSQL sur 5433 côté hôte et Mailpit sur 8025. Consultez `SCENARIO_VALIDATION.md` pour les limites d’intégration observées.
+
+### Incident Flyway Quittances : vérifications avant toute action
+
+Le développeur Quittances indique que ses neuf migrations fonctionnent sur une base dédiée initialement vide et qu’il soupçonne un conflit avec l’initialisation Docker collective. L’inspection des fichiers confirme un chevauchement d’objets : `database/init/03_quittances.sql` définit plusieurs tables et la séquence également créées par V1 à V8, et `database/init/07_quittances_emission_reelle.sql` définit la table créée par V9. Cette inspection statique ne confirme pas à elle seule l’état de la base ni la cause du redémarrage.
+
+Pour l’incident signalé (« Found non-empty schema(s) "public" but no schema history table »), **ne pas baseliner, supprimer le volume ou réinitialiser la base avant d’avoir vérifié les objets et les scripts appliqués**. Ces actions n’ont pas été effectuées dans le cadre de ce guide. La vérification runtime est **NON TESTÉE**. Relever d’abord les objets existants et l’historique Flyway avec des requêtes de lecture seule, par exemple :
+
+```sql
+SELECT schemaname, tablename
+FROM pg_catalog.pg_tables
+WHERE schemaname = 'public'
+ORDER BY tablename;
+
+SELECT to_regclass('public.flyway_schema_history') AS flyway_history_table;
+```
+
+Si `flyway_schema_history` existe, consulter ensuite son contenu avant de décider d’une procédure. Ces requêtes n’altèrent pas les données.
