@@ -336,6 +336,28 @@ public class Quittance {
         documentPrecedentId = precedentId;
         motifRemplacement = motif.strip();
     }
+    public void emettreReelle(String reference, Instant date, String empreinte) {
+        if (statut != StatutQuittance.EN_ATTENTE_SIGNATURE
+                || statutSignature != StatutSignature.EN_ATTENTE
+                || emisLe != null
+                || typeDocument != TypeDocument.QUITTANCE_INTEGRALE
+                || loyerDu.compareTo(loyerPaye) != 0
+                || chargesDues.compareTo(chargesPayees) != 0) {
+            throw new IllegalStateException("Le document ne peut pas être émis.");
+        }
+        if (reference == null || !reference.matches("QT-[0-9]{4}-[0-9]+")
+                || date == null || empreinte == null
+                || !empreinte.matches("[0-9a-f]{64}")) {
+            throw new IllegalArgumentException("Preuve d'émission incorrecte.");
+        }
+        numero = reference;
+        emisLe = date;
+        pdfReference = "db-reelle:" + id;
+        pdfSha256 = empreinte;
+        statutSignature = StatutSignature.SIGNE_VERIFIE;
+        statut = StatutQuittance.EMIS;
+    }
+
     public void emettreDemonstration(String reference, Instant date, String empreinte) {
         if (statut != StatutQuittance.EN_ATTENTE_SIGNATURE
                 || statutSignature != StatutSignature.EN_ATTENTE || emisLe != null) {

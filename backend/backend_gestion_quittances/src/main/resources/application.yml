@@ -43,6 +43,12 @@ server:
     include-stacktrace: never
 
 quittances:
+  emission-reelle:
+    active: ${QUITTANCES_EMISSION_REELLE_ACTIVE:false}
+    pkcs12-path: ${QUITTANCES_SIGNATURE_PATH:}
+    pkcs12-alias: ${QUITTANCES_SIGNATURE_ALIAS:}
+    pkcs12-password: ${QUITTANCES_SIGNATURE_PASSWORD:}
+    certificat-sha256: ${QUITTANCES_SIGNATURE_CERT_SHA256:}
   stockage:
     repertoire: ${QUITTANCES_STORAGE_PATH:./storage/quittances}
     taille-max-octets: 20971520
