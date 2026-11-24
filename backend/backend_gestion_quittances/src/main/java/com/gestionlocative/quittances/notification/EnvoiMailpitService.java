@@ -33,7 +33,7 @@ public class EnvoiMailpitService {
     }
     public EnvoiMailpitTransactions.Envoi envoyer(Authentication auth, UUID document,UUID requete,Boolean confirmation) {
         if(requete==null || !Boolean.TRUE.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Confirmez l'envoi et fournissez son identifiant de requête.");
-        if(!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !"LOCAL".equals(mode) || port<1024 || port>65535)
+        if(!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !("LOCAL".equals(mode) || (dockerDemo && "COMMUN".equals(mode))) || port<1024 || port>65535)
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Activez Mailpit dans la configuration locale.");
         var reservation=transactions.reserver(auth,document,requete);
         if(!reservation.nouveau())return reservation.envoi(); // même requête : jamais de deuxième SMTP

@@ -111,6 +111,17 @@ export const quittancesApi = {
       `${documentPath(id)}/archives-brouillon/${encodeURIComponent(archiveId)}/pdf`,
       { responseType: 'blob' }
     ),
+  issueReal: (token, id) =>
+    request(token, `${documentPath(id)}/emission`, {
+      method: 'POST',
+      body: { confirmation: true },
+    }),
+  verifyReal: (token, id) =>
+    request(token, `${documentPath(id)}/emission/verification`),
+  downloadRealPdf: (token, id) =>
+    request(token, `${documentPath(id)}/emission/pdf`, { responseType: 'blob' }),
+  downloadRealProof: (token, id) =>
+    request(token, `${documentPath(id)}/emission/preuve`, { responseType: 'blob' }),
   issueDemo: (token, id) =>
     request(token, `${documentPath(id)}/emission-demo`, {
       method: 'POST',

@@ -2,6 +2,7 @@ package com.gestionlocative.quittances.notification;
 
 import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.security.LecteurQuittances;
+import com.gestionlocative.quittances.security.IdentiteAudit;
 import org.springframework.stereotype.Service;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -18,8 +19,9 @@ import java.util.*;
 public class EnvoiMailpitTransactions {
     private final QuittanceRepository documents;
     private final JdbcTemplate jdbc;
-    public EnvoiMailpitTransactions(QuittanceRepository documents, JdbcTemplate jdbc) {
-        this.documents=documents;this.jdbc=jdbc;
+    private final IdentiteAudit identiteAudit;
+    public EnvoiMailpitTransactions(QuittanceRepository documents, JdbcTemplate jdbc, IdentiteAudit identiteAudit) {
+        this.documents=documents;this.jdbc=jdbc; this.identiteAudit = identiteAudit;
     }
     public record Envoi(UUID id, String destinataire, String statut, Instant creeLe, Instant termineLe, String erreurCode) {}
     public record Reservation(Envoi envoi, boolean nouveau) {}
@@ -69,10 +71,8 @@ public class EnvoiMailpitTransactions {
         return documents.trouverPourModification(id,lecteur.identifiant()).orElseThrow(()->erreur(404,"Document introuvable."));
     }
     private void audit(Authentication auth,UUID doc,String operation,String resultat) {
-        var jwt=(JwtAuthenticationToken)auth;
-        String acteur=jwt.getToken().getSubject(),issuer=jwt.getToken().getClaimAsString("iss");
-        if(acteur==null || acteur.isBlank() || acteur.length()>200 || issuer==null || issuer.isBlank() || issuer.length()>500)
-            throw new AccessDeniedException("Identité insuffisante pour l'audit.");
+        var identite = identiteAudit.depuis(auth);
+        String acteur = identite.sujet(), issuer = identite.emetteurIdentite();
         jdbc.update("INSERT INTO quittance_audit(id,quittance_id,acteur,emetteur_identite,operation,resultat,horodatage) VALUES (?,?,?,?,?,?,?)",UUID.randomUUID(),doc,acteur,issuer,operation,resultat,Timestamp.from(Instant.now()));
     }
     private static ResponseStatusException erreur(int code,String message) {return new ResponseStatusException(HttpStatus.valueOf(code),message);}

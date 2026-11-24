@@ -20,6 +20,8 @@ import java.util.zip.*;
 public class EmissionDemoService {
     @Value("${DARLOC_DOCKER_DEMO:false}")
     private boolean dockerDemo;
+    @Value("${DARLOC_SIGNATURE_DEMO_COMMUN:false}")
+    private boolean demoCommun;
 
     private final EmissionDemoTransactions transactions;
     private final EmissionDemoPdfService pdf;
@@ -38,7 +40,7 @@ public class EmissionDemoService {
     }
     public EmissionDemoTransactions.Resultat emettre(Authentication auth, UUID id, Boolean confirmation) {
         if (!Boolean.TRUE.equals(confirmation)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La confirmation est obligatoire.");
-        if (!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !"LOCAL".equals(jwtMode) || motDePasse.isBlank())
+        if (!actif || !ReseauDemo.ecouteAutorisee(adresse, dockerDemo) || !("LOCAL".equals(jwtMode) || (dockerDemo && demoCommun && "COMMUN".equals(jwtMode))) || motDePasse.isBlank())
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Signature de démonstration non activée sur ce serveur local.");
         var source = transactions.charger(auth, id);
         // Appel distant hors transaction. Tout changement impose une nouvelle préparation.

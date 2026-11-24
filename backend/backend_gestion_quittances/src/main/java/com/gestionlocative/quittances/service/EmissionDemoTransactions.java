@@ -5,6 +5,7 @@ import com.gestionlocative.quittances.dto.DonneesApercu;
 import com.gestionlocative.quittances.entity.Quittance;
 import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.security.LecteurQuittances;
+import com.gestionlocative.quittances.security.IdentiteAudit;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,10 +26,11 @@ public class EmissionDemoTransactions {
     private final ConsultationQuittanceService consultation;
     private final QuittanceRepository documents;
     private final JdbcTemplate jdbc;
+    private final IdentiteAudit identiteAudit;
     public EmissionDemoTransactions(PreparationApercuService preparation,
-            ConsultationQuittanceService consultation, QuittanceRepository documents, JdbcTemplate jdbc) {
+            ConsultationQuittanceService consultation, QuittanceRepository documents, JdbcTemplate jdbc, IdentiteAudit identiteAudit) {
         this.preparation = preparation; this.consultation = consultation;
-        this.documents = documents; this.jdbc = jdbc;
+        this.documents = documents; this.jdbc = jdbc; this.identiteAudit = identiteAudit;
     }
     public record Source(DonneesApercu donnees, long version, String numero, Instant date) {}
     public record Resultat(UUID id, String numero, String statut, String statutSignature,
@@ -108,10 +110,9 @@ public class EmissionDemoTransactions {
         audit(auth, id, operation, q.statut(), q.statut());
     }
     private void audit(Authentication auth, UUID id, String operation, String avant, String apres) {
-        var jwt = (JwtAuthenticationToken) auth;
-        String sujet = jwt.getToken().getSubject(), issuer = jwt.getToken().getClaimAsString("iss");
-        if (sujet == null || sujet.isBlank() || sujet.length() > 200 || issuer == null || issuer.isBlank() || issuer.length() > 500)
-            throw new AccessDeniedException("Identité insuffisante pour l'audit.");
+        var identite = identiteAudit.depuis(auth);
+        String sujet = identite.sujet();
+        String issuer = identite.emetteurIdentite();
         jdbc.update("""
             INSERT INTO quittance_audit(id,quittance_id,acteur,emetteur_identite,operation,resultat,horodatage,statut_avant,statut_apres)
             VALUES (?,?,?,?,?,'SUCCES',?,?,?)

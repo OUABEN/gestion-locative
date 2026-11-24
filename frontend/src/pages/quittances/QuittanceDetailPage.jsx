@@ -34,6 +34,9 @@ import {
 import styles from './QuittancesPage.module.css';
 
 const PAGE_SIZE = 10;
+// Preference d'interface uniquement : la securite reste appliquee par le backend.
+// Par defaut, la demonstration reste disponible tant que les vraies sources manquent.
+const realEmissionUiEnabled = import.meta.env.VITE_QUITTANCES_REAL_ISSUANCE === 'true';
 
 const statusClassName = (status) =>
   `${styles.statusPill} ${status === 'EMIS' ? styles.statusSuccess : ''}`;
@@ -214,6 +217,11 @@ export const QuittanceDetailPage = () => {
           successMessage = `Émission de démonstration acceptée (${result.numero || 'numéro retourné par le serveur'}). Ce n’est pas une signature certifiée.`;
           break;
         }
+        case 'issueReal': {
+          const result = await quittancesApi.issueReal(token, id);
+          successMessage = `Quittance émise (${result.numero || 'numéro retourné par le serveur'}). La validité cryptographique n'implique pas une signature qualifiée.`;
+          break;
+        }
         case 'mailpit': {
           const requestId = mailpitRequestId || createRequestId();
           setMailpitRequestId(requestId);
@@ -312,7 +320,10 @@ export const QuittanceDetailPage = () => {
 
   const checkIntegrity = () =>
     runReadAction('integrity', async () => {
-      setVerification(await quittancesApi.verifyDemo(token, id));
+      const resultat = emittedReal
+        ? await quittancesApi.verifyReal(token, id)
+        : await quittancesApi.verifyDemo(token, id);
+      setVerification({ ...resultat, modePresentation: emittedReal ? 'REEL' : 'DEMO' });
     });
 
   const checkPayments = () =>
@@ -340,6 +351,8 @@ export const QuittanceDetailPage = () => {
 
   const isLandlord = identity?.role === 'BAILLEUR';
   const emittedDemo = isDemoIssued(document);
+  const emittedReal = document.statut === 'EMIS'
+    && /^QT-[0-9]{4}-[0-9]+$/.test(String(document.numero || ''));
   const replaceAvailable = isLandlord && document.statut === 'ANNULE';
   const previewAvailable = isLandlord && canPreviewDraft(document);
   const archiveAvailable = isLandlord && canPreviewDraft(document);
@@ -347,7 +360,9 @@ export const QuittanceDetailPage = () => {
   const issueAvailable = isLandlord && canIssueDemo(document);
   const signatureDescription =
     document.statutSignature === 'SIGNE_VERIFIE'
-      ? 'Signature locale de démonstration vérifiée; aucune certification d’identité.'
+      ? emittedReal
+        ? 'Signature numérique détachée vérifiée; qualification juridique non garantie.'
+        : 'Signature locale de démonstration vérifiée; aucune certification d’identité.'
       : `État de signature : ${document.statutSignature || 'inconnu'}.`;
 
   return (
@@ -436,9 +451,14 @@ export const QuittanceDetailPage = () => {
               Remplacer
             </Button>
           )}
-          {issueAvailable && (
+          {issueAvailable && !realEmissionUiEnabled && (
             <Button icon={FileCheck2} onClick={() => openAction('issue', 'Émission de démonstration', 'Cette émission utilise une signature locale de démonstration, non certifiée.', false)}>
               Émettre (démonstration)
+            </Button>
+          )}
+          {issueAvailable && realEmissionUiEnabled && (
+            <Button icon={FileCheck2} onClick={() => openAction('issueReal', 'Émission de la quittance', 'L’émission définitive exige un paiement intégral vérifié, les API métiers réelles et un certificat configuré sur le backend.', false)}>
+              Émettre la quittance
             </Button>
           )}
           {archiveAvailable && (
@@ -456,6 +476,19 @@ export const QuittanceDetailPage = () => {
               </Button>
               <Button variant="secondary" icon={ShieldCheck} onClick={checkIntegrity} disabled={Boolean(actionBusy)}>
                 Vérifier l’intégrité
+              </Button>
+            </>
+          )}
+          {emittedReal && (
+            <>
+              <Button variant="secondary" icon={Download} onClick={() => download('pdf', () => quittancesApi.downloadRealPdf(token, id), `quittance-${id}.pdf`)} disabled={Boolean(actionBusy)}>
+                Télécharger le PDF émis
+              </Button>
+              <Button variant="secondary" icon={Download} onClick={() => download('proof', () => quittancesApi.downloadRealProof(token, id), `preuve-${id}.zip`)} disabled={Boolean(actionBusy)}>
+                Télécharger la preuve (ZIP)
+              </Button>
+              <Button variant="secondary" icon={ShieldCheck} onClick={checkIntegrity} disabled={Boolean(actionBusy)}>
+                Vérifier la signature
               </Button>
             </>
           )}
@@ -489,9 +522,19 @@ export const QuittanceDetailPage = () => {
         )}
         {verification && (
           <div className={styles.resultPanel} role="status">
-            <strong>Intégrité {verification.integriteValide ? 'valide' : 'invalide'} · signature {verification.signatureValide ? 'valide' : 'invalide'}</strong>
-            <span>Mode {verification.modeSignature} · SHA-256 {verification.sha256}</span>
-            <small>Résultat de démonstration, sans certification d’identité.</small>
+            {verification.modePresentation === 'REEL' ? (
+              <>
+                <strong>Signature cryptographique {verification.signatureCryptographiqueValide ? 'valide' : 'invalide'}</strong>
+                <span>SHA-256 {verification.sha256}</span>
+                <small>Signature qualifiée : {verification.signatureQualifiee ? 'oui' : 'non'}. La valeur juridique doit être vérifiée séparément.</small>
+              </>
+            ) : (
+              <>
+                <strong>Intégrité {verification.integriteValide ? 'valide' : 'invalide'} · signature {verification.signatureValide ? 'valide' : 'invalide'}</strong>
+                <span>Mode {verification.modeSignature} · SHA-256 {verification.sha256}</span>
+                <small>Résultat de démonstration, sans certification d’identité.</small>
+              </>
+            )}
           </div>
         )}
         {paymentReport && (
