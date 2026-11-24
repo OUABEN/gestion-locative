@@ -1,0 +1,54 @@
+# =====================================================================
+# Plan d'Automatisation OWASP ZAP — Module Gestion des Locataires & Baux
+# Auteur : Ahmed LAARIF — Groupe 16 (Université Ibn Zohr Agadir - FSA)
+# =====================================================================
+env:
+  contexts:
+    - name: "Module-Locataires-API"
+      urls:
+        - "http://host.docker.internal:8082"
+        - "http://localhost:8082"
+      includePaths:
+        - "http://host.docker.internal:8082/.*"
+        - "http://localhost:8082/.*"
+      excludePaths:
+        - ".*/health$"
+  parameters:
+    failOnError: false
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # 1. Import de la spécification OpenAPI / Swagger JSON du port 8082
+  - type: openapi
+    parameters:
+      apiUrl: "http://host.docker.internal:8082/api-docs.json"
+      targetUrl: "http://host.docker.internal:8082"
+
+  # 2. Attente de la fin de l'analyse passive des requêtes importées
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # 3. Scan Actif ciblé sur les vulnérabilités d'API (BOLA, Injections, Auth)
+  - type: activeScan
+    parameters:
+      context: "Module-Locataires-API"
+      policy: "API-Fast"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 10
+
+  # 4. Génération des rapports HTML et JSON
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "/zap/wrk/docs/qualite/locataires/zap"
+      reportFile: "zap-locataires-report.html"
+      reportTitle: "Rapport d'Audit DAST OWASP ZAP — Module Locataires & Baux"
+      reportDescription: "Audit dynamique de sécurité sur les points de terminaison REST du port 8082."
+
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "/zap/wrk/docs/qualite/locataires/zap"
+      reportFile: "zap-locataires-report.json"
