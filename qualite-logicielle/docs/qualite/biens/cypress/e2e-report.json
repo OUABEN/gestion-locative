@@ -1,0 +1,18 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "failures": 0,
+    "duration": 3168
+  },
+  "results": [
+    {
+      "num": "01",
+      "title": "Connexion échouée (mauvais mot de passe)",
+      "status": "PASSED",
+      "durationMs": 3168,
+      "details": "Alerte HTTP 401 interceptée et affichée"
+    }
+  ]
+}

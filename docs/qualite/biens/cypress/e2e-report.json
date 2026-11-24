@@ -1,0 +1,109 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 14,
+    "passes": 14,
+    "failures": 0,
+    "duration": 24122
+  },
+  "results": [
+    {
+      "num": "01",
+      "title": "Connexion échouée (mot de passe erroné)",
+      "status": "PASSED",
+      "durationMs": 3253,
+      "details": "Alerte HTTP 401 interceptée et affichée"
+    },
+    {
+      "num": "02",
+      "title": "Connexion réussie BAILLEUR",
+      "status": "PASSED",
+      "durationMs": 1798,
+      "details": "Authentification JWT et redirection vers le Dashboard"
+    },
+    {
+      "num": "03",
+      "title": "Vérification indicateurs KPI Dashboard",
+      "status": "PASSED",
+      "durationMs": 2977,
+      "details": "Total des biens, loyers mensuels et statuts affichés"
+    },
+    {
+      "num": "04",
+      "title": "Navigation vers \"Ajouter un bien\"",
+      "status": "PASSED",
+      "durationMs": 1729,
+      "details": "Affichage conforme du formulaire de saisie"
+    },
+    {
+      "num": "05",
+      "title": "Validation champs obligatoires et surface",
+      "status": "PASSED",
+      "durationMs": 1071,
+      "details": "Règle métier surface > 0 et champs requis validés"
+    },
+    {
+      "num": "06",
+      "title": "Création réussie du bien immobilier",
+      "status": "PASSED",
+      "durationMs": 3933,
+      "details": "Bien enregistré avec succès : 142 Boulevard Zerktouni Résidence QL-0296"
+    },
+    {
+      "num": "07",
+      "title": "Recherche et filtrage dans la liste",
+      "status": "PASSED",
+      "durationMs": 1022,
+      "details": "Filtrage dynamique et debounce fonctionnels"
+    },
+    {
+      "num": "08",
+      "title": "Consultation de la fiche détail du bien",
+      "status": "PASSED",
+      "durationMs": 1458,
+      "details": "Affichage complet des données techniques et financières"
+    },
+    {
+      "num": "09",
+      "title": "Modification du bien immobilier",
+      "status": "PASSED",
+      "durationMs": 145,
+      "details": "Loyer ajusté et persisté en base de données"
+    },
+    {
+      "num": "10",
+      "title": "Bascule de statut vers OCCUPÉ",
+      "status": "PASSED",
+      "durationMs": 181,
+      "details": "Statut mis à jour dynamiquement via PATCH /api/biens/:id/statut"
+    },
+    {
+      "num": "11",
+      "title": "Protection suppression bien OCCUPÉ (HTTP 409)",
+      "status": "PASSED",
+      "durationMs": 261,
+      "details": "Intégrité garantie : Impossible de supprimer un bien occupé"
+    },
+    {
+      "num": "12",
+      "title": "Suppression autorisée sur bien LIBRE",
+      "status": "PASSED",
+      "durationMs": 132,
+      "details": "Bien retiré du parc locatif après vérification"
+    },
+    {
+      "num": "13",
+      "title": "Déconnexion et invalidation session",
+      "status": "PASSED",
+      "durationMs": 2434,
+      "details": "Jeton JWT invalidé et redirection vers la mire d’authentification"
+    },
+    {
+      "num": "14",
+      "title": "Rôle LOCATAIRE en lecture seule",
+      "status": "PASSED",
+      "durationMs": 3728,
+      "details": "Accès sécurisé : aucun bouton d’ajout ni de modification"
+    }
+  ]
+}
