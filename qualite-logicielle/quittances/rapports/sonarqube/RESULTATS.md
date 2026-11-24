@@ -1,3 +1,50 @@
+# SonarQube - Quittances
+
+## Derniere analyse du 24 novembre 2026
+
+| Indicateur | Resultat |
+|---|---:|
+| Quality Gate | Passed (OK) |
+| Couverture du nouveau code | 81,1 % |
+| Duplication du nouveau code | 0,94 % |
+| Nouveaux problemes | 0 |
+| Problemes acceptes | 0 |
+| Security Hotspots du nouveau code | 0 |
+| Nouvelles lignes a couvrir | 904 |
+| Couverture globale | 74,1 % |
+| Couverture globale des lignes | 80,7 % |
+| Couverture globale des branches | 63,3 % |
+| Duplication globale | 1,7 % |
+| Lignes de code | 7450 |
+| Bugs | 0 |
+| Code smells | 0 |
+| Vulnerabilites | 1 |
+| Note de securite | D |
+
+L'analyse porte exclusivement sur le backend Java Quittances.
+
+Elle utilise les rapports de la campagne des 317 tests Java,
+tous reussis sans echec, erreur ni test ignore.
+
+Les trois conditions du Quality Gate sont respectees.
+Le code de retour Maven est 0.
+La duree de la commande est de 22,600 secondes.
+
+## Limites
+
+Une vulnerabilite reste ouverte dans le code global.
+Son identite exacte reste a confirmer dans SonarQube.
+Le Quality Gate ne prouve pas l'absence de vulnerabilites.
+
+SonarQube Community dispose d'une analyse de securite limitee.
+Le risque residuel JAXB signale par Snyk reste distinct.
+
+Preuve machine : `mesures-sonarqube-finalisation.json`.
+
+---
+
+## Campagnes precedentes
+
 # SonarQube — Quittances
 
 <!-- BILAN-20261124 -->

@@ -2,12 +2,12 @@
 
 <!-- BILAN-20261124 -->
 
-## Campagne du 24 novembre 2026
+## Derniere campagne du 24 novembre 2026
 
 | Indicateur | Résultat |
 |---|---:|
-| Tests exécutés | 306 |
-| Tests réussis | 306 |
+| Tests exécutés | 317 |
+| Tests réussis | 317 |
 | Échecs | 0 |
 | Erreurs | 0 |
 | Tests ignorés | 0 |
@@ -31,6 +31,45 @@ la consultation et la gestion des quittances.
 Les tests d'intégration Spring utilisent une base isolée.
 Les fournisseurs simulés ne constituent pas une preuve
 d'interopérabilité avec les services réels du groupe.
+
+
+### Validation du nouveau contrat Biens
+
+- Endpoint consomme : GET /api/users/{id}.
+- 11 nouveaux cas de test automatises.
+- Tests du client collectif : 32/32 reussis.
+- Campagne Java complete : 317/317 reussis.
+- Aucun echec, aucune erreur, aucun test ignore.
+- Relais du JWT du gestionnaire verifie.
+- Identite du proprietaire et coherence du contrat controlees.
+- Reponses invalides et erreurs HTTP externes testees.
+
+La validation reelle du parcours gestionnaire reste bloquee
+par le rejet des UUID de demonstration cote Biens (HTTP 400).
+
+### Couverture JaCoCo actualisee
+
+| Indicateur | Couverts | Total | Couverture |
+|---|---:|---:|---:|
+| Instructions | 12136 | 14750 | 82,28 % |
+| Branches | 1170 | 1849 | 63,28 % |
+| Lignes | 2461 | 2949 | 83,45 % |
+| Complexite | 736 | 1437 | 51,22 % |
+| Methodes | 420 | 506 | 83,00 % |
+| Classes | 148 | 155 | 95,48 % |
+
+### Checkstyle
+
+- Fichiers analyses : 163.
+- Erreurs : 0.
+- Avertissements : 1641.
+
+### Frontend Quittances
+
+- Vitest : 16/16 tests reussis.
+- Istanbul : 65,97 % de couverture des lignes.
+- Total Java et frontend : 333/333 tests reussis
+  sur les deux campagnes.
 
 ## GitHub Actions
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="16" failures="0" errors="0" time="3.1346865">
+    <testsuite name="src/tests/quittances.frontend.test.jsx" timestamp="2026-11-24T19:11:02.891Z" hostname="LAPTOP-JMUSHP82" tests="16" failures="0" errors="0" skipped="0" time="3.1346865">
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; transmet pagination, filtres et tris réellement disponibles" time="1.4936505">
+            <system-err>
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; envoie uniquement bailId et les dates pour préparer un brouillon" time="0.3863821">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; n’affiche aucune action d’écriture pour une identité LOCATAIRE" time="0.2484407">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; refuse explicitement un rôle que le backend Quittances ne prend pas en charge" time="0.1132034">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; affiche une seule erreur 403 pour un compte connecté sans accès documentaire" time="0.1180917">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; masque la préparation après un 403 métier sur la création" time="0.340861">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Module Quittances — frontend React &gt; exige une confirmation explicite avant d’appeler la validation" time="0.3819741">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; transmet le jeton tel quel, sans ajouter de jeton à l’URL" time="0.0073789">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; envoie le corps exact de préparation sans montant calculé côté frontend" time="0.0032407">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; expose explicitement la réponse HTTP 401" time="0.0081388">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; expose explicitement la réponse HTTP 403" time="0.0030659">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; expose explicitement la réponse HTTP 409" time="0.0026661">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; expose explicitement la réponse HTTP 503" time="0.0028656">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; ne retente pas automatiquement une mutation après une erreur réseau" time="0.0041105">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; renvoie le binaire du PDF sans exposer le jeton dans son URL" time="0.0046085">
+        </testcase>
+        <testcase classname="src/tests/quittances.frontend.test.jsx" name="Client API Quittances &gt; décode une erreur JSON renvoyée à la place du binaire" time="0.0019658">
+        </testcase>
+    </testsuite>
+</testsuites>
