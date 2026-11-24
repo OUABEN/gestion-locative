@@ -80,6 +80,6 @@ quittances:
 
     baux:
       mode: ${BAUX_MODE:SIMULATION}
-      base-url: "${LOYERS_SERVICE_URL:${BAUX_BASE_URL:http://127.0.0.1:8093}}"
+      base-url: "${LOCATAIRES_SERVICE_URL:${BAUX_BASE_URL:http://127.0.0.1:8092}}"
       chemin: "${BAUX_CHEMIN:/api/v1/baux/{id}/situation?debut={debut}&fin={fin}}"
       token: ${BAUX_TOKEN:}
