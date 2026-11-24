@@ -1,29 +1,95 @@
-﻿name: Node.js CI (Module Locataires)
+name: CI
 
 on:
   push:
-    branches: [ main, laarif-ahmed ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, laarif-ahmed ]
+    branches: [ main ]
 
 jobs:
-  build-and-test:
+  backend:
+    name: Backend ${{ matrix.service }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend/backend_gestion_locataires
-
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [ biens, locataires, loyers, quittances ]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db_gestion_locative
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d db_gestion_locative"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      JWT_SECRET: ci_secret_for_tests_only_0123456789abcdef
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: db_gestion_locative
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/db_gestion_locative
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/db_gestion_locative
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-      - name: Run tests
-        run: npm test --if-present
+      - name: Initialiser la base (scripts database/init)
+        run: |
+          for f in database/init/*.sql; do
+            psql "postgresql://postgres:postgres@localhost:5432/db_gestion_locative" -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Tests du service ${{ matrix.service }}
+        working-directory: backend/backend_gestion_${{ matrix.service }}
+        run: |
+          if [ -f package.json ]; then
+            npm install
+            npm test --if-present
+          elif [ -f pom.xml ]; then
+            mvn -B test
+          else
+            echo "Aucun projet Node ou Maven détecté dans ce dossier"; exit 1
+          fi
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer, tester, construire
+        working-directory: frontend
+        run: |
+          npm install
+          npm test --if-present
+          npm run build --if-present
+
+  docker-compose:
+    name: Validation docker-compose.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier la syntaxe du fichier compose
+        run: |
+          cp .env.example .env
+          docker compose config -q
