@@ -40,4 +40,24 @@ public class PreparationQuittanceService {
                 resultat.affectations()
         );
     }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public UUID preparerPourGestionnaire(
+            org.springframework.security.core.Authentication authentication,
+            String bailId,
+            LocalDate debut,
+            LocalDate fin
+    ) {
+        var resultat = constructionService.construirePourGestionnaire(
+                authentication,
+                bailId,
+                debut,
+                fin
+        );
+
+        return enregistrementService.enregistrer(
+                resultat.document(),
+                resultat.affectations()
+        );
+    }
 }

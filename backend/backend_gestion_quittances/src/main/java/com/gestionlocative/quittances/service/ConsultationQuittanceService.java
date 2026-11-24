@@ -84,7 +84,9 @@ public class ConsultationQuittanceService {
 
         PageRequest pagination = PageRequest.of(page, taille, ordre);
 
-        Page<Quittance> resultat = lecteur.bailleur()
+        Page<Quittance> resultat = lecteur.gestionnaire()
+                ? repository.findAll(pagination)
+                : lecteur.bailleur()
                 ? repository.findByBailleurId(
                 lecteur.identifiant(),
                 pagination
@@ -150,8 +152,10 @@ public class ConsultationQuittanceService {
 
         org.springframework.data.jpa.domain.Specification<Quittance> filtre = (root, query, cb) -> {
             java.util.List<jakarta.persistence.criteria.Predicate> conditions = new java.util.ArrayList<>();
-            conditions.add(cb.equal(root.get(lecteur.bailleur() ? "bailleurId" : "locataireId"), lecteur.identifiant()));
-            if (!lecteur.bailleur()) conditions.add(cb.isNotNull(root.get("emisLe")));
+            if (!lecteur.gestionnaire()) {
+                conditions.add(cb.equal(root.get(lecteur.bailleur() ? "bailleurId" : "locataireId"), lecteur.identifiant()));
+            }
+            if (lecteur.locataire()) conditions.add(cb.isNotNull(root.get("emisLe")));
             if (bailId != null && !bailId.isBlank()) conditions.add(cb.equal(root.get("bailId"), bailId.trim()));
             if (numero != null && !numero.isBlank()) conditions.add(cb.equal(root.get("numero"), numero.trim()));
             if (statut != null && !statut.isBlank()) {
@@ -183,7 +187,9 @@ public class ConsultationQuittanceService {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
 
-        Optional<Quittance> resultat = lecteur.bailleur()
+        Optional<Quittance> resultat = lecteur.gestionnaire()
+                ? repository.findById(id)
+                : lecteur.bailleur()
                 ? repository.findByIdAndBailleurId(
                 id,
                 lecteur.identifiant()

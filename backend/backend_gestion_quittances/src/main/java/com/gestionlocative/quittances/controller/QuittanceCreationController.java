@@ -31,15 +31,33 @@ public class QuittanceCreationController {
             @RequestBody CreationQuittanceRequest demande,
             Authentication authentication
     ) {
-        String bailleurId = identifierBailleur(authentication);
+        LecteurQuittances lecteur =
+                LecteurQuittances.depuis(authentication);
+
+        if (!lecteur.peutEcrire()) {
+            throw new AccessDeniedException(
+                    "Creation reservee au bailleur et au gestionnaire.");
+        }
+
         verifierDemande(demande);
 
-        UUID id = preparationService.preparer(
-                bailleurId,
-                demande.bailId(),
-                demande.periodeDebut(),
-                demande.periodeFin()
-        );
+        UUID id;
+
+        if (lecteur.gestionnaire()) {
+            id = preparationService.preparerPourGestionnaire(
+                    authentication,
+                    demande.bailId(),
+                    demande.periodeDebut(),
+                    demande.periodeFin()
+            );
+        } else {
+            id = preparationService.preparer(
+                    lecteur.identifiant(),
+                    demande.bailId(),
+                    demande.periodeDebut(),
+                    demande.periodeFin()
+            );
+        }
 
         CreationQuittanceResponse reponse =
                 new CreationQuittanceResponse(
@@ -51,17 +69,6 @@ public class QuittanceCreationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
     }
 
-    private String identifierBailleur(Authentication authentication) {
-        LecteurQuittances lecteur =
-                LecteurQuittances.depuis(authentication);
-        if (!lecteur.bailleur()) {
-            throw new AccessDeniedException(
-                    "La création est réservée au bailleur."
-            );
-        }
-
-        return lecteur.identifiant();
-    }
 
     private void verifierDemande(CreationQuittanceRequest demande) {
         if (demande == null

@@ -240,4 +240,48 @@ class AnnulationQuittanceServiceTest {
     private String identifiant() {
         return "TEST-ANNULATION-" + UUID.randomUUID();
     }
+
+
+    @Test
+    void gestionnairePeutAnnulerDocumentAutreBailleur() {
+        String bailleur = identifiant();
+        Quittance document = creer(bailleur);
+
+        var resultat = service.annuler(
+                identite("GESTIONNAIRE", identifiant()),
+                document.getId(),
+                "Annulation par le gestionnaire.",
+                true
+        );
+
+        assertEquals("ANNULE", resultat.statut());
+
+        Quittance conserve = repository.findById(
+                document.getId()).orElseThrow();
+
+        assertEquals(bailleur, conserve.getBailleurId());
+        assertEquals(StatutQuittance.ANNULE, conserve.getStatut());
+
+        String acteur = jdbcTemplate.queryForObject(
+                "SELECT acteur FROM quittance_audit "
+                        + "WHERE quittance_id = ? AND operation = 'ANNULATION'",
+                String.class,
+                document.getId());
+
+        assertEquals("acteur-test-annulation", acteur);
+    }
+
+    @Test
+    void gestionnaireNePeutAnnulerDocumentInexistant() {
+        var erreur = assertThrows(
+                ResponseStatusException.class,
+                () -> service.annuler(
+                        identite("GESTIONNAIRE", identifiant()),
+                        UUID.randomUUID(),
+                        "Document absent.",
+                        true));
+
+        assertEquals(404, erreur.getStatusCode().value());
+    }
+
 }

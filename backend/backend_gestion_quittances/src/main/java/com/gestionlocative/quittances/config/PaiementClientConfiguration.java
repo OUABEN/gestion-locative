@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Set;
 
 import com.gestionlocative.quittances.client.HttpPaiementClient;
+import com.gestionlocative.quittances.client.PaiementsCollectifsClient;
 import com.gestionlocative.quittances.client.PaiementClient;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +41,8 @@ public class PaiementClientConfiguration {
             @Value("${quittances.integration.paiements.token:}") String token) {
 
         URI uri = URI.create(baseUrl);
+        boolean collectif = "UTILISATEUR".equals(mode)
+                && "/api/paiements?bailId={bailId}".equals(chemin);
 
         if (uri.getHost() == null
                 || !Set.of("http", "https").contains(uri.getScheme())
@@ -54,8 +57,8 @@ public class PaiementClientConfiguration {
         if (!chemin.startsWith("/")
                 || chemin.startsWith("//")
                 || !chemin.contains("{bailId}")
-                || !chemin.contains("{debut}")
-                || !chemin.contains("{fin}")) {
+                || (!collectif && (!chemin.contains("{debut}")
+                || !chemin.contains("{fin}")))) {
             throw new IllegalArgumentException(
                     "Le chemin Paiements doit contenir les paramètres attendus."
             );
@@ -113,6 +116,6 @@ public class PaiementClientConfiguration {
             builder.requestInterceptor(new JwtUtilisateurInterceptor());
         }
 
-        return new HttpPaiementClient(builder.build(), chemin);
+        return collectif ? new PaiementsCollectifsClient(builder.build()) : new HttpPaiementClient(builder.build(), chemin);
     }
 }

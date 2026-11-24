@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,11 +30,24 @@ public class EnvoiMailpitTransactions {
         rs.getTimestamp("cree_le").toInstant(),rs.getTimestamp("termine_le")==null?null:rs.getTimestamp("termine_le").toInstant(),rs.getString("erreur_code"));
     @Transactional(timeout=10)
     public Reservation reserver(Authentication auth, UUID document, UUID requete) {
+        return reserver(auth, document, requete, false);
+    }
+
+    @Transactional(timeout=10)
+    public Reservation reserver(Authentication auth, UUID document, UUID requete, boolean emissionReelle) {
         var q=proprietaire(auth,document);
         var existant=jdbc.query("SELECT * FROM quittance_envoi WHERE quittance_id=? AND requete_id=?",mapper,document,requete);
         if(!existant.isEmpty()) return new Reservation(existant.getFirst(),false);
-        if (!"EMIS".equals(q.getStatut().name()) || q.getNumero()==null || !q.getNumero().startsWith("DEMO-QT-"))
-            throw erreur(409,"Seul un document de démonstration émis et actif peut être envoyé.");
+        boolean documentCompatible = "EMIS".equals(q.getStatut().name())
+                && q.getNumero() != null
+                && (emissionReelle
+                    ? q.getNumero().startsWith("QT-")
+                        && "SIGNE_VERIFIE".equals(q.getStatutSignature().name())
+                        && ("db-reelle:" + document).equals(q.getPdfReference())
+                    : q.getNumero().startsWith("DEMO-QT-"));
+
+        if (!documentCompatible)
+            throw erreur(409,"Seul un document emis et compatible avec le mode Mailpit peut etre envoye.");
         Integer bloque=jdbc.queryForObject("SELECT count(*) FROM quittance_envoi WHERE quittance_id=? AND statut<>'ECHEC_ENVOI'",Integer.class,document);
         if(bloque!=null && bloque>0) throw erreur(409,"Un envoi existe déjà. Consultez son état avant toute nouvelle tentative.");
         Integer recent=jdbc.queryForObject("SELECT count(*) FROM quittance_envoi WHERE quittance_id=? AND cree_le > CURRENT_TIMESTAMP - INTERVAL '30 seconds'",Integer.class,document);
@@ -67,8 +79,17 @@ public class EnvoiMailpitTransactions {
     }
     private com.gestionlocative.quittances.entity.Quittance proprietaire(Authentication auth,UUID id) {
         var lecteur=LecteurQuittances.depuis(auth);
-        if(!lecteur.bailleur())throw new AccessDeniedException("Envois réservés au bailleur.");
-        return documents.trouverPourModification(id,lecteur.identifiant()).orElseThrow(()->erreur(404,"Document introuvable."));
+        if (!lecteur.peutEcrire()) {
+            throw new AccessDeniedException(
+                    "Envois reserves au bailleur ou au gestionnaire.");
+        }
+
+        var resultat = lecteur.gestionnaire()
+                ? documents.trouverPourModificationGestionnaire(id)
+                : documents.trouverPourModification(id, lecteur.identifiant());
+
+        return resultat.orElseThrow(
+                () -> erreur(404, "Document introuvable."));
     }
     private void audit(Authentication auth,UUID doc,String operation,String resultat) {
         var identite = identiteAudit.depuis(auth);

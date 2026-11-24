@@ -7,6 +7,9 @@ import com.gestionlocative.quittances.entity.TypeDocument;
 import com.gestionlocative.quittances.mapper.QuittanceConsultationMapper;
 import com.gestionlocative.quittances.repository.QuittanceRepository;
 import com.gestionlocative.quittances.service.EmissionDemoTransactions;
+import com.gestionlocative.quittances.security.IdentiteAudit;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import static org.mockito.Mockito.doThrow;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +56,9 @@ class EmissionDemoTransactionsTest {
 
     @Autowired
     private EmissionDemoTransactions transactions;
+
+    @MockitoSpyBean
+    private IdentiteAudit identiteAudit;
 
     @Autowired
     private QuittanceRepository quittances;
@@ -196,14 +202,21 @@ class EmissionDemoTransactionsTest {
     @Test
     void echecAuditApresEcritureAnnuleLePdfEtLaTransition()
             throws Exception {
+
+        var auth = identiteBailleur(true);
+
+        doThrow(new AccessDeniedException("Echec audit simule"))
+                .when(identiteAudit).depuis(auth);
+
         try (MockedStatic<SignatureLocale> signature =
                      mockStatic(SignatureLocale.class)) {
+
             autoriserSignatureDeDemoPourLeTest(signature);
 
             assertThrows(
                     AccessDeniedException.class,
                     () -> transactions.enregistrer(
-                            identiteBailleur(false),
+                            auth,
                             quittanceId,
                             source,
                             pdf,
@@ -217,6 +230,7 @@ class EmissionDemoTransactionsTest {
         assertEquals(0L, compter("emission_demo"));
         assertEquals(0L, compterAuditsEmission());
     }
+
 
     private int tenterEmission(
             CountDownLatch prets,

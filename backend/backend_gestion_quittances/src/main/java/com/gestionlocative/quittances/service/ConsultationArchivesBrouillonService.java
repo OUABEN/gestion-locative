@@ -30,15 +30,17 @@ public class ConsultationArchivesBrouillonService {
     public PageArchivesBrouillonResponse consulter(
             Authentication authentication, UUID id, int page, int taille) {
         LecteurQuittances lecteur = LecteurQuittances.depuis(authentication);
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "Les archives de brouillons sont réservées au bailleur.");
+                    "Les archives de brouillons sont réservées au bailleur ou au gestionnaire.");
         }
         if (page < 0 || page > 1_000_000 || taille < 1 || taille > 100) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "La page doit être comprise entre 0 et 1000000 et la taille entre 1 et 100.");
         }
-        repository.findByIdAndBailleurId(id, lecteur.identifiant())
+        (lecteur.gestionnaire()
+                ? repository.findById(id)
+                : repository.findByIdAndBailleurId(id, lecteur.identifiant()))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Document introuvable."));
 

@@ -75,6 +75,7 @@ services:
       BAUX_BASE_URL: http://services-demo:8091
       BAUX_TOKEN: ""
       DARLOC_SIGNATURE_DEMO: "true"
+      DARLOC_SIGNATURE_DEMO_COMMUN: "true"
       DARLOC_SIGNATURE_PATH: /app/keys/darloc-demo.p12
       DARLOC_MAILPIT_ACTIF: "true"
       DARLOC_MAILPIT_PORT: "1025"

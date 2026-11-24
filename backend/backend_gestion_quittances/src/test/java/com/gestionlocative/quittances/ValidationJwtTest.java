@@ -391,21 +391,27 @@ class ValidationJwtTest {
     }
 
     @Test
-    void doitReconnaîtreGestionnaireSansAccèsDocumentaireArbitraire() {
+    void doitReconnaitreGestionnaireAvecDroitsEcriture() {
         Jwt jwt = Jwt.withTokenValue("test")
                 .header("alg", "HS256")
                 .subject("compte-gestionnaire")
                 .claim("role", "GESTIONNAIRE")
                 .build();
-        JwtAuthenticationToken authentication = new JwtAuthenticationToken(
-                jwt,
-                List.of(new SimpleGrantedAuthority("ROLE_GESTIONNAIRE"))
-        );
 
-        assertThrows(
-                AccessDeniedException.class,
-                () -> LecteurQuittances.depuis(authentication)
-        );
+        JwtAuthenticationToken authentication =
+                new JwtAuthenticationToken(
+                        jwt,
+                        List.of(new SimpleGrantedAuthority("ROLE_GESTIONNAIRE"))
+                );
+
+        LecteurQuittances lecteur =
+                LecteurQuittances.depuis(authentication);
+
+        assertEquals("compte-gestionnaire", lecteur.identifiant());
+        assertEquals(true, lecteur.gestionnaire());
+        assertEquals(true, lecteur.peutEcrire());
+        assertEquals(false, lecteur.bailleur());
+        assertEquals(false, lecteur.locataire());
     }
 
     private JwtDecoder decodeurCommun(String secret) {

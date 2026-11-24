@@ -46,4 +46,14 @@ public interface QuittanceRepository
             @Param("id") UUID id,
             @Param("bailleurId") String bailleurId
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select q
+            from Quittance q
+            where q.id = :id
+            """)
+    Optional<Quittance> trouverPourModificationGestionnaire(
+            @Param("id") UUID id
+    );
 }

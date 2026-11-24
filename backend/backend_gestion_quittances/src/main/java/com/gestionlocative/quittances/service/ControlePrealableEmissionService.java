@@ -71,9 +71,9 @@ public class ControlePrealableEmissionService {
     public void verifier(Authentication authentication, UUID quittanceId) {
         LecteurQuittances lecteur =
                 LecteurQuittances.depuis(authentication);
-        if (!lecteur.bailleur()) {
+        if (!lecteur.peutEcrire()) {
             throw new AccessDeniedException(
-                    "Le pré-contrôle est réservé au bailleur."
+                    "Le pré-contrôle est réservé au bailleur ou au gestionnaire."
             );
         }
 
@@ -89,7 +89,7 @@ public class ControlePrealableEmissionService {
                 acteur.emetteurIdentite()
         ) || !acteur.sujet().equals(lecteur.identifiant())) {
             throw new AccessDeniedException(
-                    "Le bailleur doit correspondre au sujet du JWT commun vérifié."
+                    "L'acteur doit correspondre au sujet du JWT commun vérifié."
             );
         }
 
@@ -100,9 +100,10 @@ public class ControlePrealableEmissionService {
             );
         }
 
-        Quittance document = quittances.findByIdAndBailleurId(
-                quittanceId,
-                lecteur.identifiant()
+        Quittance document = (lecteur.gestionnaire()
+                ? quittances.findById(quittanceId)
+                : quittances.findByIdAndBailleurId(
+                        quittanceId, lecteur.identifiant())
         ).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Document introuvable."
@@ -114,7 +115,7 @@ public class ControlePrealableEmissionService {
         ConstructionBrouillonService.Resultat situationCourante;
         try {
             situationCourante = construction.construire(
-                    lecteur.identifiant(),
+                    document.getBailleurId(),
                     document.getBailId(),
                     document.getPeriodeDebut(),
                     document.getPeriodeFin()

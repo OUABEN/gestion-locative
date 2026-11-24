@@ -417,10 +417,20 @@ class ParcoursQuittanceHttpIntegrationTest {
                 signerJwt(UUID.randomUUID().toString(), "BAILLEUR"),
                 null
         ).statusCode());
-        assertEquals(403, appeler(
+        String jwtGestionnaire =
+                signerJwt(UUID.randomUUID().toString(), "GESTIONNAIRE");
+
+        assertEquals(200, appeler(
                 "GET",
                 "/api/v1/quittances",
-                signerJwt(UUID.randomUUID().toString(), "GESTIONNAIRE"),
+                jwtGestionnaire,
+                null
+        ).statusCode());
+
+        assertEquals(200, appeler(
+                "GET",
+                "/api/v1/quittances/" + quittanceId,
+                jwtGestionnaire,
                 null
         ).statusCode());
         assertEquals(403, appeler(

@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Set;
 
+import com.gestionlocative.quittances.client.BienBailCollectifClient;
 import com.gestionlocative.quittances.client.BienBailClient;
 import com.gestionlocative.quittances.client.HttpBienBailClient;
 import com.gestionlocative.quittances.client.HttpLocataireClient;
@@ -60,7 +61,8 @@ public class ReferentielsConfiguration {
         return new HttpLocataireClient(
                 construire(endpoint, transport, true),
                 endpoint.chemin(),
-                "LOCATAIRES_LOCAL".equals(endpoint.mode()) || (jwtUtilisateur && syntheseReelle)
+                "LOCATAIRES_LOCAL".equals(endpoint.mode()) || (jwtUtilisateur && syntheseReelle),
+                jwtUtilisateur
         );
     }
 
@@ -85,19 +87,20 @@ public class ReferentielsConfiguration {
         RestClient biensClient = construire(biens, transport);
         RestClient bauxClient = construire(baux, transport);
 
-        if (!baux.chemin().contains("{debut}")
-                || !baux.chemin().contains("{fin}")) {
+        boolean collectif = "UTILISATEUR".equals(baux.mode())
+                && "UTILISATEUR".equals(biens.mode())
+                && "/api/baux/{id}".equals(baux.chemin())
+                && "/api/biens/{id}".equals(biens.chemin());
+        if (!collectif && (!baux.chemin().contains("{debut}")
+                || !baux.chemin().contains("{fin}"))) {
             throw new IllegalArgumentException(
                     "Le chemin des baux doit contenir debut et fin."
             );
         }
 
-        BienBailClient delegate = new HttpBienBailClient(
-                biensClient,
-                biens.chemin(),
-                bauxClient,
-                baux.chemin()
-        );
+        BienBailClient delegate = collectif
+                ? new BienBailCollectifClient(biensClient, biens.chemin(), bauxClient, baux.chemin())
+                : new HttpBienBailClient(biensClient, biens.chemin(), bauxClient, baux.chemin());
         return biensLocal ? new com.gestionlocative.quittances.client.BiensLocalClient(
                 delegate, biensClient, bienIntegrationId) : delegate;
     }

@@ -75,13 +75,14 @@ public final class DecodeurJwtCommun implements JwtDecoder {
             );
         }
 
-        if (!"BAILLEUR".equals(role)) {
-            return verifie;
-        }
-
         Map<String, Object> claims = new HashMap<>(verifie.getClaims());
-        // En mode commun, l'identité bailleur est le sujet déjà vérifié.
-        claims.put("bailleur_id", verifie.getSubject());
+
+        claims.remove("bailleur_id");
+        claims.remove("locataire_id");
+
+        if ("BAILLEUR".equals(role)) {
+            claims.put("bailleur_id", verifie.getSubject());
+        }
         return new Jwt(
                 verifie.getTokenValue(),
                 verifie.getIssuedAt(),

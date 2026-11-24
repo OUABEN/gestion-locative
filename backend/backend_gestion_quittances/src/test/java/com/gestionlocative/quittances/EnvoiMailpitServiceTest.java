@@ -14,7 +14,7 @@ class EnvoiMailpitServiceTest {
     private final EmissionDemoService documents=mock(EmissionDemoService.class);
     private final TestingAuthenticationToken auth=new TestingAuthenticationToken("test","");
     private final UUID doc=UUID.randomUUID(),requete=UUID.randomUUID(),envoi=UUID.randomUUID();
-    private EnvoiMailpitService service(boolean actif,String mode) {return new EnvoiMailpitService(transactions,documents,actif,"127.0.0.1",mode,1025);}
+    private EnvoiMailpitService service(boolean actif,String mode) {return new EnvoiMailpitService(transactions,documents, documentsReels,actif,"127.0.0.1",mode,1025);}
     @Test void refuseSansConfirmation(){
         var e=assertThrows(ResponseStatusException.class,()->service(true,"LOCAL").envoyer(auth,doc,requete,false));
         assertEquals(400,e.getStatusCode().value());verifyNoInteractions(transactions,documents);
@@ -44,5 +44,82 @@ class EnvoiMailpitServiceTest {
         var e=assertThrows(ResponseStatusException.class,()->service(true,"LOCAL").envoyer(auth,doc,requete,true));
         assertEquals(503,e.getStatusCode().value());
         verify(transactions).terminer(auth,doc,envoi,"ECHEC_ENVOI","PREPARATION_OU_CONNEXION");
+    }
+
+    private final com.gestionlocative.quittances.service.EmissionReelleService documentsReels =
+            mock(com.gestionlocative.quittances.service.EmissionReelleService.class);
+
+    private EnvoiMailpitService serviceReel(boolean actif, boolean emissionActive) {
+        var service = new EnvoiMailpitService(
+                transactions, documents, documentsReels, actif, "0.0.0.0", "COMMUN", 1025);
+
+        org.springframework.test.util.ReflectionTestUtils.setField(
+                service, "integrationReelle", true);
+
+        org.springframework.test.util.ReflectionTestUtils.setField(
+                service, "emissionReelleActive", emissionActive);
+
+
+
+        return service;
+    }
+
+    @Test
+    void refuseIntegrationReelleSiMailpitDesactive() {
+        var e = assertThrows(ResponseStatusException.class,
+                () -> serviceReel(false, true).envoyer(auth, doc, requete, true));
+
+        assertEquals(503, e.getStatusCode().value());
+        verifyNoInteractions(transactions, documents, documentsReels);
+    }
+
+    @Test
+    void refuseIntegrationSiEmissionReelleDesactivee() {
+        var e = assertThrows(ResponseStatusException.class,
+                () -> serviceReel(true, false).envoyer(auth, doc, requete, true));
+
+        assertEquals(503, e.getStatusCode().value());
+        verifyNoInteractions(transactions, documents, documentsReels);
+    }
+
+    @Test
+    void repetitionEnModeReelNeRenvoiePasLeDocument() {
+        var existant = new EnvoiMailpitTransactions.Envoi(
+                envoi, "test@example.test", "ENVOYE",
+                Instant.now(), Instant.now(), null);
+
+        when(transactions.reserver(auth, doc, requete, true))
+                .thenReturn(new EnvoiMailpitTransactions.Reservation(existant, false));
+
+        assertSame(existant,
+                serviceReel(true, true).envoyer(auth, doc, requete, true));
+
+        verify(transactions).reserver(auth, doc, requete, true);
+        verifyNoInteractions(documents, documentsReels);
+        verifyNoMoreInteractions(transactions);
+    }
+
+    @Test
+    void utiliseLePdfReelEtHistoriseSonEchec() {
+        var nouveau = new EnvoiMailpitTransactions.Envoi(
+                envoi, "test@example.test", "EN_ATTENTE_ENVOI",
+                Instant.now(), null, null);
+
+        when(transactions.reserver(auth, doc, requete, true))
+                .thenReturn(new EnvoiMailpitTransactions.Reservation(nouveau, true));
+
+        when(documentsReels.telechargerPdf(auth, doc))
+                .thenThrow(new IllegalStateException("PDF reel indisponible"));
+
+        var e = assertThrows(ResponseStatusException.class,
+                () -> serviceReel(true, true).envoyer(auth, doc, requete, true));
+
+        assertEquals(503, e.getStatusCode().value());
+
+        verify(documentsReels).telechargerPdf(auth, doc);
+        verifyNoInteractions(documents);
+
+        verify(transactions).terminer(
+                auth, doc, envoi, "ECHEC_ENVOI", "PREPARATION_OU_CONNEXION");
     }
 }
