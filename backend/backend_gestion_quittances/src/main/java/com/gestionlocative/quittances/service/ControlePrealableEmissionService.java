@@ -171,17 +171,20 @@ public class ControlePrealableEmissionService {
     }
 
     private boolean sourcesReellesConfigurees() {
-        return "INTEGRATION".equals(modePaiements)
+        return modeIntegration(modePaiements)
                 && modeIntegration(referentiels.locataires())
                 && modeIntegration(referentiels.biens())
                 && modeIntegration(referentiels.baux());
     }
 
+    private static boolean modeIntegration(String mode) {
+        return "INTEGRATION".equals(mode) || "UTILISATEUR".equals(mode);
+    }
     private static boolean modeIntegration(
             ReferentielsProperties.Endpoint endpoint
     ) {
         return endpoint != null
-                && "INTEGRATION".equals(endpoint.mode());
+                && modeIntegration(endpoint.mode());
     }
 
     private void verifierEtat(Quittance document) {

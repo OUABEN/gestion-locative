@@ -154,6 +154,49 @@ class ControlePrealableEmissionServiceTest {
     }
 
     @Test
+    void modeUtilisateurAvecSourcesReellesPermetLePrecontrole() throws Exception {
+        var endpoints = new ReferentielsProperties(
+                new ReferentielsProperties.Endpoint(
+                        "UTILISATEUR", "https://locataires.example.test",
+                        "/api/v1/locataires/{id}/quittance-summary", ""),
+                new ReferentielsProperties.Endpoint(
+                        "UTILISATEUR", "https://biens.example.test",
+                        "/api/biens/{id}", ""),
+                new ReferentielsProperties.Endpoint(
+                        "UTILISATEUR", "https://baux.example.test",
+                        "/api/v1/baux/{id}/situation?debut={debut}&fin={fin}", "")
+        );
+
+        service("COMMUN", "UTILISATEUR", endpoints)
+                .verifier(authentification("BAILLEUR", BAILLEUR_ID), quittanceId());
+
+        verify(biensBaux).consulterBail(BAIL_ID, PERIODE_DEBUT, PERIODE_FIN);
+        verify(paiements).consulterAffectations(BAIL_ID, PERIODE_DEBUT, PERIODE_FIN);
+    }
+
+    @Test
+    void modeUtilisateurContinueDeRefuserLesSourcesSimulees() throws Exception {
+        var endpoints = new ReferentielsProperties(
+                new ReferentielsProperties.Endpoint(
+                        "UTILISATEUR", "https://locataires.example.test",
+                        "/api/v1/locataires/{id}/quittance-summary", ""),
+                new ReferentielsProperties.Endpoint(
+                        "SIMULATION", "http://127.0.0.1:8093",
+                        "/api/biens/{id}", ""),
+                new ReferentielsProperties.Endpoint(
+                        "UTILISATEUR", "https://baux.example.test",
+                        "/api/v1/baux/{id}/situation?debut={debut}&fin={fin}", "")
+        );
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
+                assertThrows(ResponseStatusException.class,
+                        () -> service("COMMUN", "UTILISATEUR", endpoints)
+                                .verifier(authentification("BAILLEUR", BAILLEUR_ID),
+                                        quittanceId()))
+                        .getStatusCode());
+        verifyNoInteractions(quittances, biensBaux, locataires, paiements);
+    }
+    @Test
     void autreBailleurNePeutPasVerifierLeDocument() throws Exception {
         when(quittances.findByIdAndBailleurId(
                 quittanceId(),

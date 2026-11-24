@@ -45,11 +45,22 @@ public class ReferentielsConfiguration {
             @Qualifier("referentielsHttpTransport") HttpClient transport) {
 
         Endpoint endpoint = properties.locataires();
+        boolean jwtUtilisateur = endpoint != null && "UTILISATEUR".equals(endpoint.mode());
+        boolean syntheseReelle = endpoint != null && endpoint.chemin() != null && Set.of(
+                "/api/locataires/{id}/quittance-summary",
+                "/api/v1/locataires/{id}/quittance-summary"
+        ).contains(endpoint.chemin());
+
+        if (jwtUtilisateur && !syntheseReelle) {
+            throw new IllegalArgumentException(
+                    "Le mode UTILISATEUR exige le chemin /api/v1/locataires/{id}/quittance-summary."
+            );
+        }
 
         return new HttpLocataireClient(
                 construire(endpoint, transport, true),
                 endpoint.chemin(),
-                "LOCATAIRES_LOCAL".equals(endpoint.mode())
+                "LOCATAIRES_LOCAL".equals(endpoint.mode()) || (jwtUtilisateur && syntheseReelle)
         );
     }
 
@@ -147,9 +158,15 @@ public class ReferentielsConfiguration {
                         "Un jeton de service est requis pour l'intégration."
                 );
             }
+        } else if ("UTILISATEUR".equals(endpoint.mode())) {
+            if (!token.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Le mode UTILISATEUR interdit les jetons statiques."
+                );
+            }
         } else {
             throw new IllegalArgumentException(
-                    "Le mode doit être SIMULATION ou INTEGRATION."
+                    "Le mode doit être SIMULATION, INTEGRATION ou UTILISATEUR."
             );
         }
 
@@ -168,6 +185,8 @@ public class ReferentielsConfiguration {
 
         if ("INTEGRATION".equals(endpoint.mode())) {
             builder.defaultHeaders(headers -> headers.setBearerAuth(token));
+        } else if ("UTILISATEUR".equals(endpoint.mode())) {
+            builder.requestInterceptor(new JwtUtilisateurInterceptor());
         }
 
         return builder.build();

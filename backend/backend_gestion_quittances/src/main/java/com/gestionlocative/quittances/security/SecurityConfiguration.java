@@ -175,7 +175,8 @@ public class SecurityConfiguration {
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/v1/systeme/etat"
+                                "/api/v1/systeme/etat",
+                                "/health"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,

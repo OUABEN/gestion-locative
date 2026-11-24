@@ -56,6 +56,14 @@ class EtatServiceHttpTest {
     }
 
     @Test
+    void doitFournirHealthcheckSansJeton() throws Exception {
+        HttpResponse<String> response = appeler("/health", null);
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().replaceAll("\\s+", "")
+                .contains("\"service\":\"service-quittances\""));
+    }
+
+    @Test
     void doitRefuserIdentiteSansJeton() throws Exception {
         HttpResponse<String> response =
                 appeler("/api/v1/identite", null);

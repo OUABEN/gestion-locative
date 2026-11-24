@@ -26,7 +26,7 @@ spring:
           json_format_mapper: jackson
 
   flyway:
-    enabled: true
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
     locations: classpath:db/migration
     validate-on-migrate: true
     clean-disabled: true
@@ -55,25 +55,25 @@ quittances:
   integration:
     paiements:
       mode: ${PAIEMENTS_MODE:SIMULATION}
-      base-url: ${PAIEMENTS_BASE_URL:http://127.0.0.1:8091}
+      base-url: "${LOYERS_SERVICE_URL:${PAIEMENTS_BASE_URL:http://127.0.0.1:8091}}"
       chemin: "${PAIEMENTS_CHEMIN:/api/v1/paiements/affectations?bailId={bailId}&debut={debut}&fin={fin}}"
       token: ${PAIEMENTS_TOKEN:}
 
   referentiels:
     locataires:
       mode: ${LOCATAIRES_MODE:SIMULATION}
-      base-url: ${LOCATAIRES_BASE_URL:http://127.0.0.1:8092}
+      base-url: "${LOCATAIRES_SERVICE_URL:${LOCATAIRES_BASE_URL:http://127.0.0.1:8092}}"
       chemin: "${LOCATAIRES_CHEMIN:/api/v1/locataires/{id}}"
       token: ${LOCATAIRES_TOKEN:}
 
     biens:
       mode: ${BIENS_MODE:SIMULATION}
-      base-url: ${BIENS_BASE_URL:http://127.0.0.1:8093}
+      base-url: "${BIENS_SERVICE_URL:${BIENS_BASE_URL:http://127.0.0.1:8093}}"
       chemin: "${BIENS_CHEMIN:/api/biens/{id}}"
       token: ${BIENS_TOKEN:}
 
     baux:
       mode: ${BAUX_MODE:SIMULATION}
-      base-url: ${BAUX_BASE_URL:http://127.0.0.1:8093}
+      base-url: "${LOYERS_SERVICE_URL:${BAUX_BASE_URL:http://127.0.0.1:8093}}"
       chemin: "${BAUX_CHEMIN:/api/v1/baux/{id}/situation?debut={debut}&fin={fin}}"
       token: ${BAUX_TOKEN:}
