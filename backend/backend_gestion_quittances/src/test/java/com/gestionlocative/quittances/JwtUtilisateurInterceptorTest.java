@@ -93,7 +93,7 @@ class JwtUtilisateurInterceptorTest {
         var config = new ReferentielsConfiguration();
         var endpoint = new Endpoint(
                 "UTILISATEUR", "http://127.0.0.1:18082",
-                "/api/v1/locataires/{id}", ""
+                "/api/v1/locataires/{id}/quittance-summary", ""
         );
 
         try (HttpClient transport = HttpClient.newHttpClient()) {

@@ -45,11 +45,22 @@ public class ReferentielsConfiguration {
             @Qualifier("referentielsHttpTransport") HttpClient transport) {
 
         Endpoint endpoint = properties.locataires();
+        boolean jwtUtilisateur = endpoint != null && "UTILISATEUR".equals(endpoint.mode());
+        boolean syntheseReelle = endpoint != null && endpoint.chemin() != null && Set.of(
+                "/api/locataires/{id}/quittance-summary",
+                "/api/v1/locataires/{id}/quittance-summary"
+        ).contains(endpoint.chemin());
+
+        if (jwtUtilisateur && !syntheseReelle) {
+            throw new IllegalArgumentException(
+                    "Le mode UTILISATEUR exige le chemin /api/v1/locataires/{id}/quittance-summary."
+            );
+        }
 
         return new HttpLocataireClient(
                 construire(endpoint, transport, true),
                 endpoint.chemin(),
-                "LOCATAIRES_LOCAL".equals(endpoint.mode())
+                "LOCATAIRES_LOCAL".equals(endpoint.mode()) || (jwtUtilisateur && syntheseReelle)
         );
     }
 
