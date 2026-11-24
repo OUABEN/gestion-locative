@@ -11,6 +11,7 @@ const bailController = new BailController();
 router.use(authenticate);
 
 // Lecture (accessible à tous les rôles authentifiés avec filtrage auto pour LOCATAIRE)
+router.get('/me', locController.getMe);
 router.get('/', locController.lister);
 router.get('/cin/:cin', locController.getByCin);
 router.get('/:id/quittance-summary', locController.getQuittanceSummary);

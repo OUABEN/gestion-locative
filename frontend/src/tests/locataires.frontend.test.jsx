@@ -59,6 +59,13 @@ describe('Frontend Module Locataires — Tests Unitaires & Composants (Vitest + 
       const all = await locatairesApi.getAll();
       expect(all.some((l) => l.cin === 'ZZ889900')).toBe(true);
     });
+
+    it('getMe retourne le profil du locataire connecté', async () => {
+      const me = await locatairesApi.getMe();
+      expect(me).toBeDefined();
+      expect(me).toHaveProperty('email');
+      expect(me).toHaveProperty('cin');
+    });
   });
 
   describe('2. Pages & Composants Locataires', () => {

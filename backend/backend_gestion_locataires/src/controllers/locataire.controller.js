@@ -46,6 +46,36 @@ class LocataireController {
     }
   };
 
+  getMe = (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized',
+        message: 'Utilisateur non authentifié.'
+      });
+    }
+
+    const email = req.user.email;
+    if (!email) {
+      return res.status(404).json({
+        status: 404,
+        error: 'Not Found',
+        message: 'Aucun claim email présent dans le jeton JWT.'
+      });
+    }
+
+    const locataire = this.service.getByEmail(email);
+    if (!locataire) {
+      return res.status(404).json({
+        status: 404,
+        error: 'Not Found',
+        message: `Aucune fiche locataire trouvée pour l'email : ${email}`
+      });
+    }
+
+    return res.status(200).json(locataire);
+  };
+
   lister = (req, res) => {
     const { search, page, limit } = req.query;
 
@@ -81,24 +111,33 @@ class LocataireController {
   getById = (req, res) => {
     const { id } = req.params;
     const locataire = this.service.getById(id);
+
+    // Règle de confidentialité & RBAC :
+    // BAILLEUR et GESTIONNAIRE ont un accès total (y compris pour les appels inter-services Loyers/Quittances)
+    // LOCATAIRE ne peut consulter que ses propres données, sinon 403
+    if (req.user && req.user.role === 'LOCATAIRE') {
+      const isOwner = req.user.sub === id || (locataire && req.user.email && locataire.email && req.user.email.toLowerCase() === locataire.email.toLowerCase());
+      if (!isOwner) {
+        return res.status(403).json({
+          status: 403,
+          error: 'Forbidden',
+          message: 'Accès refusé : un locataire ne peut consulter que ses propres données.'
+        });
+      }
+    } else if (req.user && !['BAILLEUR', 'GESTIONNAIRE'].includes(req.user.role)) {
+      return res.status(403).json({
+        status: 403,
+        error: 'Forbidden',
+        message: `Accès refusé : rôle '${req.user.role}' non autorisé.`
+      });
+    }
+
     if (!locataire) {
       return res.status(404).json({
         status: 404,
         error: 'Not Found',
         message: `Locataire introuvable avec l'identifiant : ${id}`
       });
-    }
-
-    // Règle de confidentialité : le LOCATAIRE ne peut consulter que sa propre fiche
-    if (req.user && req.user.role === 'LOCATAIRE') {
-      const isOwner = req.user.sub === id || (req.user.email && locataire.email && req.user.email.toLowerCase() === locataire.email.toLowerCase());
-      if (!isOwner) {
-        return res.status(403).json({
-          status: 403,
-          error: 'Forbidden',
-          message: 'Accès refusé : un locataire ne peut consulter que sa propre fiche.'
-        });
-      }
     }
 
     return res.status(200).json(locataire);

@@ -31,13 +31,13 @@ describe('Campagne de Tests - Authentification JWT et Rôles (Ahmed LAARIF)', ()
     expect(next).not.toHaveBeenCalled();
   });
 
-  test('UT-AUTH-03 : Acceptation du jeton JWT valide et injection de req.user', () => {
+  test('UT-AUTH-03 : Acceptation du jeton JWT valide et extraction de { sub, role, email }', () => {
     const payload = {
       sub: 'u1111111-1111-1111-1111-111111111111',
       role: 'BAILLEUR',
       email: 'bailleur@gestion-locative.com'
     };
-    const validToken = jwt.sign(payload, env.JWT_SECRET);
+    const validToken = jwt.sign(payload, env.JWT_SECRET, { algorithm: 'HS256' });
     req.headers.authorization = `Bearer ${validToken}`;
 
     authenticate(req, res, next);
@@ -45,6 +45,19 @@ describe('Campagne de Tests - Authentification JWT et Rôles (Ahmed LAARIF)', ()
     expect(req.user).toBeDefined();
     expect(req.user.sub).toBe(payload.sub);
     expect(req.user.role).toBe('BAILLEUR');
+    expect(req.user.email).toBe('bailleur@gestion-locative.com');
+    expect(req.token).toBe(validToken);
+  });
+
+  test('UT-AUTH-03b : Rejet 401 si le token utilise un algorithme non autorisé (ex. "none")', () => {
+    // Création d'un faux token non signé (alg: none)
+    const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({ sub: 'u111', role: 'BAILLEUR', email: 'test@mail.ma' })).toString('base64url');
+    req.headers.authorization = `Bearer ${header}.${body}.`;
+
+    authenticate(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
   });
 
   test('UT-AUTH-04 : Contrôle de rôle RBAC - Rejet 403 pour rôle insuffisant', () => {

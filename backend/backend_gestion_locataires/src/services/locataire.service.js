@@ -98,6 +98,17 @@ class LocataireService {
     return null;
   }
 
+  getByEmail(email) {
+    if (!email || typeof email !== 'string') return null;
+    const normalized = email.trim().toLowerCase();
+    for (const loc of this.locataires.values()) {
+      if (loc.email && loc.email.trim().toLowerCase() === normalized) {
+        return loc;
+      }
+    }
+    return null;
+  }
+
   existsByCin(cin) {
     if (!cin) return false;
     const normalized = cin.trim().toUpperCase();

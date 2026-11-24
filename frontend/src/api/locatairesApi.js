@@ -168,6 +168,20 @@ locatairesClient.interceptors.response.use(
 );
 
 export const locatairesApi = {
+  // Profil du locataire connecté (GET /api/locataires/me)
+  getMe: async () => {
+    try {
+      const response = await locatairesClient.get('/me');
+      if (response.data) return response.data;
+    } catch (err) {
+      if (err.response?.status === 401 || err.response?.status === 403 || err.response?.status === 404) {
+        throw err;
+      }
+    }
+    const store = readLocalStore();
+    return store.length > 0 ? store[0] : null;
+  },
+
   // Liste des locataires
   getAll: async (params = {}) => {
     try {

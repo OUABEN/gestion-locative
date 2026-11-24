@@ -25,7 +25,7 @@
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Jeton JWT partagé émis par backend_gestion_biens (sub, role).'
+        description: 'Jeton JWT validé par JWT_SECRET (HS256) contenant { sub, role, email }.'
       }
     },
     schemas: {
@@ -81,6 +81,17 @@
         }
       }
     },
+    '/api/locataires/me': {
+      get: {
+        summary: 'Consulter le profil du locataire connecté',
+        description: 'Retrouve la fiche du locataire à partir du claim email présent dans le JWT (req.user.email). Retourne 404 si aucune fiche ne correspond, 401 sans token valide.',
+        responses: {
+          200: { description: 'Fiche du locataire connecté' },
+          401: { description: 'Non authentifié ou jeton invalide' },
+          404: { description: 'Aucune fiche locataire associée à cet email' }
+        }
+      }
+    },
     '/api/locataires': {
       get: {
         summary: 'Lister les locataires (filtrage automatique selon le rôle)',
@@ -126,7 +137,8 @@
     },
     '/api/baux': {
       get: {
-        summary: 'Lister les baux (filtrage par statut=ACTIF, locataireId, bienId)',
+        summary: 'Lister les baux en lecture seule (filtrage par statut=ACTIF, locataireId, bienId)',
+        description: 'La création et la clôture des baux sont désormais gérées par le module Loyers. Le module Locataires maintient ces baux en lecture seule pour consultation et interopérabilité.',
         parameters: [
           { name: 'statut', in: 'query', schema: { type: 'string' } },
           { name: 'locataireId', in: 'query', schema: { type: 'string' } }
@@ -134,18 +146,12 @@
         responses: {
           200: { description: 'Liste des baux' }
         }
-      },
-      post: {
-        summary: 'Créer un contrat de bail (contrôle de disponibilité auprès de Biens)',
-        responses: {
-          201: { description: 'Bail créé' },
-          409: { description: 'Bien déjà loué' }
-        }
       }
     },
     '/api/baux/{id}': {
       get: {
-        summary: 'Lecture d\'un bail par ID (utilisé par Loyers et Quittances)',
+        summary: 'Lecture d\'un bail par ID en lecture seule (utilisé par Loyers et Quittances)',
+        description: 'Consultation du contrat de bail (BailDto). Les opérations d\'écriture sont gérées par le module Loyers.',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           200: { description: 'Détail du bail (BailDto)' },
